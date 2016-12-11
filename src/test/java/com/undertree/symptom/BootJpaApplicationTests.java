@@ -1,4 +1,4 @@
-package com.undertree;
+package com.undertree.symptom;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

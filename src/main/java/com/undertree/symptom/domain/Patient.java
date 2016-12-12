@@ -1,9 +1,11 @@
 package com.undertree.symptom.domain;
 
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 import java.time.LocalDate;
+
+// https://health-lifesci.schema.org/Patient
 
 @Entity
 public class Patient {

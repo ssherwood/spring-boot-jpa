@@ -6,6 +6,8 @@ import com.undertree.symptom.repositories.PatientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+// https://spring.io/understanding/REST
+
 @RestController
 public class PatientController {
 

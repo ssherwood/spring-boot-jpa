@@ -1,14 +1,15 @@
 # Overview
 
-This project is the revisit an older one that I did a few years back
-when I took part in the [Coursera](https://www.coursera.org/)
-Specialization on [Android Development](https://www.coursera.org/specializations/android-app-development).
+This project is a revisit an older one that I did a few years back when
+I took part in the [Coursera](https://www.coursera.org/) Specialization
+on [Android Development](https://www.coursera.org/specializations/android-app-development).
+
 During the final Capstone we were given the choice of several projects
 to implement and I chose one that was both interesting and personal: an
-application for cancer patients to self report on their pain symptoms.
+application for cancer patients to self-report on their pain symptoms.
 
-A brief article about the Capstone project was written on the Vanderbilt's
-School of Engineering [web site](http://engineering.vanderbilt.edu/news/2014/capstone-app-project-for-mooc-aims-to-track-help-manage-cancer-patients-pain/).
+A brief article about this specific project was published on the
+Vanderbilt School of Engineering's [web site](http://engineering.vanderbilt.edu/news/2014/capstone-app-project-for-mooc-aims-to-track-help-manage-cancer-patients-pain/).
 
 ## History
 
@@ -167,7 +168,7 @@ However, you will notice that nothing is displayed... that's weird.
 
 TODO discuss findOne behavior of returning null
 
-# Step 5: Create an FindBy Implementation
+# Step 5: Create a FindBy Implementation
 
 Since the default behavior really isn't all that desirable, lets add a
 more appropriate method to the Repository interface:
@@ -434,11 +435,107 @@ what you might have written by hand?
 Spoiler Alert!  I expect that this test case will fail at some point in
 the future.  Can you guess why?
 
+Now let's add a test for the Controller.  Create a package called
+`controllers` and create a test class called `PatientControllerTests`.
+Then add the following code:
 
+```java
+@RunWith(SpringRunner.class)
+@WebMvcTest(PatientController.class)
+public class PatientControllerTests {
+    @Autowired
+    private MockMvc mockMvc;
 
+    @MockBean
+    private PatientRepository mockPatientRepository;
 
+    @Test
+    public void test_MockPatient_Expect_ThatGuy() throws Exception {
+        given(mockPatientRepository.findById(1L)).willReturn(Optional.of(thatGuy()));
 
-# TODOs
+        mockMvc.perform(get("/patient/1")
+                .accept(APPLICATION_JSON_UTF8))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(APPLICATION_JSON_UTF8))
+                .andExpect(jsonPath("$.givenName", is("Guy")))
+                .andExpect(jsonPath("$.familyName", is("Stromboli")))
+                .andExpect(jsonPath("$.birthDate", is("1942-11-21")));
+    }
+
+    private Patient thatGuy() {
+        Patient aPatient = new Patient();
+        aPatient.setGivenName("Guy");
+        aPatient.setFamilyName("Stromboli");
+        aPatient.setBirthDate(LocalDate.of(1942, 11, 21));
+        return aPatient;
+    }
+}
+```
+
+This is a "mock" test.  It is not testing the repository that we created
+but instead is leveraging a mock version of it thanks to Mockito.
+
+Basically, all we are doing is telling the mock how to behave when we
+call it and then are asserting that it is responding correctly.  It is a
+good test but it isn't really a complete test end-to-end test.  The
+overall benefit of this kind of test is when you want to test certain
+behaviors that might be hard to recreate under normal circumstances.
+
+Next, lets add a more complete web test.  In the same package, add a
+test class called `PatientControllerWebTests`.  Then add the following
+code:
+
+```
+@RunWith(SpringRunner.class)
+@SpringBootTest(webEnvironment=RANDOM_PORT)
+public class PatientControllerWebTests {
+
+    @Autowired
+    private TestRestTemplate restTemplate;
+
+    @Test
+    public void test_PatientController_getPatient_Expect_Patient1_Exists() {
+        ResponseEntity<Patient> entity = restTemplate.getForEntity("/patient/1", Patient.class);
+
+        assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        Patient aPatient = entity.getBody();
+        assertThat(aPatient).isNotNull();
+        assertThat(aPatient.getGivenName()).isEqualTo("Phillip");
+        assertThat(aPatient.getFamilyName()).isEqualTo("Spec");
+        assertThat(aPatient.getBirthDate()).isEqualTo(LocalDate.of(1972, 5, 5));
+    }
+```
+
+If you run this test right now, it will fail.  Why?  Well, the obvious
+answer is that when we run the test the database is initialized as an
+empty data set.  How do we initialize the database so we can rely on
+a specific data set?
+
+One way is to tap into a feature of Spring Boot.  If we create a file
+in the test section of the `resources` folder called `data.sql` that
+file will be used to initialize the database on ever test case.
+
+Create that file and add the following:
+
+```
+INSERT INTO PATIENT(id, given_name, family_name, birth_date) VALUES (null, 'Phillip', 'Spec', '1972-5-5');
+INSERT INTO PATIENT(id, given_name, family_name, birth_date) VALUES (null, 'Sally', 'Certify', '1973-6-6');
+```
+
+During the startup of the tests, Spring Boot will invoke this file and
+initialize the database.
+
+Now, if we run the test cases, they should succeed with a green bar!
+Yeah!
+
+# Step 11:  What about performance?
+
+TODO setup a performance test.
+
+# Next
+
+## TODOs
 - Add @Valid
 - Add example mocking tests
 - Add performance tests
@@ -446,6 +543,7 @@ the future.  Can you guess why?
 - Add custom response wrapping
 - Add REST documentation Swagger vs RESTDocs
 - Add Spring Security with OAuth2 and JWT
+- Explain HIPA and PII concerns
 
 
 # Additional Resources

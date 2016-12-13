@@ -101,14 +101,14 @@ we started the app (this is the Spring Boot default database URL).
 Sweet.  This is pretty nice but how do we get the application to be able
 to create, read, update and delete Patients?
 
-# Step 3: Create a CRUD repository
+# Step 3: Create a Repository
 
 Create a package called `repositories` in the base package and create a
 `PatientRepository` Java interface class.
   
 Finally, add the following code:
 
-```
+```java
 public interface PatientRepository extends JpaRepository<Patient, Long> {
 }
 ```
@@ -319,7 +319,6 @@ handle JSR 310 Dates (introduced in Java 8).  Add this to the pom.xml:
 <dependency>
     <groupId>com.fasterxml.jackson.datatype</groupId>
     <artifactId>jackson-datatype-jsr310</artifactId>
-    <version>2.8.5</version>
 </dependency>
 
 ```
@@ -335,10 +334,11 @@ looking date structure:
   ]
 ```
 
-That isn't exactly what we want.  There is yet another configuration
-change we need here to tell Jackson to format the date "correctly".
-
-Update the application.properties and include:
+That isn't exactly what we want.
+  
+There is yet another configuration change we need here to tell Jackson
+to format the date "correctly".  Update the application.properties and
+include:
 
 ```
 spring.jackson.serialization.WRITE_DATES_AS_TIMESTAMPS = false
@@ -348,7 +348,7 @@ Volia!
 
 But wait.  If we look at how the date is actually stored in the database
 through the H2 console, it looks like a BLOB.  That isn't good since
-we might want to be able to query against it.
+we might want to be able to query against it later.
 
 Why doesn't JPA support LocalDate?
 
@@ -485,7 +485,7 @@ Next, lets add a more complete web test.  In the same package, add a
 test class called `PatientControllerWebTests`.  Then add the following
 code:
 
-```
+```java
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment=RANDOM_PORT)
 public class PatientControllerWebTests {
@@ -507,16 +507,18 @@ public class PatientControllerWebTests {
     }
 ```
 
-If you run this test right now, it will fail.  Why?  Well, the obvious
-answer is that when we run the test the database is initialized as an
-empty data set.  How do we initialize the database so we can rely on
-a specific data set?
+If you run this test right now, it will fail.  Why?
+  
+Well, the obvious answer is that when we ran the test and the database
+is initialized with empty data.  How do we initialize the database so we
+can rely on a specific data set?
 
 One way is to tap into a feature of Spring Boot.  If we create a file
-in the test section of the `resources` folder called `data.sql` that
-file will be used to initialize the database on ever test case.
+in the test section of the project called `resources` and then a file
+called `data.sql` within it we have a way to initialize the database on
+ever test case.
 
-Create that file and add the following:
+Create that file and add the following to it:
 
 ```
 INSERT INTO PATIENT(id, given_name, family_name, birth_date) VALUES (null, 'Phillip', 'Spec', '1972-5-5');
@@ -524,9 +526,9 @@ INSERT INTO PATIENT(id, given_name, family_name, birth_date) VALUES (null, 'Sall
 ```
 
 During the startup of the tests, Spring Boot will invoke this file and
-initialize the database.
+initialize the database.  Now, if we re-run the test cases, they should
+succeed with a green bar!
 
-Now, if we run the test cases, they should succeed with a green bar!
 Yeah!
 
 # Step 11:  What about performance?
@@ -541,6 +543,7 @@ TODO setup a performance test.
 - Add performance tests
 - Add QueryDsl support
 - Add custom response wrapping
+- Add support for JTA transactions
 - Add REST documentation Swagger vs RESTDocs
 - Add Spring Security with OAuth2 and JWT
 - Explain HIPA and PII concerns

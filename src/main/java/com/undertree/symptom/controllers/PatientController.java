@@ -6,6 +6,8 @@ import com.undertree.symptom.repositories.PatientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+
 // https://spring.io/understanding/REST
 
 @RestController
@@ -25,7 +27,7 @@ public class PatientController {
     }
 
     @PostMapping("/patient")
-    public Patient addPatient(@RequestBody Patient patient) {
+    public Patient addPatient(@Valid @RequestBody Patient patient) {
         return patientRepository.save(patient);
     }
 }

@@ -1,2 +1,0 @@
-INSERT INTO PATIENT(id, given_name, family_name, birth_date) VALUES (null, 'Phillip', 'Spec', '1972-5-5');
-INSERT INTO PATIENT(id, given_name, family_name, birth_date) VALUES (null, 'Sally', 'Certify', '1973-6-6');

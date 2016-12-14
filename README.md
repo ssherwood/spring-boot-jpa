@@ -534,16 +534,178 @@ Yeah!
 # Step 11:  What about performance?
 
 TODO setup a performance test.
+https://github.com/jmeter-maven-plugin/jmeter-maven-plugin
+http://www.xoriant.com/blog/software-testing-and-qa/performance-testing-of-restful-apis-using-jmeter.html
+
+TODO I've add an initial performance plan but this will need to be
+better documented as JMeter can be a complex tool in and of itself.
+Additionally, I'm still working out details on how to load the in-memory
+database using a CSV so I can share the data between the application and
+the JMeter test (what I have appears to work but I'm still looking for
+better that having to store the CSV in the resources/classpath).
+
+After this, it might be a good idea to go back and refactor this to be
+the pattern used from the start.
+
+FYI - The reason I'm wanting to have JMeter set up so early in the life
+of the project is so that we can establish base-lines for later as we
+add more complex capabilities.  I think its a good idea to have some
+sense of what impact to performance a specific feature can have.
+
+Another piece to document would be to connect to the application with
+JConsole and then run the test.  Reviewing heap and threads is a good
+practice.
+
+Finally, consider introducing the jmeter plugin to the maven POM.
+
+# Step 12: Validation
+
+There a a few types of validations that we can add to our application
+for the entity classes.
+  
+One type is to use the JPA `@Column` annotations to define constraints
+on the resulting database tables.  I typically like to delay this
+exercise until the project is a bit more fleshed out.  During this
+initial discovery phase, I find it more advantageous to leave the schema
+more flexible and adaptable.  At some point in the future I plan on
+having the schema be versioned - then we'll need to investigate
+additional tooling like Flyway or Liquibase.
+
+Another option for data validation is the Java Bean Validator
+annotations:
+https://docs.jboss.org/hibernate/stable/validator/reference/en-US/html_single/#table-spec-constraints
+
+In the domain object for Patient, lets add a few common sense
+validations:
+
+```java
+    @NotNull
+    private String givenName;
+    @NotNull
+    private String familyName;
+```
+
+If you restart the application and look at the Hibernate create table,
+you'll see that I was wrong.  Hibernate did honor these validations and
+modified the schema accordingly.  Now if I try to post a blank JSON
+object to the /patient URL, I should see an error:
+
+```json
+{
+  "timestamp": "2016-12-14T15:22:39.519+0000",
+  "status": 500,
+  "error": "Internal Server Error",
+  "exception": "javax.validation.ConstraintViolationException",
+  "message": "Validation failed for classes [com.undertree.symptom.domain.Patient] during persist time for groups [javax.validation.groups.Default, ]\nList of constraint violations:[\n\tConstraintViolationImpl{interpolatedMessage='may not be null', propertyPath=givenName, rootBeanClass=class com.undertree.symptom.domain.Patient, messageTemplate='{javax.validation.constraints.NotNull.message}'}\n\tConstraintViolationImpl{interpolatedMessage='may not be null', propertyPath=familyName, rootBeanClass=class com.undertree.symptom.domain.Patient, messageTemplate='{javax.validation.constraints.NotNull.message}'}\n]",
+  "path": "/patient"
+}
+```
+
+During persistence I violated one or more constraints and the database
+isn't happy.  I'm not happy either because of the 500 error status.  I'd
+actually like to catch this condition a lot higher up the stack.
+
+Spring has a simple solution for this.  Add a `@Validated` annotation to
+the RequestBody parameter like this:
+
+```java
+    @PostMapping("/patient")
+    public Patient addPatient(@Validated @RequestBody Patient patient) {
+        return patientRepository.save(patient);
+    }
+```
+
+Restart and rerun the POST:
+
+```json
+{
+  "timestamp": "2016-12-14T15:41:20.115+0000",
+  "status": 400,
+  "error": "Bad Request",
+  "exception": "org.springframework.web.bind.MethodArgumentNotValidException",
+  "errors": [
+    {
+      "codes": [
+        "NotNull.patient.givenName",
+        "NotNull.givenName",
+        "NotNull.java.lang.String",
+        "NotNull"
+      ],
+      "arguments": [
+        {
+          "codes": [
+            "patient.givenName",
+            "givenName"
+          ],
+          "arguments": null,
+          "defaultMessage": "givenName",
+          "code": "givenName"
+        }
+      ],
+      "defaultMessage": "may not be null",
+      "objectName": "patient",
+      "field": "givenName",
+      "rejectedValue": null,
+      "bindingFailure": false,
+      "code": "NotNull"
+    },
+    {
+      "codes": [
+        "NotNull.patient.familyName",
+        "NotNull.familyName",
+        "NotNull.java.lang.String",
+        "NotNull"
+      ],
+      "arguments": [
+        {
+          "codes": [
+            "patient.familyName",
+            "familyName"
+          ],
+          "arguments": null,
+          "defaultMessage": "familyName",
+          "code": "familyName"
+        }
+      ],
+      "defaultMessage": "may not be null",
+      "objectName": "patient",
+      "field": "familyName",
+      "rejectedValue": null,
+      "bindingFailure": false,
+      "code": "NotNull"
+    }
+  ],
+  "message": "Validation failed for object='patient'. Error count: 2",
+  "path": "/patient"
+}
+```
+
+It 400 error is more in lines with what I would expect but wow that is a
+bit of a verbose error.
+
+TODO this would be a good place to look into customizing the Spring Boot
+standard error object.  The errors block is just blindly marshalling the
+entire object with codes and arguments that aren't all that useful to a
+client.  We could probably clean this up a bit.
+
+I did waste some time trying to customized the ValidationMessages and
+had a little success but it didn't feel as clean as I would have liked
+so I need to do more research there as well.
+
+
+
 
 # Next
 
 ## TODOs
 - Add @Valid
-- Add example mocking tests
+- Add more example mocking tests
+- Add equals/hashcodes
 - Add performance tests
 - Add QueryDsl support
 - Add custom response wrapping
-- Add support for JTA transactions
+- Add support for Flyway
+- Add support for JPA/JTA transactions
 - Add REST documentation Swagger vs RESTDocs
 - Add Spring Security with OAuth2 and JWT
 - Explain HIPA and PII concerns

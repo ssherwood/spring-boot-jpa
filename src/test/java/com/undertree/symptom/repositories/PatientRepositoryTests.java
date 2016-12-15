@@ -1,20 +1,23 @@
 package com.undertree.symptom.repositories;
 
 import com.undertree.symptom.domain.Patient;
+import com.undertree.symptom.domain.TestPatientBuilder;
 import com.undertree.symptom.exceptions.NotFoundException;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.time.LocalDate;
-import java.time.Month;
-import java.time.temporal.ChronoUnit;
-import java.util.Random;
+import javax.validation.ConstraintViolationException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.containsString;
 
 // refer to:
 // https://joel-costigliola.github.io/assertj/
@@ -26,6 +29,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DataJpaTest
 public class PatientRepositoryTests {
 
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
+
     @Autowired
     private TestEntityManager entityManager;
 
@@ -34,23 +40,49 @@ public class PatientRepositoryTests {
 
     @Test
     public void test_PatientRepository_FindById_ExpectExists() throws Exception {
-        Long patientId = entityManager.persistAndGetId(new Patient(), Long.class);
+        Long patientId = entityManager.persistAndGetId(new TestPatientBuilder().build(), Long.class);
         Patient aPatient = patientRepository.findById(patientId).orElseThrow(NotFoundException::new);
         assertThat(aPatient.getId()).isEqualTo(patientId);
     }
 
-    // TODO make this more random
-    private Patient createRandomPatient() {
-        Patient randomPatient = new Patient();
-        randomPatient.setBirthDate(randomDate(1970));
-        randomPatient.setGivenName("random");
-        randomPatient.setFamilyName("random");
-        return randomPatient;
+    @Test
+    public void test_PatientRepository_SaveWithNull_ExpectException() throws Exception {
+        thrown.expect(InvalidDataAccessApiUsageException.class);
+        patientRepository.save((Patient)null);
     }
 
-    private LocalDate randomDate(int year) {
-        LocalDate start = LocalDate.of(year, Month.JANUARY, 1);
-        long days = ChronoUnit.DAYS.between(start, LocalDate.now());
-        return start.plusDays(new Random().nextInt((int) days + 1));
+    @Test
+    public void test_PatientRepository_SaveWithEmpty_ExpectException() throws Exception {
+        thrown.expect(ConstraintViolationException.class);
+        thrown.expectMessage(containsString("'may not be empty'"));
+        patientRepository.save(new Patient());
+    }
+
+    @Test
+    public void test_PatientRepository_SaveWithEmptyGivenName_ExpectException() throws Exception {
+        thrown.expect(ConstraintViolationException.class);
+        thrown.expectMessage(allOf(containsString("givenName"), containsString("'may not be empty'")));
+        patientRepository.save(new TestPatientBuilder().withGivenName("").build());
+    }
+
+    @Test
+    public void test_PatientRepository_SaveWithEmptyFamilyName_ExpectException() throws Exception {
+        thrown.expect(ConstraintViolationException.class);
+        thrown.expectMessage(allOf(containsString("familyName"), containsString("'may not be empty'")));
+        patientRepository.save(new TestPatientBuilder().withFamilyName("").build());
+    }
+
+    @Test
+    public void test_PatientRepository_SaveWithShortGivenName_ExpectException() throws Exception {
+        thrown.expect(ConstraintViolationException.class);
+        thrown.expectMessage(allOf(containsString("givenName"), containsString("'size must be between 2 and")));
+        patientRepository.save(new TestPatientBuilder().withGivenName("A").build());
+    }
+
+    @Test
+    public void test_PatientRepository_SaveWithShortFamilyName_ExpectException() throws Exception {
+        thrown.expect(ConstraintViolationException.class);
+        thrown.expectMessage(allOf(containsString("familyName"), containsString("'size must be between 2 and")));
+        patientRepository.save(new TestPatientBuilder().withFamilyName("Z").build());
     }
 }

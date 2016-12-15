@@ -494,17 +494,28 @@ public class PatientControllerWebTests {
     private TestRestTemplate restTemplate;
 
     @Test
-    public void test_PatientController_getPatient_Expect_Patient1_Exists() {
+    public void test_PatientController_getPatient_Expect_Patient1_Exists() throws Exception {
         ResponseEntity<Patient> entity = restTemplate.getForEntity("/patient/1", Patient.class);
 
         assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
-
-        Patient aPatient = entity.getBody();
-        assertThat(aPatient).isNotNull();
-        assertThat(aPatient.getGivenName()).isEqualTo("Phillip");
-        assertThat(aPatient.getFamilyName()).isEqualTo("Spec");
-        assertThat(aPatient.getBirthDate()).isEqualTo(LocalDate.of(1972, 5, 5));
+        assertThat(entity.getBody()).isNotNull()
+                .hasFieldOrPropertyWithValue("givenName", "Phillip")
+                .hasFieldOrPropertyWithValue("familyName", "Spec")
+                .hasFieldOrPropertyWithValue("birthDate", LocalDate.of(1972, 5, 5));
     }
+
+    @Test
+    public void test_PatientController_getPatient_Expect_Patient99999999_NotFound() throws Exception {
+        ResponseEntity<Patient> entity = restTemplate.getForEntity("/patient/99999999", Patient.class);
+        assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    public void test_PatientController_getPatient_Expect_Invalid() throws Exception {
+        String response = restTemplate.getForObject("/patient/foo", String.class);
+        assertThat(response).contains("Bad Request");
+    }
+}
 ```
 
 If you run this test right now, it will fail.  Why?
@@ -558,7 +569,7 @@ practice.
 
 Finally, consider introducing the jmeter plugin to the maven POM.
 
-# Step 12: Validation
+# Step 12: Validation JSR 309/3
 
 There a a few types of validations that we can add to our application
 for the entity classes.
@@ -579,9 +590,9 @@ In the domain object for Patient, lets add a few common sense
 validations:
 
 ```java
-    @NotNull
+    @NotBlank @Size(min = 2)
     private String givenName;
-    @NotNull
+    @NotBlank @Size(min = 2)
     private String familyName;
 ```
 
@@ -602,15 +613,16 @@ object to the /patient URL, I should see an error:
 ```
 
 During persistence I violated one or more constraints and the database
-isn't happy.  I'm not happy either because of the 500 error status.  I'd
-actually like to catch this condition a lot higher up the stack.
+isn't happy.  I'm not happy either because of the 500 error status code.
+I'd actually like to catch this condition higher up the stack and return
+a more proper error.
 
-Spring has a simple solution for this.  Add a `@Validated` annotation to
-the RequestBody parameter like this:
+Java and Spring have a simple solution for this.  Add a `@Valid`
+annotation to the RequestBody parameter like this:
 
 ```java
     @PostMapping("/patient")
-    public Patient addPatient(@Validated @RequestBody Patient patient) {
+    public Patient addPatient(@Valid @RequestBody Patient patient) {
         return patientRepository.save(patient);
     }
 ```
@@ -680,8 +692,8 @@ Restart and rerun the POST:
 }
 ```
 
-It 400 error is more in lines with what I would expect but wow that is a
-bit of a verbose error.
+It 400 error is more in lines with what I was expecting but wow that is
+a verbose error.
 
 TODO this would be a good place to look into customizing the Spring Boot
 standard error object.  The errors block is just blindly marshalling the
@@ -692,16 +704,204 @@ I did waste some time trying to customized the ValidationMessages and
 had a little success but it didn't feel as clean as I would have liked
 so I need to do more research there as well.
 
+Lets run or test cases just to be sure everything is working as
+expected.  Wait, there was an error:
 
+```
+javax.validation.ConstraintViolationException: Validation failed for classes [com.undertree.symptom.domain.Patient] during persist time for groups [javax.validation.groups.Default, ]
+List of constraint violations:[
+	ConstraintViolationImpl{interpolatedMessage='may not be empty', propertyPath=familyName, rootBeanClass=class com.undertree.symptom.domain.Patient, messageTemplate='{org.hibernate.validator.constraints.NotBlank.message}'}
+	ConstraintViolationImpl{interpolatedMessage='may not be empty', propertyPath=givenName, rootBeanClass=class com.undertree.symptom.domain.Patient, messageTemplate='{org.hibernate.validator.constraints.NotBlank.message}'}
+]
+```
+
+This is what I thought might happen.  Our original test was using an
+empty resource during the Add.  Now this is an invalid state.  We should
+fix that first.
+
+First add a new library to our dependencies in the pom.xml:
+
+```xml
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.5</version>
+		</dependency>
+```
+
+We'll use this in conjunction with a helpful utility class that can be
+added to test suite under a new `domain` package.  This will be a new
+Java class called `TestPatientBuilder` with the code:
+
+```java
+public class TestPatientBuilder {
+    private final Patient testPatient = new Patient();
+
+    public TestPatientBuilder() {
+        // Start out with a valid randomized patient
+        testPatient.setGivenName(RandomStringUtils.randomAlphabetic(2, 30));
+        testPatient.setFamilyName(RandomStringUtils.randomAlphabetic(2, 30));
+        LocalDate start = LocalDate.of(1949, Month.JANUARY, 1);
+        long days = ChronoUnit.DAYS.between(start, LocalDate.now());
+        testPatient.setBirthDate(start.plusDays(RandomUtils.nextLong(0, days + 1)));
+    }
+
+    public TestPatientBuilder withGivenName(String givenName) {
+        testPatient.setGivenName(givenName);
+        return this;
+    }
+
+    public TestPatientBuilder withFamilyName(String familyName) {
+        testPatient.setFamilyName(familyName);
+        return this;
+    }
+
+    public TestPatientBuilder withBirthDate(LocalDate birthDate) {
+        testPatient.setBirthDate(birthDate);
+        return this;
+    }
+
+    public Patient build() {
+        return testPatient;
+    }
+}
+```
+
+This class lets us create random test patients with the added ability to
+override any attribute that we would like.  This can be very useful in
+unit testing.
+
+Now, try it out buy updating the failing test case:
+
+```java
+   @Test
+    public void test_PatientRepository_FindById_ExpectExists() throws Exception {
+        Long patientId = entityManager.persistAndGetId(new TestPatientBuilder().build(), Long.class);
+        Patient aPatient = patientRepository.findById(patientId).orElseThrow(NotFoundException::new);
+        assertThat(aPatient.getId()).isEqualTo(patientId);
+    }
+```
+
+We should go ahead and add a few negative tests that certify the
+validations that we recently added.  First add a JUnit rule for
+exceptions:
+
+```java
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
+```
+
+Now when we expect an exception to be thrown we'll set up the `thrown`
+with our expectations:
+
+```java
+    @Test
+    public void test_PatientRepository_SaveWithNull_ExpectException() throws Exception {
+        thrown.expect(InvalidDataAccessApiUsageException.class);
+        patientRepository.save((Patient)null);
+    }
+
+    @Test
+    public void test_PatientRepository_SaveWithEmpty_ExpectException() throws Exception {
+        thrown.expect(ConstraintViolationException.class);
+        thrown.expectMessage(containsString("'may not be empty'"));
+        patientRepository.save(new Patient());
+    }
+
+    @Test
+    public void test_PatientRepository_SaveWithEmptyGivenName_ExpectException() throws Exception {
+        thrown.expect(ConstraintViolationException.class);
+        thrown.expectMessage(allOf(containsString("givenName"), containsString("'may not be empty'")));
+        patientRepository.save(new TestPatientBuilder().withGivenName("").build());
+    }
+
+    @Test
+    public void test_PatientRepository_SaveWithEmptyFamilyName_ExpectException() throws Exception {
+        thrown.expect(ConstraintViolationException.class);
+        thrown.expectMessage(allOf(containsString("familyName"), containsString("'may not be empty'")));
+        patientRepository.save(new TestPatientBuilder().withFamilyName("").build());
+    }
+
+    @Test
+    public void test_PatientRepository_SaveWithShortGivenName_ExpectException() throws Exception {
+        thrown.expect(ConstraintViolationException.class);
+        thrown.expectMessage(allOf(containsString("givenName"), containsString("'size must be between 2 and")));
+        patientRepository.save(new TestPatientBuilder().withGivenName("A").build());
+    }
+
+    @Test
+    public void test_PatientRepository_SaveWithShortFamilyName_ExpectException() throws Exception {
+        thrown.expect(ConstraintViolationException.class);
+        thrown.expectMessage(allOf(containsString("familyName"), containsString("'size must be between 2 and")));
+        patientRepository.save(new TestPatientBuilder().withFamilyName("Z").build());
+    }
+```
+
+Not only can we assert that a specific exception is thrown but we can
+verify that it contains the message details that we would expect.
+
+Finally, lets refactor and update the Controller tests.  In the
+`PatientControllerTests` refactor to use the `TestPatientBuilder`:
+
+```java
+        given(mockPatientRepository.findById(1L))
+                .willReturn(Optional.of(new TestPatientBuilder()
+                        .withGivenName("Guy")
+                        .withFamilyName("Stromboli")
+                        .withBirthDate(LocalDate.of(1942, 11, 21))
+                        .build()));
+```
+
+In the `PatientControllerWebTests` add a few new tests that also verify
+the `@Valid` is working:
+
+```java
+    @Test
+    public void test_PatientController_addPatient_Expect_OK() throws Exception {
+        ResponseEntity<Patient> entity = restTemplate.postForEntity("/patient",
+                new TestPatientBuilder().build(), Patient.class);
+
+        assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(entity.getBody()).isNotNull()
+                .hasNoNullFieldsOrProperties();
+    }
+
+    @Test
+    public void test_PatientController_addPatient_WithEmpty_Expect_BadRequest() throws Exception {
+        ResponseEntity<String> json = restTemplate.postForEntity("/patient", new Patient(), String.class);
+
+        assertThat(json.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        JSONAssert.assertEquals("{exception:\"org.springframework.web.bind.MethodArgumentNotValidException\"}", json.getBody(), false);
+    }
+
+    @Test
+    public void test_PatientController_addPatient_WithEmptyGivenName_Expect_BadRequest() throws Exception {
+        ResponseEntity<String> json = restTemplate.postForEntity("/patient",
+                new TestPatientBuilder().withGivenName("").build(), String.class);
+
+        assertThat(json.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        JSONAssert.assertEquals("{exception:\"org.springframework.web.bind.MethodArgumentNotValidException\"}", json.getBody(), false);
+    }
+
+    @Test
+    public void test_PatientController_addPatient_WithEmptyFamilyName_Expect_BadRequest() throws Exception {
+        ResponseEntity<String> json = restTemplate.postForEntity("/patient",
+                new TestPatientBuilder().withFamilyName("").build(), String.class);
+
+        assertThat(json.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        JSONAssert.assertEquals("{exception:\"org.springframework.web.bind.MethodArgumentNotValidException\"}", json.getBody(), false);
+    }
+```
 
 
 # Next
 
 ## TODOs
-- Add @Valid
+- Add more @Valid
 - Add more example mocking tests
 - Add equals/hashcodes
-- Add performance tests
+- Add better performance tests
+- Add Query by Example examples
 - Add QueryDsl support
 - Add custom response wrapping
 - Add support for Flyway

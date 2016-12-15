@@ -1,6 +1,6 @@
 package com.undertree.symptom.controllers;
 
-import com.undertree.symptom.domain.Patient;
+import com.undertree.symptom.domain.TestPatientBuilder;
 import com.undertree.symptom.repositories.PatientRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,7 +30,12 @@ public class PatientControllerTests {
 
     @Test
     public void test_MockPatient_Expect_ThatGuy() throws Exception {
-        given(mockPatientRepository.findById(1L)).willReturn(Optional.of(thatGuy()));
+        given(mockPatientRepository.findById(1L))
+                .willReturn(Optional.of(new TestPatientBuilder()
+                        .withGivenName("Guy")
+                        .withFamilyName("Stromboli")
+                        .withBirthDate(LocalDate.of(1942, 11, 21))
+                        .build()));
 
         mockMvc.perform(get("/patient/1")
                 .accept(APPLICATION_JSON_UTF8))
@@ -39,13 +44,5 @@ public class PatientControllerTests {
                 .andExpect(jsonPath("$.givenName", is("Guy")))
                 .andExpect(jsonPath("$.familyName", is("Stromboli")))
                 .andExpect(jsonPath("$.birthDate", is("1942-11-21")));
-    }
-
-    private Patient thatGuy() {
-        Patient aPatient = new Patient();
-        aPatient.setGivenName("Guy");
-        aPatient.setFamilyName("Stromboli");
-        aPatient.setBirthDate(LocalDate.of(1942, 11, 21));
-        return aPatient;
     }
 }

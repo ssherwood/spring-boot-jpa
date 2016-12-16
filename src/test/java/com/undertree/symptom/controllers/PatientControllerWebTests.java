@@ -69,7 +69,7 @@ public class PatientControllerWebTests {
         ResponseEntity<String> json = restTemplate.postForEntity("/patient", new Patient(), String.class);
 
         assertThat(json.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        JSONAssert.assertEquals("{exception:\"org.springframework.web.bind.MethodArgumentNotValidException\"}", json.getBody(), false);
+        JSONAssert.assertEquals("{exception:\"org.springframework.http.converter.HttpMessageNotReadableException\"}", json.getBody(), false);
     }
 
     @Test

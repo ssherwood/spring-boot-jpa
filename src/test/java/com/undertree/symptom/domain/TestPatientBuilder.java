@@ -13,10 +13,16 @@ public class TestPatientBuilder {
     public TestPatientBuilder() {
         // Start out with a valid randomized patient
         testPatient.setGivenName(RandomStringUtils.randomAlphabetic(2, 30));
+        testPatient.setAdditionalName(RandomStringUtils.randomAlphabetic(2, 30));
         testPatient.setFamilyName(RandomStringUtils.randomAlphabetic(2, 30));
         LocalDate start = LocalDate.of(1949, Month.JANUARY, 1);
         long days = ChronoUnit.DAYS.between(start, LocalDate.now());
         testPatient.setBirthDate(start.plusDays(RandomUtils.nextLong(0, days + 1)));
+        testPatient.setEmail(String.format("%s@%s.com", RandomStringUtils.randomAlphanumeric(20),
+                RandomStringUtils.randomAlphanumeric(20)));
+        testPatient.setGender(Gender.values()[RandomUtils.nextInt(0, Gender.values().length)]);
+        testPatient.setHeight((short) RandomUtils.nextInt(140, 300));
+        testPatient.setWeight((short) RandomUtils.nextInt(50, 90));
     }
 
     public TestPatientBuilder withGivenName(String givenName) {

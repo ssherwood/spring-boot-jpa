@@ -24,13 +24,11 @@ public class Patient {
     @Id
     @GeneratedValue
     private Long id;
-    @NotBlank
-    @Size(min = 2)
+    @NotBlank @Size(min = 2)
     private String givenName;
     @Size(min = 2)
     private String additionalName;
-    @NotBlank
-    @Size(min = 2)
+    @NotBlank @Size(min = 2)
     private String familyName;
     //@Past https://stackoverflow.com/questions/30249829/error-no-validator-could-be-found-for-type-java-time-localdate
     @Access(AccessType.PROPERTY)
@@ -41,7 +39,7 @@ public class Patient {
     @Email
     private String email;
     @Min(0)
-    private Short height; // height in cm does not need additional precision
+    private Short height; // height in cm
     @Min(0)
     private Short weight; // weight in kg
 

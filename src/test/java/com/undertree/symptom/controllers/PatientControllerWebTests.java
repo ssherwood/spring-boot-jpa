@@ -1,7 +1,5 @@
 package com.undertree.symptom.controllers;
 
-import com.jayway.jsonpath.DocumentContext;
-import com.jayway.jsonpath.JsonPath;
 import com.undertree.symptom.domain.Patient;
 import com.undertree.symptom.domain.TestPatientBuilder;
 import org.junit.Rule;
@@ -69,7 +67,7 @@ public class PatientControllerWebTests {
         ResponseEntity<String> json = restTemplate.postForEntity("/patient", new Patient(), String.class);
 
         assertThat(json.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        JSONAssert.assertEquals("{exception:\"org.springframework.http.converter.HttpMessageNotReadableException\"}", json.getBody(), false);
+        JSONAssert.assertEquals("{exception:\"org.springframework.web.bind.MethodArgumentNotValidException\"}", json.getBody(), false);
     }
 
     @Test
@@ -88,5 +86,24 @@ public class PatientControllerWebTests {
 
         assertThat(json.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         JSONAssert.assertEquals("{exception:\"org.springframework.web.bind.MethodArgumentNotValidException\"}", json.getBody(), false);
+    }
+
+    @Test
+    public void test_PatientController_addPatient_WithInvalidEmail_Expect_BadRequest() throws Exception {
+        ResponseEntity<String> json = restTemplate.postForEntity("/patient",
+                new TestPatientBuilder().withEmail("bad/email").build(), String.class);
+
+        assertThat(json.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        JSONAssert.assertEquals("{exception:\"org.springframework.web.bind.MethodArgumentNotValidException\"}", json.getBody(), false);
+    }
+
+        @Test
+    public void test_PatientController_addPatient_WithBirthDate_Expect_ValidAge() throws Exception {
+        ResponseEntity<Patient> entity = restTemplate.postForEntity("/patient",
+                new TestPatientBuilder().withBirthDate(LocalDate.of(1980, 1, 1)).build(), Patient.class);
+
+        assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(entity.getBody()).isNotNull()
+                .hasFieldOrPropertyWithValue("age", LocalDate.now().getYear() - 1980);
     }
 }

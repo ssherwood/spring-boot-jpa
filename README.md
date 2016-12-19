@@ -1,21 +1,19 @@
 # Overview
 
-This project is a revisit an older one that I did a few years back when
-I took part in the [Coursera](https://www.coursera.org/) Specialization
-on [Android Development](https://www.coursera.org/specializations/android-app-development).
+This project is a revisit an older one that I did a few years back when I took part in the
+[Coursera](https://www.coursera.org/) Specialization on [Android Development](https://www.coursera.org/specializations/android-app-development).
 
-During the final Capstone we were given the choice of several projects
-to implement and I chose one that was both interesting and personal: an
-application for cancer patients to self-report on their pain symptoms.
+During the final Capstone we were given the choice of several projects to implement and I chose one that was both
+interesting and personal: an application to help cancer patients self-report on their pain symptoms so their doctors
+can be notified of extended durations of persistent pain or inability to eat.
 
-A brief article about this specific project was published on the
-Vanderbilt School of Engineering's [web site](http://engineering.vanderbilt.edu/news/2014/capstone-app-project-for-mooc-aims-to-track-help-manage-cancer-patients-pain/).
+A brief article about this specific project was published on the Vanderbilt School of Engineering's
+[web site](http://engineering.vanderbilt.edu/news/2014/capstone-app-project-for-mooc-aims-to-track-help-manage-cancer-patients-pain/).
 
 ## History
 
-The original server-side implementation of the Capstone project was my
-first time using Spring Boot and since then I've felt that there were
-many ways to improve upon the original.
+The original server-side implementation of the Capstone project was my first time using Spring Boot and since then I've
+felt that there were many ways to improve upon the original code.
   
 Since the final Capstone project was only a few weeks long, I did not
 get as much time to dedicate to the server-side as I would have liked. I
@@ -892,6 +890,140 @@ the `@Valid` is working:
         JSONAssert.assertEquals("{exception:\"org.springframework.web.bind.MethodArgumentNotValidException\"}", json.getBody(), false);
     }
 ```
+
+# Step 13 - More Attributions
+
+The patient needs some more attribution.  Let's add a few new fields that will help round out the `Patient`:
+
+```java
+    @Size(min = 2)
+    private String additionalName;
+    @Transient
+    private Integer age;
+    @Email
+    private String email;
+    @Min(0)
+    private Short height; // height in cm
+    @Min(0)
+    private Short weight; // weight in kg
+```
+
+The `additionalName` is useful for capturing a person's middle but what is the @Transient annotation on `age`?  Well
+this is a derived attribute based on `birthDate`.  Since it is derived, we don't want JPA to persist it so this
+annotation is useful for signifying that (its basically an ignore marker).  However, since we don't have any storage
+mechanism for this how will it get set?
+
+I've chosen to calculate the Patient's age each time `birthDate` is set.  Like this:
+
+```java
+    public void setBirthDate(LocalDate birthDate) {
+        this.birthDate = birthDate;
+        this.age = Period.between(birthDate, LocalDate.now()).getYears();
+    }
+```
+
+This ensures that any time the birthDate is modified the age is recalculated.  However, if you run the program right now
+age will always appear null.  That is a bit of a surprise.  It is because Hibernate is using Field level access based on
+how we've used the JPA annotations.  There is a simple way to update the birthDate field so Hibernate will instead use
+Property-level access:
+
+```java
+    @Access(AccessType.PROPERTY)
+    private LocalDate birthDate;
+```
+
+Now Hibernate will use the getter/setter methods when accessing birthDate and age will get set appropriately.
+
+In addition add the associated getter and setter for the new properties and restart the application.  Note: since age is
+not stored we don't want anyone to accidentally change it.  An easy way to ensure this is to not provide a setter method
+for it.
+
+Our new properties are being returned as null in the response JSON.  If we don't want Jackson to marshal null values,
+there is a quick setting that we can change in the `application.properties`:
+
+```properties
+spring.jackson.default-property-inclusion=non_null
+```
+
+That looks better.  If we want, we can go ahead and update the patients.csv to support these new fields:
+
+```csv
+ID,BIRTH_DATE,GIVEN_NAME,FAMILY_NAME,ADDITIONAL_NAME,GENDER,EMAIL,HEIGHT,WEIGHT
+1,1972-05-05,Phillip,Spec,J,1,pjspec@junit.org,84,180
+2,1973-06-06,Sally,Certify,T,2,,78,163
+3,1962-02-15,Frank,Neubus,,0,,88,178
+```
+
+Then update the associate `data.sql`:
+
+```sql
+INSERT INTO PATIENT(ID,BIRTH_DATE,GIVEN_NAME,FAMILY_NAME,ADDITIONAL_NAME,GENDER,EMAIL,HEIGHT,WEIGHT)
+  (SELECT * FROM CSVREAD('classpath:patients.csv'));
+```
+
+We also need to look at our test cases but first, lets update the `TestPatientBuilder` to account for the new
+attributes:
+
+```java
+        testPatient.setEmail(String.format("%s@%s.com", RandomStringUtils.randomAlphanumeric(20),
+                RandomStringUtils.randomAlphanumeric(20)));
+        testPatient.setGender(Gender.values()[RandomUtils.nextInt(0, Gender.values().length)]);
+        testPatient.setHeight((short) RandomUtils.nextInt(140, 300));
+        testPatient.setWeight((short) RandomUtils.nextInt(50, 90));
+```
+
+Don't forget to add the associate "with" methods so we can override the random values if needed.
+
+```java
+    public TestPatientBuilder withAdditionalName(String additionalName) {
+        testPatient.setAdditionalName(additionalName);
+        return this;
+    }
+
+    public TestPatientBuilder withEmail(String email) {
+        testPatient.setEmail(email);
+        return this;
+    }
+
+    public TestPatientBuilder withGender(Gender gender) {
+        testPatient.setGender(gender);
+        return this;
+    }
+
+    public TestPatientBuilder withHeight(Short height) {
+        testPatient.setHeight(height);
+        return this;
+    }
+
+    public TestPatientBuilder withWeight(Short weight) {
+        testPatient.setWeight(weight);
+        return this;
+    }
+```
+
+Add a few more tests to the PatientControllerWebTests class:
+
+```java
+    @Test
+    public void test_PatientController_addPatient_WithInvalidEmail_Expect_BadRequest() throws Exception {
+        ResponseEntity<String> json = restTemplate.postForEntity("/patient",
+                new TestPatientBuilder().withEmail("bad/email").build(), String.class);
+
+        assertThat(json.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        JSONAssert.assertEquals("{exception:\"org.springframework.web.bind.MethodArgumentNotValidException\"}", json.getBody(), false);
+    }
+
+        @Test
+    public void test_PatientController_addPatient_WithBirthDate_Expect_ValidAge() throws Exception {
+        ResponseEntity<Patient> entity = restTemplate.postForEntity("/patient",
+                new TestPatientBuilder().withBirthDate(LocalDate.of(1980, 1, 1)).build(), Patient.class);
+
+        assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(entity.getBody()).isNotNull()
+                .hasFieldOrPropertyWithValue("age", LocalDate.now().getYear() - 1980);
+    }
+```
+
 
 
 # Next

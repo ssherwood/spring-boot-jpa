@@ -48,7 +48,7 @@ public class PatientRepositoryTests {
     @Test
     public void test_PatientRepository_SaveWithNull_ExpectException() throws Exception {
         thrown.expect(InvalidDataAccessApiUsageException.class);
-        patientRepository.save((Patient)null);
+        patientRepository.save((Patient) null);
     }
 
     @Test
@@ -84,5 +84,33 @@ public class PatientRepositoryTests {
         thrown.expect(ConstraintViolationException.class);
         thrown.expectMessage(allOf(containsString("familyName"), containsString("'size must be between 2 and")));
         patientRepository.save(new TestPatientBuilder().withFamilyName("Z").build());
+    }
+
+    @Test
+    public void test_PatientRepository_SaveWithShortAdditionalName_ExpectException() throws Exception {
+        thrown.expect(ConstraintViolationException.class);
+        thrown.expectMessage(allOf(containsString("additionalName"), containsString("'size must be between 2 and")));
+        patientRepository.save(new TestPatientBuilder().withAdditionalName("Z").build());
+    }
+
+    @Test
+    public void test_PatientRepository_SaveWithInvalidEmail_ExpectException() throws Exception {
+        thrown.expect(ConstraintViolationException.class);
+        thrown.expectMessage(allOf(containsString("email"), containsString("'not a well-formed email address'")));
+        patientRepository.save(new TestPatientBuilder().withEmail("baz").build());
+    }
+
+    @Test
+    public void test_PatientRepository_SaveWithLessThanMinHeight_ExpectException() throws Exception {
+        thrown.expect(ConstraintViolationException.class);
+        thrown.expectMessage(allOf(containsString("height"), containsString("'must be greater than or equal to 0'")));
+        patientRepository.save(new TestPatientBuilder().withHeight((short) -1).build());
+    }
+
+    @Test
+    public void test_PatientRepository_SaveWithLessThanMinWeight_ExpectException() throws Exception {
+        thrown.expect(ConstraintViolationException.class);
+        thrown.expectMessage(allOf(containsString("weight"), containsString("'must be greater than or equal to 0'")));
+        patientRepository.save(new TestPatientBuilder().withWeight((short) -1).build());
     }
 }

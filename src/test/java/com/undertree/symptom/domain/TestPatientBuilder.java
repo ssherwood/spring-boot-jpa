@@ -35,8 +35,33 @@ public class TestPatientBuilder {
         return this;
     }
 
+    public TestPatientBuilder withAdditionalName(String additionalName) {
+        testPatient.setAdditionalName(additionalName);
+        return this;
+    }
+
     public TestPatientBuilder withBirthDate(LocalDate birthDate) {
         testPatient.setBirthDate(birthDate);
+        return this;
+    }
+
+    public TestPatientBuilder withEmail(String email) {
+        testPatient.setEmail(email);
+        return this;
+    }
+
+    public TestPatientBuilder withGender(Gender gender) {
+        testPatient.setGender(gender);
+        return this;
+    }
+
+    public TestPatientBuilder withHeight(Short height) {
+        testPatient.setHeight(height);
+        return this;
+    }
+
+    public TestPatientBuilder withWeight(Short weight) {
+        testPatient.setWeight(weight);
         return this;
     }
 

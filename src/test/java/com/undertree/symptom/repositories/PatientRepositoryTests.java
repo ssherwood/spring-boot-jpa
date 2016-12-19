@@ -87,13 +87,6 @@ public class PatientRepositoryTests {
     }
 
     @Test
-    public void test_PatientRepository_SaveWithShortAdditionalName_ExpectException() throws Exception {
-        thrown.expect(ConstraintViolationException.class);
-        thrown.expectMessage(allOf(containsString("additionalName"), containsString("'size must be between 2 and")));
-        patientRepository.save(new TestPatientBuilder().withAdditionalName("Z").build());
-    }
-
-    @Test
     public void test_PatientRepository_SaveWithInvalidEmail_ExpectException() throws Exception {
         thrown.expect(ConstraintViolationException.class);
         thrown.expectMessage(allOf(containsString("email"), containsString("'not a well-formed email address'")));

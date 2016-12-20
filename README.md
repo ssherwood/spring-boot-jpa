@@ -49,7 +49,7 @@ generated from the Initializr.
 If all goes well, you should see several INFO commands printed out to
 the Console and a Tomcat instance being started on port 8080.
   
-Try it out now at: (http://localhost:8080).
+Try it out now at: http://localhost:8080
 
 You should see the default "Whitelablel" error page.  
 
@@ -95,8 +95,7 @@ default JPA implementation).
 
 What you may not have noticed however is that by including H2 as a
 dependency you are also running an in-memory database with a full web
-console:
-http://localhost:8080/h2-console
+console at http://localhost:8080/h2-console
 
 FYI: Make sure you set the JDBC URL to 'jdbc:h2:mem:testdb' instead of 
 the default or else you won't see the PATIENT table that was create when
@@ -105,7 +104,7 @@ we started the app (this is the Spring Boot default database URL).
 Sweet.  This is pretty nice but how do we get the application to be able
 to create, read, update and delete Patients?
 
-# Step 3: Create a Repository
+# Step 3: Create a JPA Repository
 
 Create a package called `repositories` in the base package and create a
 `PatientRepository` Java interface class.
@@ -166,7 +165,7 @@ public class PatientController {
 Restart the application.
 
 After the application restarted you should now be able to make "RESTful"
-calls against the /patient URL like this: (http://localhost:8080/patient/1)
+calls against the /patient URL like this: http://localhost:8080/patient/1
 
 However, you will notice that nothing is displayed... that's weird.
 
@@ -194,7 +193,7 @@ and change the GET implementation in the controller to:
 
 Apply these changes and restart.
 
-Now if we use curl:
+Now if we use curl again:
 
 ```
 curl -sS localhost:8080/patient/1 | jq
@@ -245,7 +244,7 @@ Restart the application and attempt the `curl` command again.
 
 That looks better!
 
-# Step 7:  Add a Patient
+# Step 7:  Add a Patient via POST
 
 We have a functional GET but now we need a way to add a Patient.  Using
 REST semantics this should be expressed with a POST.  To support this,
@@ -344,8 +343,8 @@ There is yet another configuration change we need here to tell Jackson
 to format the date "correctly".  Update the application.properties and
 include:
 
-```
-spring.jackson.serialization.WRITE_DATES_AS_TIMESTAMPS = false
+```properties
+spring.jackson.serialization.WRITE_DATES_AS_TIMESTAMPS=false
 ```
 
 Volia!
@@ -356,7 +355,7 @@ we might want to be able to query against it later.
 
 Why doesn't JPA support LocalDate?
 
-# Step 9: Create a JPA Converter
+# Step 9: Create a JPA LocalDate Converter
 
 As of the time of writing, JPA still does not natively support the JSR
 310 dates.  It does, however, provide support for custom converters that
@@ -399,7 +398,7 @@ That is a huge improvement!  If you use other Java 8 Date types, you'll
 need a converter for each (I can't believe no one has created a utility
 library for these yet).
 
-# Step 10:  Let's write some tests
+# Step 10:  Let's write some unit tests
 
 So far we've not written a lot of code but its still a good idea to get
 into the habit of writing unit tests.  Spring Boot 1.4 provides some new
@@ -573,7 +572,7 @@ practice.
 
 Finally, consider introducing the jmeter plugin to the maven POM.
 
-# Step 12: Validation JSR 309/3
+# Step 12: Bean Validation JSR 309/3
 
 There a a few types of validations that we can add to our application
 for the entity classes.
@@ -923,7 +922,7 @@ I've chosen to calculate the Patient's age each time `birthDate` is set.  Like t
 ```java
     public void setBirthDate(LocalDate birthDate) {
         this.birthDate = birthDate;
-        this.age = Period.between(birthDate, LocalDate.now()).getYears();
+        this.age = birthDate == null ? null : Period.between(birthDate, LocalDate.now()).getYears();
     }
 ```
 
@@ -1055,11 +1054,48 @@ Add a few more tests to the PatientControllerWebTests class:
     }
 ```
 
+# Step X:  Add Remaining "CRUD" Operations to the Patient
+
+So far we have the CR of CRUD implemented.  This seems like a good opportunity to add the remaining lifecycle
+operations.  In the `PatientController` add the following code:
+
+```java
+    @PutMapping(Patient.RESOURCE_PATH + "/{id}")
+    public Patient updatePatientIncludingNulls(@PathVariable("id") Long id, @Valid @RequestBody Patient patient) {
+        Patient aPatient = patientRepository.findById(id)
+                .orElseThrow(() ->
+                        new NotFoundException(String.format("Resource %s/%d not found", Patient.RESOURCE_PATH, id)));
+        // copy bean properties including nulls
+        BeanUtils.copyProperties(patient, aPatient);
+        return patientRepository.save(aPatient);
+    }
+```
+
+Simply replace the existing resource with the one supplied in the RequestBody.  This implementation first attempts to
+load the resource in question and then overlay it with the one provided (including null or missing fields).  The
+resource should return the replaced entity at the same location (id).
+
+Add the following to the `PatientControllerWebTests`:
+
+```java
+    @Test
+    public void test_PatientController_updatePatient_WithValidRandom_Expect_OK() throws Exception {
+        HttpEntity<Patient> patientToUpdate = new HttpEntity<>(new TestPatientBuilder().build());
+        
+        ResponseEntity<Patient> entity = restTemplate.exchange("/patient/{id}", HttpMethod.PUT,
+                patientToUpdate, Patient.class, new HashMap<String, Object>() {{ put("id", 1L); }});
+
+        assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(entity.getBody()).isNotNull()
+                .isEqualToIgnoringGivenFields(patientToUpdate.getBody(), "id");
+    }
+```
 
 
 ---
 
 ## TODOs
+
 - Add more @Valid
 - Add more example mocking tests
 - Add equals/hashcodes
@@ -1073,29 +1109,27 @@ Add a few more tests to the PatientControllerWebTests class:
 - Add Spring Security with OAuth2 and JWT
 - Explain HIPA and PII concerns
 
-
 # Additional Resources
 
-- [Spring Boot Reference Guide]:(https://docs.spring.io/spring-boot/docs/current/reference/html/)
-- [Spring Data JPA]:(http://docs.spring.io/spring-data/jpa/docs/current/reference/html/)
-- [Hibernate ORM]:(http://hibernate.org/orm/)
-- [Hibernate Validator]:(http://hibernate.org/validator/)
-- [Jackson]:(http://wiki.fasterxml.com/JacksonHome)
-- [H2 Database]:(http://www.h2database.com/html/main.html)
-
+- [Spring Boot Reference Guide](https://docs.spring.io/spring-boot/docs/current/reference/html/)
+- [Spring Data JPA](http://docs.spring.io/spring-data/jpa/docs/current/reference/html/)
+- [Hibernate ORM](http://hibernate.org/orm/)
+- [Hibernate Validator](http://hibernate.org/validator/)
+- [Jackson](http://wiki.fasterxml.com/JacksonHome)
+- [H2 Database](http://www.h2database.com/html/main.html)
 
 # License
 
-   Copyright 2016 Shawn Sherwood
+    Copyright 2016 Shawn Sherwood
 
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
 
-       http://www.apache.org/licenses/LICENSE-2.0
+        http://www.apache.org/licenses/LICENSE-2.0
 
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.

@@ -10,11 +10,15 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
@@ -97,7 +101,7 @@ public class PatientControllerWebTests {
         JSONAssert.assertEquals("{exception:\"org.springframework.web.bind.MethodArgumentNotValidException\"}", json.getBody(), false);
     }
 
-        @Test
+    @Test
     public void test_PatientController_addPatient_WithBirthDate_Expect_ValidAge() throws Exception {
         ResponseEntity<Patient> entity = restTemplate.postForEntity("/patient",
                 new TestPatientBuilder().withBirthDate(LocalDate.of(1980, 1, 1)).build(), Patient.class);
@@ -105,5 +109,35 @@ public class PatientControllerWebTests {
         assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(entity.getBody()).isNotNull()
                 .hasFieldOrPropertyWithValue("age", LocalDate.now().getYear() - 1980);
+    }
+
+    @Test
+    public void test_PatientController_updatePatient_WithValidRandom_Expect_OK() throws Exception {
+        HttpEntity<Patient> patientToUpdate = new HttpEntity<>(new TestPatientBuilder().build());
+
+        ResponseEntity<Patient> entity = restTemplate.exchange("/patient/{id}", HttpMethod.PUT,
+                patientToUpdate, Patient.class, new HashMap<String, Object>() {{ put("id", 1L); }});
+
+        assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(entity.getBody()).isNotNull()
+                .isEqualToIgnoringGivenFields(patientToUpdate.getBody(), "id");
+    }
+
+    @Test
+    public void test_PatientController_patchPatient_() throws Exception {
+        Map<String, Object> params = new HashMap<>();
+        params.put("id", 1L);
+
+        Patient patchPatient = new Patient();
+        patchPatient.setEmail("somewhere@overtherainbow.com");
+        HttpEntity<Patient> patientToUpdate = new HttpEntity<>(patchPatient);
+
+        // great the default impl doesn't appear to support PATCH
+        //ResponseEntity<Patient> entity = restTemplate.exchange("/patient/{id}", HttpMethod.PATCH,
+        //        patientToUpdate, Patient.class, params);
+
+        //assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        //assertThat(entity.getBody()).isNotNull()
+        //        .isEqualToIgnoringGivenFields(patientToUpdate.getBody(), "id");
     }
 }

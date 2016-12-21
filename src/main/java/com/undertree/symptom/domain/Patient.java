@@ -26,6 +26,7 @@ import java.time.LocalDate;
 import java.time.Period;
 
 // https://health-lifesci.schema.org/Patient
+// http://www.openmhealth.org/documentation/#/schema-docs/schema-library
 
 // Additional Notes:
 // We decided to not store the age attribute and instead calculate it.

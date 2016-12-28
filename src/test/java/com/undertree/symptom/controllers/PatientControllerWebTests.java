@@ -35,7 +35,7 @@ public class PatientControllerWebTests {
 
     @Test
     public void test_PatientController_getPatient_Expect_Patient1_Exists() throws Exception {
-        ResponseEntity<Patient> entity = restTemplate.getForEntity("/patient/1", Patient.class);
+        ResponseEntity<Patient> entity = restTemplate.getForEntity("/patients/1", Patient.class);
 
         assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(entity.getBody()).isNotNull()
@@ -46,19 +46,19 @@ public class PatientControllerWebTests {
 
     @Test
     public void test_PatientController_getPatient_Expect_NotFound() throws Exception {
-        ResponseEntity<Patient> entity = restTemplate.getForEntity("/patient/99999999", Patient.class);
+        ResponseEntity<Patient> entity = restTemplate.getForEntity("/patients/99999999", Patient.class);
         assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
     @Test
     public void test_PatientController_getPatient_Expect_BadRequest() throws Exception {
-        String response = restTemplate.getForObject("/patient/foo", String.class);
+        String response = restTemplate.getForObject("/patients/foo", String.class);
         assertThat(response).contains("Bad Request");
     }
 
     @Test
     public void test_PatientController_addPatient_Expect_OK() throws Exception {
-        ResponseEntity<Patient> entity = restTemplate.postForEntity("/patient",
+        ResponseEntity<Patient> entity = restTemplate.postForEntity("/patients",
                 new TestPatientBuilder().build(), Patient.class);
 
         assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -68,7 +68,7 @@ public class PatientControllerWebTests {
 
     @Test
     public void test_PatientController_addPatient_WithEmpty_Expect_BadRequest() throws Exception {
-        ResponseEntity<String> json = restTemplate.postForEntity("/patient", new Patient(), String.class);
+        ResponseEntity<String> json = restTemplate.postForEntity("/patients", new Patient(), String.class);
 
         assertThat(json.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         JSONAssert.assertEquals("{exception:\"org.springframework.web.bind.MethodArgumentNotValidException\"}", json.getBody(), false);
@@ -76,7 +76,7 @@ public class PatientControllerWebTests {
 
     @Test
     public void test_PatientController_addPatient_WithEmptyGivenName_Expect_BadRequest() throws Exception {
-        ResponseEntity<String> json = restTemplate.postForEntity("/patient",
+        ResponseEntity<String> json = restTemplate.postForEntity("/patients",
                 new TestPatientBuilder().withGivenName("").build(), String.class);
 
         assertThat(json.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
@@ -85,7 +85,7 @@ public class PatientControllerWebTests {
 
     @Test
     public void test_PatientController_addPatient_WithEmptyFamilyName_Expect_BadRequest() throws Exception {
-        ResponseEntity<String> json = restTemplate.postForEntity("/patient",
+        ResponseEntity<String> json = restTemplate.postForEntity("/patients",
                 new TestPatientBuilder().withFamilyName("").build(), String.class);
 
         assertThat(json.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
@@ -94,7 +94,7 @@ public class PatientControllerWebTests {
 
     @Test
     public void test_PatientController_addPatient_WithInvalidEmail_Expect_BadRequest() throws Exception {
-        ResponseEntity<String> json = restTemplate.postForEntity("/patient",
+        ResponseEntity<String> json = restTemplate.postForEntity("/patients",
                 new TestPatientBuilder().withEmail("bad/email").build(), String.class);
 
         assertThat(json.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
@@ -103,7 +103,7 @@ public class PatientControllerWebTests {
 
     @Test
     public void test_PatientController_addPatient_WithBirthDate_Expect_ValidAge() throws Exception {
-        ResponseEntity<Patient> entity = restTemplate.postForEntity("/patient",
+        ResponseEntity<Patient> entity = restTemplate.postForEntity("/patients",
                 new TestPatientBuilder().withBirthDate(LocalDate.of(1980, 1, 1)).build(), Patient.class);
 
         assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -115,7 +115,7 @@ public class PatientControllerWebTests {
     public void test_PatientController_updatePatient_WithValidRandom_Expect_OK() throws Exception {
         HttpEntity<Patient> patientToUpdate = new HttpEntity<>(new TestPatientBuilder().build());
 
-        ResponseEntity<Patient> entity = restTemplate.exchange("/patient/{id}", HttpMethod.PUT,
+        ResponseEntity<Patient> entity = restTemplate.exchange("/patients/{id}", HttpMethod.PUT,
                 patientToUpdate, Patient.class, new HashMap<String, Object>() {{ put("id", 1L); }});
 
         assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);

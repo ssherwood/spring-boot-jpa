@@ -155,7 +155,7 @@ public class PatientController {
         this.patientRepository = patientRepository;
     }
     
-    @GetMapping("/patient/{id}")
+    @GetMapping("/patients/{id}")
     public Patient getPatient(@PathVariable("id") Long id) {
         return patientRepository.findOne(id);
     }
@@ -165,7 +165,7 @@ public class PatientController {
 Restart the application.
 
 After the application restarted you should now be able to make "RESTful"
-calls against the /patient URL like this: http://localhost:8080/patient/1
+calls against the /patients URL like this: http://localhost:8080/patients/1
 
 However, you will notice that nothing is displayed... that's weird.
 
@@ -185,7 +185,7 @@ public interface PatientRepository extends JpaRepository<Patient, Long> {
 and change the GET implementation in the controller to:
 
 ```java
-    @GetMapping("/patient/{id}")
+    @GetMapping("/patients/{id}")
     public Patient getPatient(@PathVariable("id") Long id) {
         return patientRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Not found"));
     }
@@ -196,7 +196,7 @@ Apply these changes and restart.
 Now if we use curl again:
 
 ```
-curl -sS localhost:8080/patient/1 | jq
+curl -sS localhost:8080/patients/1 | jq
 ```
 
 we will at least get a 500 status error code.  However, that is not the
@@ -238,7 +238,7 @@ Restart the application and attempt the `curl` command again.
   "error": "Not Found",
   "exception": "com.undertree.symptom.exceptions.NotFoundException",
   "message": "Patient 1 not found",
-  "path": "/patient/1"
+  "path": "/patients/1"
 }
 ```
 
@@ -251,7 +251,7 @@ REST semantics this should be expressed with a POST.  To support this,
 add the following code to the PatientController:
 
 ```java
-    @PostMapping("/patient")
+    @PostMapping("/patients")
     public Patient addPatient(@RequestBody Patient patient) {
         return patientRepository.save(patient);
     }
@@ -268,7 +268,7 @@ with the ID of 1.  If we use our GET operation, we should get the entity
 back right?
 
 ```
-curl -sS localhost:8080/patient/1 | jq
+curl -sS localhost:8080/patients/1 | jq
 ```
 
 Still the same empty empty object?
@@ -289,7 +289,7 @@ Modify the Patient class to add a getter for the id field:
 Now when you execute the POST we can see an id field on the JSON object
 
 ```bash
-curl -sS -H "Content-Type: application/json" -X POST localhost:8080/patient -d '{}' | jq
+curl -sS -H "Content-Type: application/json" -X POST localhost:8080/patients -d '{}' | jq
 ```
 
 TODO discuss Lombok
@@ -310,7 +310,7 @@ possible.
 Using curl again submit a Patient add request:
 
 ```bash
-curl -sS -H "Content-Type: application/json" -X POST localhost:8080/patient -d '{"givenName":"Max","familyName":"Colorado","birthDate":"1942-12-11"}' | jq
+curl -sS -H "Content-Type: application/json" -X POST localhost:8080/patients -d '{"givenName":"Max","familyName":"Colorado","birthDate":"1942-12-11"}' | jq
 ```
 
 400 Error?  So that LocalDate is causes a JsonMappingException.
@@ -456,7 +456,7 @@ public class PatientControllerTests {
     public void test_MockPatient_Expect_ThatGuy() throws Exception {
         given(mockPatientRepository.findById(1L)).willReturn(Optional.of(thatGuy()));
 
-        mockMvc.perform(get("/patient/1")
+        mockMvc.perform(get("/patients/1")
                 .accept(APPLICATION_JSON_UTF8))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(APPLICATION_JSON_UTF8))
@@ -498,7 +498,7 @@ public class PatientControllerWebTests {
 
     @Test
     public void test_PatientController_getPatient_Expect_Patient1_Exists() throws Exception {
-        ResponseEntity<Patient> entity = restTemplate.getForEntity("/patient/1", Patient.class);
+        ResponseEntity<Patient> entity = restTemplate.getForEntity("/patients/1", Patient.class);
 
         assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(entity.getBody()).isNotNull()
@@ -509,13 +509,13 @@ public class PatientControllerWebTests {
 
     @Test
     public void test_PatientController_getPatient_Expect_Patient99999999_NotFound() throws Exception {
-        ResponseEntity<Patient> entity = restTemplate.getForEntity("/patient/99999999", Patient.class);
+        ResponseEntity<Patient> entity = restTemplate.getForEntity("/patients/99999999", Patient.class);
         assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
     @Test
     public void test_PatientController_getPatient_Expect_Invalid() throws Exception {
-        String response = restTemplate.getForObject("/patient/foo", String.class);
+        String response = restTemplate.getForObject("/patients/foo", String.class);
         assertThat(response).contains("Bad Request");
     }
 }
@@ -602,7 +602,7 @@ validations:
 If you restart the application and look at the Hibernate create table,
 you'll see that I was wrong.  Hibernate did honor these validations and
 modified the schema accordingly.  Now if I try to post a blank JSON
-object to the /patient URL, I should see an error:
+object to the /patients URL, I should see an error:
 
 ```json
 {
@@ -611,7 +611,7 @@ object to the /patient URL, I should see an error:
   "error": "Internal Server Error",
   "exception": "javax.validation.ConstraintViolationException",
   "message": "Validation failed for classes [com.undertree.symptom.domain.Patient] during persist time for groups [javax.validation.groups.Default, ]\nList of constraint violations:[\n\tConstraintViolationImpl{interpolatedMessage='may not be null', propertyPath=givenName, rootBeanClass=class com.undertree.symptom.domain.Patient, messageTemplate='{javax.validation.constraints.NotNull.message}'}\n\tConstraintViolationImpl{interpolatedMessage='may not be null', propertyPath=familyName, rootBeanClass=class com.undertree.symptom.domain.Patient, messageTemplate='{javax.validation.constraints.NotNull.message}'}\n]",
-  "path": "/patient"
+  "path": "/patients"
 }
 ```
 
@@ -624,7 +624,7 @@ Java and Spring have a simple solution for this.  Add a `@Valid`
 annotation to the RequestBody parameter like this:
 
 ```java
-    @PostMapping("/patient")
+    @PostMapping("/patients")
     public Patient addPatient(@Valid @RequestBody Patient patient) {
         return patientRepository.save(patient);
     }
@@ -691,7 +691,7 @@ Restart and rerun the POST:
     }
   ],
   "message": "Validation failed for object='patient'. Error count: 2",
-  "path": "/patient"
+  "path": "/patients"
 }
 ```
 
@@ -861,7 +861,7 @@ the `@Valid` is working:
 ```java
     @Test
     public void test_PatientController_addPatient_Expect_OK() throws Exception {
-        ResponseEntity<Patient> entity = restTemplate.postForEntity("/patient",
+        ResponseEntity<Patient> entity = restTemplate.postForEntity("/patients",
                 new TestPatientBuilder().build(), Patient.class);
 
         assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -871,7 +871,7 @@ the `@Valid` is working:
 
     @Test
     public void test_PatientController_addPatient_WithEmpty_Expect_BadRequest() throws Exception {
-        ResponseEntity<String> json = restTemplate.postForEntity("/patient", new Patient(), String.class);
+        ResponseEntity<String> json = restTemplate.postForEntity("/patients", new Patient(), String.class);
 
         assertThat(json.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         JSONAssert.assertEquals("{exception:\"org.springframework.web.bind.MethodArgumentNotValidException\"}", json.getBody(), false);
@@ -879,7 +879,7 @@ the `@Valid` is working:
 
     @Test
     public void test_PatientController_addPatient_WithEmptyGivenName_Expect_BadRequest() throws Exception {
-        ResponseEntity<String> json = restTemplate.postForEntity("/patient",
+        ResponseEntity<String> json = restTemplate.postForEntity("/patients",
                 new TestPatientBuilder().withGivenName("").build(), String.class);
 
         assertThat(json.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
@@ -888,7 +888,7 @@ the `@Valid` is working:
 
     @Test
     public void test_PatientController_addPatient_WithEmptyFamilyName_Expect_BadRequest() throws Exception {
-        ResponseEntity<String> json = restTemplate.postForEntity("/patient",
+        ResponseEntity<String> json = restTemplate.postForEntity("/patients",
                 new TestPatientBuilder().withFamilyName("").build(), String.class);
 
         assertThat(json.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
@@ -1036,7 +1036,7 @@ Add a few more tests to the PatientControllerWebTests class:
 ```java
     @Test
     public void test_PatientController_addPatient_WithInvalidEmail_Expect_BadRequest() throws Exception {
-        ResponseEntity<String> json = restTemplate.postForEntity("/patient",
+        ResponseEntity<String> json = restTemplate.postForEntity("/patients",
                 new TestPatientBuilder().withEmail("bad/email").build(), String.class);
 
         assertThat(json.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
@@ -1045,7 +1045,7 @@ Add a few more tests to the PatientControllerWebTests class:
 
         @Test
     public void test_PatientController_addPatient_WithBirthDate_Expect_ValidAge() throws Exception {
-        ResponseEntity<Patient> entity = restTemplate.postForEntity("/patient",
+        ResponseEntity<Patient> entity = restTemplate.postForEntity("/patients",
                 new TestPatientBuilder().withBirthDate(LocalDate.of(1980, 1, 1)).build(), Patient.class);
 
         assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -1082,7 +1082,7 @@ Add the following to the `PatientControllerWebTests`:
     public void test_PatientController_updatePatient_WithValidRandom_Expect_OK() throws Exception {
         HttpEntity<Patient> patientToUpdate = new HttpEntity<>(new TestPatientBuilder().build());
         
-        ResponseEntity<Patient> entity = restTemplate.exchange("/patient/{id}", HttpMethod.PUT,
+        ResponseEntity<Patient> entity = restTemplate.exchange("/patients/{id}", HttpMethod.PUT,
                 patientToUpdate, Patient.class, new HashMap<String, Object>() {{ put("id", 1L); }});
 
         assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -1091,12 +1091,84 @@ Add the following to the `PatientControllerWebTests`:
     }
 ```
 
+# Step X: Returning a Collection of Resources
+
+So far all of our resource interactions are with single entities but we frequently want to retrieve collections of
+resources.  Spring Data provides some basic ones for JPA by default, so lets see what that might look like in our
+controller.
+
+Add the following code to the PatientController:
+
+```java
+    @GetMapping(Patient.RESOURCES_PATH)
+    public List<Patient> getPatients() {
+        return patientRepository.findAll();
+    }
+```
+
+If you hit the /patients resource you should see the default patients that we have automatically created with the
+data.sql and CSV file.  The result is a raw collection of resources.  The result set is small so we can return the whole
+collection with this call but in reality, most unbounded queries like this can cause performance issues if not
+automatically bounded.
+
+To add this capability we need to add support for paging.  Replace the previous method with this:
+
+```java
+    @GetMapping(Patient.RESOURCE_PATH)
+    public List<Patient> getPatients(Pageable pageable) {
+        Page<Patient> pagedResults = patientRepository.findAll(pageable);
+
+        if (!pagedResults.hasContent()) {
+            throw new NotFoundException(String.format("Resource %s not found", Patient.RESOURCE_PATH));
+        }
+
+        return pagedResults.getContent();
+    }
+```
+
+Now request the collection with paging parameters via http:
+
+```bash
+http "localhost:8080/patients?size=1&page=1"
+```
+
+The result is now limited to the second result (just remember that page starts at zero).  Without a lot of effort we can
+now support paging.  The default page size is 20 so if a user does not provide any paging parameters, we can be assured
+that we won't accidentally allow unbounded queries to be returned.  You can customize this with the `@PageableDefault`
+annotation but to do so globally isn't possible yet without overriding `WebMvcConfigurerAdapter` and adding a customized
+`PageableHandlerMethodArgumentResolver`.
+
+In addition to pagination, you also get sorting support:
+
+```bash
+http "localhost:8080/patients?sort=familyName"
+```
+
+The result should be sorted as requested.  You can also verify this by reviewing the SQL that is being executed in the
+logs:
+
+```sql
+    select
+        patient0_.id as id1_1_,
+        patient0_.additional_name as addition2_1_,
+        patient0_.birth_date as birth_da3_1_,
+        patient0_.email as email4_1_,
+        patient0_.family_name as family_n5_1_,
+        patient0_.gender as gender6_1_,
+        patient0_.given_name as given_na7_1_,
+        patient0_.height as height8_1_,
+        patient0_.weight as weight9_1_ 
+    from
+        patient patient0_ 
+    order by
+        patient0_.family_name asc limit ?
+```
 
 ---
 
 ## TODOs
 
-- Add more @Valid
+- Add custom @Valid
 - Add more example mocking tests
 - Add equals/hashcodes
 - Add better performance tests
@@ -1107,6 +1179,7 @@ Add the following to the `PatientControllerWebTests`:
 - Add support for JPA/JTA transactions
 - Add REST documentation Swagger vs RESTDocs
 - Add Spring Security with OAuth2 and JWT
+- Add Auditing
 - Explain HIPA and PII concerns
 
 # Additional Resources
@@ -1117,6 +1190,11 @@ Add the following to the `PatientControllerWebTests`:
 - [Hibernate Validator](http://hibernate.org/validator/)
 - [Jackson](http://wiki.fasterxml.com/JacksonHome)
 - [H2 Database](http://www.h2database.com/html/main.html)
+
+
+Rest design guides:
+https://github.com/Microsoft/api-guidelines/blob/master/Guidelines.md
+https://docs.microsoft.com/en-us/azure/best-practices-api-design
 
 # License
 

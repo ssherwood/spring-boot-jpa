@@ -38,8 +38,7 @@ import java.time.Period;
 // considered as part of the actual persistence object.
 @Entity
 public class Patient {
-    public static final String RESOURCE_PATH = "/patient";
-    public static final String RESOURCES_PATH = "/patients";
+    public static final String RESOURCE_PATH = "/patients";
 
     @Id
     @GeneratedValue

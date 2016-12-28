@@ -37,7 +37,7 @@ public class PatientControllerTests {
                         .withBirthDate(LocalDate.of(1942, 11, 21))
                         .build()));
 
-        mockMvc.perform(get("/patient/1")
+        mockMvc.perform(get("/patients/1")
                 .accept(APPLICATION_JSON_UTF8))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(APPLICATION_JSON_UTF8))

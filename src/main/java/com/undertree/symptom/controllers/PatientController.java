@@ -7,10 +7,15 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.beans.FeatureDescriptor;
+import java.util.List;
 import java.util.stream.Stream;
 
 // https://spring.io/understanding/REST
@@ -110,6 +115,23 @@ public class PatientController {
         if (patientRepository.findOne(id) != null) {
             patientRepository.delete(id);
         }
+    }
+
+
+    /**
+     */
+    @GetMapping(Patient.RESOURCE_PATH)
+    public List<Patient> getPatients(@PageableDefault(size = 30) Pageable pageable, HttpServletResponse response) {
+        Page<Patient> pagedResults = patientRepository.findAll(pageable);
+
+        if (!pagedResults.hasContent()) {
+            throw new NotFoundException(String.format("Resource %s not found", Patient.RESOURCE_PATH));
+        }
+
+        response.setHeader("X-Meta-Pagination", String.format("{ \"pageNumber\":%d, \"pageSize\":%d, \"totalElements\":%d, \"totalPages\":%d }",
+                pageable.getPageNumber(), pageable.getPageSize(), pagedResults.getTotalElements(), pagedResults.getTotalPages()));
+
+        return pagedResults.getContent();
     }
 
     ///

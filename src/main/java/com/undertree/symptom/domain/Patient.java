@@ -15,7 +15,7 @@
  */
 package com.undertree.symptom.domain;
 
-import org.apache.commons.lang3.StringUtils;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotBlank;
 
@@ -63,13 +63,14 @@ public class Patient {
 
     //
 
+    @JsonIgnore
     public Long getId() {
         return id;
     }
 
-    //public String getResourceId() {
-    //    return RESOURCE_PATH + "/" + id;
-    //}
+    public String getResourceId() {
+        return RESOURCE_PATH + "/" + id;
+    }
 
     public String getGivenName() {
         return givenName;

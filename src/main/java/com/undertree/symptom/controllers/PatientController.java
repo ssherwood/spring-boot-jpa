@@ -117,26 +117,39 @@ public class PatientController {
         }
     }
 
-
     /**
+     * Returns a "paged" collection of resources.  Pagination requests are captured as parameters on the request
+     * using "page=X" and "size=y" (ex. /patients?page=2&size=10).  The default is page 0 and size 20 however, we have
+     * overridden the default to 30 using @PagableDefault as an example.
+     *
+     * @param pageable
+     * @param response
+     * @return
      */
     @GetMapping(Patient.RESOURCE_PATH)
     public List<Patient> getPatients(@PageableDefault(size = 30) Pageable pageable, HttpServletResponse response) {
         Page<Patient> pagedResults = patientRepository.findAll(pageable);
 
+        setMetadataResponseHeaders(response, pageable, pagedResults);
+
         if (!pagedResults.hasContent()) {
             throw new NotFoundException(String.format("Resource %s not found", Patient.RESOURCE_PATH));
         }
-
-        response.setHeader("X-Meta-Pagination", String.format("{ \"pageNumber\":%d, \"pageSize\":%d, \"totalElements\":%d, \"totalPages\":%d }",
-                pageable.getPageNumber(), pageable.getPageSize(), pagedResults.getTotalElements(), pagedResults.getTotalPages()));
 
         return pagedResults.getContent();
     }
 
     ///
 
-    // TODO put in a more appropriate "util" class or common base class
+    private void setMetadataResponseHeaders(HttpServletResponse response, Pageable pageable, Page pagedResults) {
+        // TODO look into additional meta fields like first and last
+        response.setHeader("X-Meta-Pagination",
+                String.format("page-number=%d,page-size=%d,total-elements=%d,total-pages=%d",
+                        pageable.getPageNumber(), pageable.getPageSize(),
+                        pagedResults.getTotalElements(), pagedResults.getTotalPages()));
+    }
+
+    // TODO put in a more appropriate "Util" class or common base class
     public static String[] getNullPropertyNames(Object source) {
         final BeanWrapper wrappedSource = new BeanWrapperImpl(source);
 

@@ -63,7 +63,7 @@ public class PatientControllerWebTests {
 
         assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(entity.getBody()).isNotNull()
-                .hasNoNullFieldsOrProperties();
+                .hasNoNullFieldsOrPropertiesExcept("id");
     }
 
     @Test

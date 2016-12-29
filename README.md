@@ -1144,8 +1144,8 @@ In addition to pagination, you also get sorting support:
 http "localhost:8080/patients?sort=familyName"
 ```
 
-The result should be sorted as requested.  You can also verify this by reviewing the SQL that is being executed in the
-logs:
+The result should be sorted as it was requested.  You can also verify this by reviewing the SQL that is being executed
+in the logs:
 
 ```sql
     select
@@ -1164,6 +1164,87 @@ logs:
         patient0_.family_name asc limit ?
 ```
 
+TODO: discuss using HTTP header for metadata versus a JSON envelope for paging info.  Research shows lots of examples
+using a JSON wrapper but many write-up/guides say very explicitly not to do this arguing that HTTP itself is the
+envelope and to use headers for this information.  Right now I am leaning towards headers knowing that this does impact
+human readability slightly if you are just using a default browser for GET requests.
+
+To add the pagination metadata to the result replace/add the following code:
+
+```java
+    @GetMapping(Patient.RESOURCE_PATH)
+    public List<Patient> getPatients(@PageableDefault(size = 30) Pageable pageable, HttpServletResponse response) {
+        Page<Patient> pagedResults = patientRepository.findAll(pageable);
+
+        setMetadataResponseHeaders(response, pageable, pagedResults);
+
+        if (!pagedResults.hasContent()) {
+            throw new NotFoundException(String.format("Resource %s not found", Patient.RESOURCE_PATH));
+        }
+
+        return pagedResults.getContent();
+    }
+
+    private void setMetadataResponseHeaders(HttpServletResponse response, Pageable pageable, Page pagedResults) {
+        // TODO look into additional meta fields like first and last
+        response.setHeader("X-Meta-Pagination",
+                String.format("page-number=%d,page-size=%d,total-elements=%d,total-pages=%d",
+                        pageable.getPageNumber(), pageable.getPageSize(),
+                        pagedResults.getTotalElements(), pagedResults.getTotalPages()));
+    }
+```
+
+If we make a call to /patients now, we get back a pagination result metadata header:
+
+```
+X-Meta-Pagination: page-number=0,page-size=30,total-elements=3,total-pages=1
+```
+
+This is pretty useful and non-intrusive on the client.  There are probably a lot of other pieces of metadata that could
+prove useful and we will explore them further over time.
+
+# Step X: Change Response to not return "raw" ids
+
+It can be argued that returning the raw database id isn't a good RESTful design.  One approach is to replace the raw id
+with the path represention of the entity itself.  To do so is fairly simple; let's modify the Patient entity as such:
+
+```java
+    @JsonIgnore
+    public Long getId() {
+        return id;
+    }
+
+    public String getResourceId() {
+        return RESOURCE_PATH + "/" + id;
+    }
+```
+
+The `@JsonIgnore` will cause Jackson to ignore this attribute during marshalling and instead use our synthetic resource
+path to the entity.  Our results will now look something like this:
+
+```json
+{
+  "givenName": "Sally",
+  "additionalName": "T",
+  "familyName": "Certify",
+  "birthDate": "1973-06-06",
+  "age": 43,
+  "gender": "female",
+  "height": 78,
+  "weight": 163,
+  "resourceId": "/patients/2"
+}
+```
+
+We could also choose to just ignore the id/resourceId entirely and use a Link header with "self" described but this
+won't work quite as well for collection resources.
+
+Sidenote: I also update the JMeter script to run a Fina All and rerun the scripts together.  After a few runs to warm
+up the JVM we get pretty consistent sub millisecond responses.  So far it does not appear that we have had a negative
+impact on performance.
+
+
+
 ---
 
 ## TODOs
@@ -1177,10 +1258,12 @@ logs:
 - Add custom response wrapping
 - Add support for Flyway
 - Add support for JPA/JTA transactions
-- Add REST documentation Swagger vs RESTDocs
+- Add REST documentation Swagger vs RESTDocs (http://apihandyman.io/categories/posts/)
 - Add Spring Security with OAuth2 and JWT
 - Add Auditing
 - Explain HIPA and PII concerns
+- Convert to Kotlin?
+- Discuss this JPA approach benefits has initial schema-less feel
 
 # Additional Resources
 
@@ -1191,10 +1274,9 @@ logs:
 - [Jackson](http://wiki.fasterxml.com/JacksonHome)
 - [H2 Database](http://www.h2database.com/html/main.html)
 
-
-Rest design guides:
-https://github.com/Microsoft/api-guidelines/blob/master/Guidelines.md
-https://docs.microsoft.com/en-us/azure/best-practices-api-design
+# Reference REST design guides:
+- https://github.com/Microsoft/api-guidelines/blob/master/Guidelines.md
+- https://docs.microsoft.com/en-us/azure/best-practices-api-design
 
 # License
 

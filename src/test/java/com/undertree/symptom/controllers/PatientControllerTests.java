@@ -12,6 +12,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.hamcrest.Matchers.is;
 import static org.mockito.BDDMockito.given;
@@ -30,14 +31,14 @@ public class PatientControllerTests {
 
     @Test
     public void test_MockPatient_Expect_ThatGuy() throws Exception {
-        given(mockPatientRepository.findById(1L))
+        given(mockPatientRepository.findById(UUID.fromString("e7a47ecd-4182-4209-911b-f7574ded1611")))
                 .willReturn(Optional.of(new TestPatientBuilder()
                         .withGivenName("Guy")
                         .withFamilyName("Stromboli")
                         .withBirthDate(LocalDate.of(1942, 11, 21))
                         .build()));
 
-        mockMvc.perform(get("/patients/1")
+        mockMvc.perform(get("/patients/e7a47ecd-4182-4209-911b-f7574ded1611")
                 .accept(APPLICATION_JSON_UTF8))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(APPLICATION_JSON_UTF8))

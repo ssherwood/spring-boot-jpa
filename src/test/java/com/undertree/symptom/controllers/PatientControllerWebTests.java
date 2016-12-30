@@ -20,6 +20,7 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
@@ -36,7 +37,7 @@ public class PatientControllerWebTests {
 
     @Test
     public void test_PatientController_getPatient_Expect_Patient1_Exists() throws Exception {
-        ResponseEntity<Patient> entity = restTemplate.getForEntity("/patients/1", Patient.class);
+        ResponseEntity<Patient> entity = restTemplate.getForEntity("/patients/e7a47ecd-4182-4209-911b-f7574ded1611", Patient.class);
 
         assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(entity.getBody()).isNotNull()
@@ -47,7 +48,7 @@ public class PatientControllerWebTests {
 
     @Test
     public void test_PatientController_getPatient_Expect_NotFound() throws Exception {
-        ResponseEntity<Patient> entity = restTemplate.getForEntity("/patients/99999999", Patient.class);
+        ResponseEntity<Patient> entity = restTemplate.getForEntity("/patients/00b16c4a-f9f8-43aa-8bec-75053fb3206d", Patient.class);
         assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
@@ -117,7 +118,7 @@ public class PatientControllerWebTests {
         HttpEntity<Patient> patientToUpdate = new HttpEntity<>(new TestPatientBuilder().build());
 
         ResponseEntity<Patient> entity = restTemplate.exchange("/patients/{id}", HttpMethod.PUT,
-                patientToUpdate, Patient.class, 1L);
+                patientToUpdate, Patient.class, UUID.fromString("e7a47ecd-4182-4209-911b-f7574ded1611"));
 
         assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(entity.getBody()).isNotNull()

@@ -39,7 +39,7 @@ import java.util.UUID;
 // age calculation, and marking the age field @Transient so that it is not
 // considered as part of the actual persistence object.
 @Entity
-@JsonPropertyOrder({ "resourceId" })
+@JsonPropertyOrder({ "_id" })
 public class Patient {
     public static final String RESOURCE_PATH = "/patients";
 
@@ -54,7 +54,7 @@ public class Patient {
     // http://www.thoughts-on-java.org/generate-uuids-primary-keys-hibernate/
     @Id
     @GeneratedValue
-    private Long id;
+    private UUID id;
     @NotBlank @Size(min = 2)
     private String givenName;
     private String additionalName;
@@ -65,7 +65,7 @@ public class Patient {
     private LocalDate birthDate;
     @Transient
     private Integer age;
-    private Gender gender;
+    private Gender gender = Gender.NOT_KNOWN;
     @Email
     private String email;
     @Min(0)
@@ -76,11 +76,11 @@ public class Patient {
     //
 
     @JsonIgnore
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public String getResourceId() {
+    public String get_id() {
         return RESOURCE_PATH + "/" + id;
     }
 

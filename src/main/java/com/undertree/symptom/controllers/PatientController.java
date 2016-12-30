@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.beans.FeatureDescriptor;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 // https://spring.io/understanding/REST
@@ -51,10 +52,10 @@ public class PatientController {
      * @return
      */
     @GetMapping(Patient.RESOURCE_PATH + "/{id}")
-    public Patient getPatient(@PathVariable("id") Long id) {
+    public Patient getPatient(@PathVariable("id") UUID id) {
         return patientRepository.findById(id)
                 .orElseThrow(() ->
-                        new NotFoundException(String.format("Resource %s/%d not found", Patient.RESOURCE_PATH, id)));
+                        new NotFoundException(String.format("Resource %s/%s not found", Patient.RESOURCE_PATH, id)));
     }
 
     /**
@@ -67,10 +68,10 @@ public class PatientController {
      * @return
      */
     @PutMapping(Patient.RESOURCE_PATH + "/{id}")
-    public Patient updatePatientIncludingNulls(@PathVariable("id") Long id, @Valid @RequestBody Patient patient) {
+    public Patient updatePatientIncludingNulls(@PathVariable("id") UUID id, @Valid @RequestBody Patient patient) {
         Patient aPatient = patientRepository.findById(id)
                 .orElseThrow(() ->
-                        new NotFoundException(String.format("Resource %s/%d not found", Patient.RESOURCE_PATH, id)));
+                        new NotFoundException(String.format("Resource %s/%s not found", Patient.RESOURCE_PATH, id)));
         // copy bean properties including nulls
         BeanUtils.copyProperties(patient, aPatient);
         return patientRepository.save(aPatient);
@@ -91,10 +92,10 @@ public class PatientController {
      * @return
      */
     @PatchMapping(Patient.RESOURCE_PATH + "/{id}")
-    public Patient updatePatientExcludingNulls(@PathVariable("id") Long id, @Valid @RequestBody Patient patient) {
+    public Patient updatePatientExcludingNulls(@PathVariable("id") UUID id, @Valid @RequestBody Patient patient) {
         Patient aPatient = patientRepository.findById(id)
                 .orElseThrow(() ->
-                        new NotFoundException(String.format("Resource %s/%d not found", Patient.RESOURCE_PATH, id)));
+                        new NotFoundException(String.format("Resource %s/%s not found", Patient.RESOURCE_PATH, id)));
         // copy bean properties excluding nulls
         BeanUtils.copyProperties(patient, aPatient, getNullPropertyNames(patient));
         return patientRepository.save(aPatient);
@@ -111,7 +112,7 @@ public class PatientController {
      * @param id
      */
     @DeleteMapping(Patient.RESOURCE_PATH + "/{id}")
-    public void deletePatient(@PathVariable("id") Long id) {
+    public void deletePatient(@PathVariable("id") UUID id) {
         if (patientRepository.findOne(id) != null) {
             patientRepository.delete(id);
         }

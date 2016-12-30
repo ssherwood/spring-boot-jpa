@@ -15,6 +15,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.validation.ConstraintViolationException;
 
+import java.util.UUID;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsString;
@@ -40,7 +42,7 @@ public class PatientRepositoryTests {
 
     @Test
     public void test_PatientRepository_FindById_ExpectExists() throws Exception {
-        Long patientId = entityManager.persistAndGetId(new TestPatientBuilder().build(), Long.class);
+        UUID patientId = entityManager.persistAndGetId(new TestPatientBuilder().build(), UUID.class);
         Patient aPatient = patientRepository.findById(patientId).orElseThrow(NotFoundException::new);
         assertThat(aPatient.getId()).isEqualTo(patientId);
     }
@@ -48,62 +50,62 @@ public class PatientRepositoryTests {
     @Test
     public void test_PatientRepository_SaveWithNull_ExpectException() throws Exception {
         thrown.expect(InvalidDataAccessApiUsageException.class);
-        patientRepository.save((Patient) null);
+        patientRepository.saveAndFlush((Patient) null);
     }
 
     @Test
     public void test_PatientRepository_SaveWithEmpty_ExpectException() throws Exception {
         thrown.expect(ConstraintViolationException.class);
         thrown.expectMessage(containsString("'may not be empty'"));
-        patientRepository.save(new Patient());
+        patientRepository.saveAndFlush(new Patient());
     }
 
     @Test
     public void test_PatientRepository_SaveWithEmptyGivenName_ExpectException() throws Exception {
         thrown.expect(ConstraintViolationException.class);
         thrown.expectMessage(allOf(containsString("givenName"), containsString("'may not be empty'")));
-        patientRepository.save(new TestPatientBuilder().withGivenName("").build());
+        patientRepository.saveAndFlush(new TestPatientBuilder().withGivenName("").build());
     }
 
     @Test
     public void test_PatientRepository_SaveWithEmptyFamilyName_ExpectException() throws Exception {
         thrown.expect(ConstraintViolationException.class);
         thrown.expectMessage(allOf(containsString("familyName"), containsString("'may not be empty'")));
-        patientRepository.save(new TestPatientBuilder().withFamilyName("").build());
+        patientRepository.saveAndFlush(new TestPatientBuilder().withFamilyName("").build());
     }
 
     @Test
     public void test_PatientRepository_SaveWithShortGivenName_ExpectException() throws Exception {
         thrown.expect(ConstraintViolationException.class);
         thrown.expectMessage(allOf(containsString("givenName"), containsString("'size must be between 2 and")));
-        patientRepository.save(new TestPatientBuilder().withGivenName("A").build());
+        patientRepository.saveAndFlush(new TestPatientBuilder().withGivenName("A").build());
     }
 
     @Test
     public void test_PatientRepository_SaveWithShortFamilyName_ExpectException() throws Exception {
         thrown.expect(ConstraintViolationException.class);
         thrown.expectMessage(allOf(containsString("familyName"), containsString("'size must be between 2 and")));
-        patientRepository.save(new TestPatientBuilder().withFamilyName("Z").build());
+        patientRepository.saveAndFlush(new TestPatientBuilder().withFamilyName("Z").build());
     }
 
     @Test
     public void test_PatientRepository_SaveWithInvalidEmail_ExpectException() throws Exception {
         thrown.expect(ConstraintViolationException.class);
         thrown.expectMessage(allOf(containsString("email"), containsString("'not a well-formed email address'")));
-        patientRepository.save(new TestPatientBuilder().withEmail("baz").build());
+        patientRepository.saveAndFlush(new TestPatientBuilder().withEmail("baz").build());
     }
 
     @Test
     public void test_PatientRepository_SaveWithLessThanMinHeight_ExpectException() throws Exception {
         thrown.expect(ConstraintViolationException.class);
         thrown.expectMessage(allOf(containsString("height"), containsString("'must be greater than or equal to 0'")));
-        patientRepository.save(new TestPatientBuilder().withHeight((short) -1).build());
+        patientRepository.saveAndFlush(new TestPatientBuilder().withHeight((short) -1).build());
     }
 
     @Test
     public void test_PatientRepository_SaveWithLessThanMinWeight_ExpectException() throws Exception {
         thrown.expect(ConstraintViolationException.class);
         thrown.expectMessage(allOf(containsString("weight"), containsString("'must be greater than or equal to 0'")));
-        patientRepository.save(new TestPatientBuilder().withWeight((short) -1).build());
+        patientRepository.saveAndFlush(new TestPatientBuilder().withWeight((short) -1).build());
     }
 }

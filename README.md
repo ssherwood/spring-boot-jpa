@@ -1205,8 +1205,9 @@ prove useful and we will explore them further over time.
 
 # Step X: Change Response to not return "raw" ids
 
-It can be argued that returning the raw database id isn't a good RESTful design.  One approach is to replace the raw id
-with the path represention of the entity itself.  To do so is fairly simple; let's modify the Patient entity as such:
+It can be argued that returning the raw database id isn't a good RESTful design (or secure).  We should probably
+introduce a UUID instead and use that as the reference.  But first, lets replace the raw id with the path representation
+of itself.  To do so is fairly simple; let's modify the Patient entity as such:
 
 ```java
     @JsonIgnore
@@ -1239,10 +1240,51 @@ path to the entity.  Our results will now look something like this:
 We could also choose to just ignore the id/resourceId entirely and use a Link header with "self" described but this
 won't work quite as well for collection resources.
 
-Sidenote: I also update the JMeter script to run a Fina All and rerun the scripts together.  After a few runs to warm
+Sidenote: I also update the JMeter script to run a Find All and rerun the scripts together.  After a few runs to warm
 up the JVM we get pretty consistent sub millisecond responses.  So far it does not appear that we have had a negative
 impact on performance.
 
+As with most new features lets make sure we have unit tests to support them.  In the PatientControllerWebTest add the
+following code:
+
+```java
+    @Test
+    public void test_PatientController_getPatients_Expect_OK() throws Exception {
+        ResponseEntity<Patient[]> entity = restTemplate.getForEntity("/patients", Patient[].class);
+
+        assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        assertThat(Arrays.asList(entity.getBody())).isNotNull()
+                .extracting(Patient::getFamilyName)
+                .contains("Spec", "Certify", "Neubus");
+    }
+
+    @Test
+    public void test_PatientController_getPatientsWithPagination_Expect_PagedResult() throws Exception {
+        ResponseEntity<Patient[]> entity =
+                restTemplate.getForEntity("/patients?page={page}&size={size}", Patient[].class, 1, 1);
+
+        assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(entity.getHeaders().containsKey("X-Meta-Pagination")).isTrue();
+
+        assertThat(Arrays.asList(entity.getBody())).isNotNull()
+                .extracting(Patient::getFamilyName)
+                .containsOnly("Certify");
+    }
+
+    @Test
+    public void test_PatientController_getPatientsWithSortDesc_Expect_OrderedResult() throws Exception {
+        ResponseEntity<Patient[]> entity =
+                restTemplate.getForEntity("/patients?sort=familyName,desc", Patient[].class);
+
+        assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(entity.getHeaders().containsKey("X-Meta-Pagination")).isTrue();
+
+        assertThat(Arrays.asList(entity.getBody())).isNotNull()
+                .extracting(Patient::getFamilyName)
+                .contains("Spec", "Neubus", "Certify");
+    }
+```
 
 
 ---
@@ -1273,6 +1315,7 @@ impact on performance.
 - [Hibernate Validator](http://hibernate.org/validator/)
 - [Jackson](http://wiki.fasterxml.com/JacksonHome)
 - [H2 Database](http://www.h2database.com/html/main.html)
+- [AsserjJ](https://joel-costigliola.github.io/assertj/)
 
 # Reference REST design guides:
 - https://github.com/Microsoft/api-guidelines/blob/master/Guidelines.md

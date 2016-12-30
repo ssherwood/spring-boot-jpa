@@ -16,6 +16,7 @@
 package com.undertree.symptom.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotBlank;
 
@@ -24,6 +25,7 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
 import java.time.Period;
+import java.util.UUID;
 
 // https://health-lifesci.schema.org/Patient
 // http://www.openmhealth.org/documentation/#/schema-docs/schema-library
@@ -37,9 +39,19 @@ import java.time.Period;
 // age calculation, and marking the age field @Transient so that it is not
 // considered as part of the actual persistence object.
 @Entity
+@JsonPropertyOrder({ "resourceId" })
 public class Patient {
     public static final String RESOURCE_PATH = "/patients";
 
+    // TODO need to research further possible performance impact of using a UUID instead
+    // the info so far indicates not using a UUID on clustered indexes since UUIDs are not sequential
+    // some databases seem to have "native" support for UUIDs and others do not so this could cause
+    // issues with some.
+    // https://dba.stackexchange.com/questions/322/what-are-the-drawbacks-with-using-uuid-or-guid-as-a-primary-key
+    // http://blog.xebia.com/jpa-implementation-patterns-using-uuids-as-primary-keys/
+    // https://vladmihalcea.com/2014/07/01/hibernate-and-uuid-identifiers/
+    // https://mariadb.com/kb/en/mariadb/guiduuid-performance/
+    // http://www.thoughts-on-java.org/generate-uuids-primary-keys-hibernate/
     @Id
     @GeneratedValue
     private Long id;

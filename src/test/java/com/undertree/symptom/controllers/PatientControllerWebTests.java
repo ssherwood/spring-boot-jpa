@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -116,7 +117,7 @@ public class PatientControllerWebTests {
         HttpEntity<Patient> patientToUpdate = new HttpEntity<>(new TestPatientBuilder().build());
 
         ResponseEntity<Patient> entity = restTemplate.exchange("/patients/{id}", HttpMethod.PUT,
-                patientToUpdate, Patient.class, new HashMap<String, Object>() {{ put("id", 1L); }});
+                patientToUpdate, Patient.class, 1L);
 
         assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(entity.getBody()).isNotNull()
@@ -124,7 +125,7 @@ public class PatientControllerWebTests {
     }
 
     @Test
-    public void test_PatientController_patchPatient_() throws Exception {
+    public void test_PatientController_patchPatient_TODO() throws Exception {
         Map<String, Object> params = new HashMap<>();
         params.put("id", 1L);
 
@@ -132,12 +133,52 @@ public class PatientControllerWebTests {
         patchPatient.setEmail("somewhere@overtherainbow.com");
         HttpEntity<Patient> patientToUpdate = new HttpEntity<>(patchPatient);
 
-        // great the default impl doesn't appear to support PATCH
+        // great the default impl doesn't appear to support PATCH...
+        // this appears to have been fixed in 1.4.3: https://github.com/spring-projects/spring-boot/issues/7412
+        // but still won't work until 1.4.4: https://github.com/spring-projects/spring-boot/issues/7742
+
         //ResponseEntity<Patient> entity = restTemplate.exchange("/patient/{id}", HttpMethod.PATCH,
         //        patientToUpdate, Patient.class, params);
 
         //assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
         //assertThat(entity.getBody()).isNotNull()
         //        .isEqualToIgnoringGivenFields(patientToUpdate.getBody(), "id");
+    }
+
+    @Test
+    public void test_PatientController_getPatients_Expect_OK() throws Exception {
+        ResponseEntity<Patient[]> entity = restTemplate.getForEntity("/patients", Patient[].class);
+
+        assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        assertThat(Arrays.asList(entity.getBody())).isNotNull()
+                .extracting(Patient::getFamilyName)
+                .contains("Spec", "Certify", "Neubus");
+    }
+
+    @Test
+    public void test_PatientController_getPatientsWithPagination_Expect_PagedResult() throws Exception {
+        ResponseEntity<Patient[]> entity =
+                restTemplate.getForEntity("/patients?page={page}&size={size}", Patient[].class, 1, 1);
+
+        assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(entity.getHeaders().containsKey("X-Meta-Pagination")).isTrue();
+
+        assertThat(Arrays.asList(entity.getBody())).isNotNull()
+                .extracting(Patient::getFamilyName)
+                .containsOnly("Certify");
+    }
+
+    @Test
+    public void test_PatientController_getPatientsWithSortDesc_Expect_OrderedResult() throws Exception {
+        ResponseEntity<Patient[]> entity =
+                restTemplate.getForEntity("/patients?sort=familyName,desc", Patient[].class);
+
+        assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(entity.getHeaders().containsKey("X-Meta-Pagination")).isTrue();
+
+        assertThat(Arrays.asList(entity.getBody())).isNotNull()
+                .extracting(Patient::getFamilyName)
+                .contains("Spec", "Neubus", "Certify");
     }
 }

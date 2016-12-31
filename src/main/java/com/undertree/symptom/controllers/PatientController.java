@@ -1,5 +1,21 @@
+/*
+ * Copyright 2016 Shawn Sherwood
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.undertree.symptom.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.undertree.symptom.domain.Patient;
 import com.undertree.symptom.exceptions.NotFoundException;
 import com.undertree.symptom.repositories.PatientRepository;
@@ -7,6 +23,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -16,14 +34,21 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.beans.FeatureDescriptor;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
+
+import static org.springframework.data.domain.ExampleMatcher.StringMatcher.CONTAINING;
 
 // https://spring.io/understanding/REST
 // http://www.restapitutorial.com/
 
 @RestController
 public class PatientController {
+
+    private static final ExampleMatcher DEFAULT_MATCHER = ExampleMatcher.matching()
+                                                                .withStringMatcher(CONTAINING)
+                                                                .withIgnoreCase();
 
     private final PatientRepository patientRepository;
 
@@ -139,6 +164,39 @@ public class PatientController {
 
         return pagedResults.getContent();
     }
+
+
+    /**
+     * Returns a "paged" collection of resources matching the input query params using default matching rules for
+     * strings of "contains and ignores case".
+     *
+     * @param paramMap
+     * @param pageable
+     * @param response
+     * @param objectMapper
+     * @return
+     */
+    @GetMapping(Patient.RESOURCE_PATH + "/queryByExample")
+    public List<Patient> getPatientsByExample(@RequestParam Map<String, Object> paramMap,
+                                              @PageableDefault(size = 30) Pageable pageable,
+                                              HttpServletResponse response,
+                                              ObjectMapper objectMapper) {
+        // TODO doesn't seem to handle the LocalDate conversion
+        // copy the map of query params into a new instance of the Patient POJO
+        Patient examplePatient = objectMapper.convertValue(paramMap, Patient.class);
+
+        Page<Patient> pagedResults = patientRepository.findAll(Example.of(examplePatient, DEFAULT_MATCHER), pageable);
+
+        setMetadataResponseHeaders(response, pageable, pagedResults);
+
+        if (!pagedResults.hasContent()) {
+            throw new NotFoundException(String.format("Resource %s not found", Patient.RESOURCE_PATH));
+        }
+
+        return pagedResults.getContent();
+    }
+
+
 
     ///
 

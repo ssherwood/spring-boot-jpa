@@ -15,6 +15,8 @@
  */
 package com.undertree.symptom.domain;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import org.hibernate.validator.constraints.Email;
@@ -22,6 +24,7 @@ import org.hibernate.validator.constraints.NotBlank;
 
 import javax.persistence.*;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
 import java.time.Period;
@@ -52,20 +55,27 @@ public class Patient {
     // https://vladmihalcea.com/2014/07/01/hibernate-and-uuid-identifiers/
     // https://mariadb.com/kb/en/mariadb/guiduuid-performance/
     // http://www.thoughts-on-java.org/generate-uuids-primary-keys-hibernate/
+    // http://www.starkandwayne.com/blog/uuid-primary-keys-in-postgresql/
+    // https://www.clever-cloud.com/blog/engineering/2015/05/20/why-auto-increment-is-a-terrible-idea/  <- good read
+
     @Id
     @GeneratedValue
+    @Column(columnDefinition = "uuid", updatable = false)
     private UUID id;
     @NotBlank @Size(min = 2)
+    @Pattern(regexp = "^[A-Za-z0-9]+$")
     private String givenName;
+    @Pattern(regexp = "^[A-Za-z0-9]+$")
     private String additionalName;
     @NotBlank @Size(min = 2)
+    @Pattern(regexp = "^[A-Za-z0-9]+$")
     private String familyName;
     //@Past https://stackoverflow.com/questions/30249829/error-no-validator-could-be-found-for-type-java-time-localdate
     @Access(AccessType.PROPERTY)
     private LocalDate birthDate;
     @Transient
     private Integer age;
-    private Gender gender = Gender.NOT_KNOWN;
+    private Gender gender;
     @Email
     private String email;
     @Min(0)

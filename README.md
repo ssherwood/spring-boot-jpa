@@ -1286,6 +1286,66 @@ following code:
     }
 ```
 
+# Step X: Refactor Patient to use UUIDs as Primary Keys
+
+After reading several articles and counter articles I decided to switch the Patient table to use a UUID instead of a
+sequential Long.
+
+The primary reasoning for this changes was to make it more difficult for someone to guess valid database IDs for
+Patients if the system was somehow compromised.  Yes, we will add security around the REST calls and validate that the
+user has the authority to see the Patient record, but in case there is a flaw or weakness accidentally introduced into
+the system, this will make it quite a bit harder to just scrape the patient records just by guessing the next sequence
+number.
+
+The downside of this change is that storing each patient is a little more inefficient and takes more space.  Also,
+depending on the actual database used UUIDs may not be stored as efficiently as possible and may have performance
+problems at larger scales (> a couple million).  Many of these claims are several years old and database technologies
+have improved in this area so it may be worth re-evaluating on a per database perspective.
+
+On a side note, one could argue that a Patient should have some sort of generated universal Patient ID that is unique
+and "human manageable" (meaning something one could relate on the phone) but we would need to derive some kind of
+generation scheme that makes it reasonably difficult to guess what that ID would be.  Whatever this would look like
+would likely have to be driven by government and standards bodies and is outside the scope of this exercise.
+  
+Even something like SSN as a natural key is somewhat suspect to me as it might give easy cross-system correlation of
+data assuming the attacker is just using a secondary table lookup to harvest valid entries from this database.
+
+In all this wasn't terribly difficult.  For the Patient entity we just convert the `@Id` field and the associated
+getter methods:
+
+```java
+    @Id
+    @GeneratedValue
+    @Column(columnDefinition = "uuid", updatable = false)
+    private UUID id;
+
+    ...
+
+    @JsonIgnore
+    public UUID getId() {
+        return id;
+    }
+
+    public String get_id() {
+        return RESOURCE_PATH + "/" + id;
+    }
+```
+
+Several test cases need to be reworked and the patients.csv needs to be updated to reflect the UUID instead of a number:
+
+```csv
+ID,BIRTH_DATE,GIVEN_NAME,FAMILY_NAME,ADDITIONAL_NAME,GENDER,EMAIL,HEIGHT,WEIGHT
+e7a47ecd-4182-4209-911b-f7574ded1611,1972-05-05,Phillip,Spec,J,1,pjspec@junit.org,84,180
+db890577-b31c-46d6-ae79-da965bcc8d5b,1973-06-06,Sally,Certify,T,2,,78,163
+9b107a19-92c8-4242-8cdb-d8c07fd96b15,1962-02-15,Frank,Neubus,,0,,88,178
+```
+
+One other last thought is to combine the two ideas and still use a Long as Id and have a secondary indexed field for the
+UUID field and only allow GETs on the UUID.  This could lessen the impact on databases that use clustered indexes (and
+thus have issues with indexing randomized keys) by making it possible to periodically regenerate the index.  I still
+suspect there may be performance issues with millions of rows however...
+
+# Step X: 
 
 ---
 
@@ -1297,6 +1357,7 @@ following code:
 - Add better performance tests
 - Add Query by Example examples
 - Add QueryDsl support
+- Add more data to the patients.csv
 - Add custom response wrapping
 - Add support for Flyway
 - Add support for JPA/JTA transactions

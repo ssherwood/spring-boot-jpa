@@ -1391,7 +1391,7 @@ suspect there may be performance issues with millions of rows however...
 
 # License
 
-    Copyright 2016 Shawn Sherwood
+    Copyright 2016-2017 Shawn Sherwood
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.

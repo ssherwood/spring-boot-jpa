@@ -15,8 +15,6 @@
  */
 package com.undertree.symptom.domain;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import org.hibernate.validator.constraints.Email;
@@ -62,6 +60,12 @@ public class Patient {
     @GeneratedValue
     @Column(columnDefinition = "uuid", updatable = false)
     private UUID id;
+    // TODO research using naturalid for the uuid and let the id be the database managed id
+    // however there is no JPA equivalent to it..
+    // @NaturalId
+    // private UUID patientId;
+    // @Version
+    // private Long version;
     @NotBlank @Size(min = 2)
     @Pattern(regexp = "^[A-Za-z0-9]+$")
     private String givenName;
@@ -163,5 +167,10 @@ public class Patient {
         this.weight = weight;
     }
 
+
     // TODO discuss equals and hashcode
+    // Plenty of articles discussing the issues/concerns:
+    // http://www.onjava.com/pub/a/onjava/2006/09/13/dont-let-hibernate-steal-your-identity.html?page=1
+    // https://developer.jboss.org/wiki/EqualsAndHashCode?_sscc=t
+    // https://stackoverflow.com/questions/5031614/the-jpa-hashcode-equals-dilemma
 }

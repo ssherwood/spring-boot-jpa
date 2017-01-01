@@ -1352,11 +1352,12 @@ suspect there may be performance issues with millions of rows however...
 ## TODOs
 
 - Add custom @Valid
-- Add more example mocking tests
+- Add more example mocking tests (when and why)
 - Add equals/hashcodes
 - Add better performance tests
 - Add Query by Example examples
 - Add QueryDsl support
+- Add Optimistic Locking support with @Version
 - Add more data to the patients.csv
 - Add custom response wrapping
 - Add support for Flyway
@@ -1381,6 +1382,12 @@ suspect there may be performance issues with millions of rows however...
 # Reference REST design guides:
 - https://github.com/Microsoft/api-guidelines/blob/master/Guidelines.md
 - https://docs.microsoft.com/en-us/azure/best-practices-api-design
+
+
+# Good Blogs I've found on this journey
+
+- https://vladmihalcea.com/
+
 
 # License
 

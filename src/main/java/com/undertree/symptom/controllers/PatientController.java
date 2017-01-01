@@ -38,6 +38,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import static com.undertree.symptom.repositories.PatientRepository.Predicates.*;
 import static org.springframework.data.domain.ExampleMatcher.StringMatcher.CONTAINING;
 
 // https://spring.io/understanding/REST
@@ -117,7 +118,7 @@ public class PatientController {
      * @return
      */
     @PatchMapping(Patient.RESOURCE_PATH + "/{id}")
-    public Patient updatePatientExcludingNulls(@PathVariable("id") UUID id, @Valid @RequestBody Patient patient) {
+    public Patient updatePatientExcludingNulls(@PathVariable("id") UUID id, /*@Valid*/ @RequestBody Patient patient) {
         Patient aPatient = patientRepository.findById(id)
                 .orElseThrow(() ->
                         new NotFoundException(String.format("Resource %s/%s not found", Patient.RESOURCE_PATH, id)));
@@ -169,6 +170,9 @@ public class PatientController {
     /**
      * Returns a "paged" collection of resources matching the input query params using default matching rules for
      * strings of "contains and ignores case".
+     *
+     * TODO I'm not exactly happy with the resource name "queryByExample".  Need to research more what other APIs look
+     * like for this kind of functionality
      *
      * @param paramMap
      * @param pageable

@@ -25,6 +25,9 @@ import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.querydsl.QueryDslPredicateExecutor;
 
+/**
+ * Spring Data JPA Repository for the Patient entity with QueryDsl support.
+ */
 public interface PatientRepository extends JpaRepository<Patient, UUID>,
     QueryDslPredicateExecutor<Patient> {
 
@@ -33,7 +36,10 @@ public interface PatientRepository extends JpaRepository<Patient, UUID>,
 
   class Predicates {
 
-    public static BooleanExpression hasBirthdayOn(LocalDate date) {
+    private Predicates() {
+    }
+
+    public static BooleanExpression hasBirthdayOn(final LocalDate date) {
       return patient.birthDate.month().eq(date.getMonthValue()).and(
           patient.birthDate.dayOfMonth().eq(date.getDayOfMonth()));
     }

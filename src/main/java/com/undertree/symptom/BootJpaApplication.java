@@ -24,10 +24,18 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.context.request.RequestAttributes;
 
+/**
+ * Basic Spring Boot Application originally generated from the Spring Initializr.
+ */
 @SpringBootApplication
 public class BootJpaApplication {
 
-  public static void main(String[] args) {
+  /**
+   * Default application main to bootstrap the Spring Boot application container.
+   *
+   * @param args default command line args
+   */
+  public static void main(final String[] args) {
     SpringApplication.run(BootJpaApplication.class, args);
   }
 

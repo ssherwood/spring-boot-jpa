@@ -17,16 +17,21 @@ package com.undertree.symptom.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import org.hibernate.validator.constraints.Email;
-import org.hibernate.validator.constraints.NotBlank;
-
-import javax.persistence.*;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.UUID;
+import javax.persistence.Access;
+import javax.persistence.AccessType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Transient;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
+import org.hibernate.validator.constraints.Email;
+import org.hibernate.validator.constraints.NotBlank;
 
 // https://health-lifesci.schema.org/Patient
 // http://www.openmhealth.org/documentation/#/schema-docs/schema-library
@@ -40,137 +45,139 @@ import java.util.UUID;
 // age calculation, and marking the age field @Transient so that it is not
 // considered as part of the actual persistence object.
 @Entity
-@JsonPropertyOrder({ "_id" })
+@JsonPropertyOrder({"_id"})
 public class Patient {
-    public static final String RESOURCE_PATH = "/patients";
 
-    // TODO need to research further possible performance impact of using a UUID instead
-    // the info so far indicates not using a UUID on clustered indexes since UUIDs are not sequential
-    // some databases seem to have "native" support for UUIDs and others do not so this could cause
-    // issues with some.
-    // https://dba.stackexchange.com/questions/322/what-are-the-drawbacks-with-using-uuid-or-guid-as-a-primary-key
-    // http://blog.xebia.com/jpa-implementation-patterns-using-uuids-as-primary-keys/
-    // https://vladmihalcea.com/2014/07/01/hibernate-and-uuid-identifiers/
-    // https://mariadb.com/kb/en/mariadb/guiduuid-performance/
-    // http://www.thoughts-on-java.org/generate-uuids-primary-keys-hibernate/
-    // http://www.starkandwayne.com/blog/uuid-primary-keys-in-postgresql/
-    // https://www.clever-cloud.com/blog/engineering/2015/05/20/why-auto-increment-is-a-terrible-idea/  <- good read
+  public static final String RESOURCE_PATH = "/patients";
 
-    @Id
-    @GeneratedValue
-    @Column(columnDefinition = "uuid", updatable = false)
-    private UUID id;
-    // TODO research using naturalid for the uuid and let the id be the database managed id
-    // however there is no JPA equivalent to it..
-    // @NaturalId
-    // private UUID patientId;
-    // @Version
-    // private Long version;
-    @NotBlank @Size(min = 2)
-    @Pattern(regexp = "^[A-Za-z0-9]+$")
-    private String givenName;
-    @Pattern(regexp = "^[A-Za-z0-9]+$")
-    private String additionalName;
-    @NotBlank @Size(min = 2)
-    @Pattern(regexp = "^[A-Za-z0-9]+$")
-    private String familyName;
-    //@Past https://stackoverflow.com/questions/30249829/error-no-validator-could-be-found-for-type-java-time-localdate
-    @Access(AccessType.PROPERTY)
-    private LocalDate birthDate;
-    @Transient
-    private Integer age;
-    private Gender gender;
-    @Email
-    private String email;
-    @Min(0)
-    private Short height; // height in cm
-    @Min(0)
-    private Short weight; // weight in kg
+  // TODO need to research further possible performance impact of using a UUID instead
+  // the info so far indicates not using a UUID on clustered indexes since UUIDs are not sequential
+  // some databases seem to have "native" support for UUIDs and others do not so this could cause
+  // issues with some.
+  // https://dba.stackexchange.com/questions/322/what-are-the-drawbacks-with-using-uuid-or-guid-as-a-primary-key
+  // http://blog.xebia.com/jpa-implementation-patterns-using-uuids-as-primary-keys/
+  // https://vladmihalcea.com/2014/07/01/hibernate-and-uuid-identifiers/
+  // https://mariadb.com/kb/en/mariadb/guiduuid-performance/
+  // http://www.thoughts-on-java.org/generate-uuids-primary-keys-hibernate/
+  // http://www.starkandwayne.com/blog/uuid-primary-keys-in-postgresql/
+  // https://www.clever-cloud.com/blog/engineering/2015/05/20/why-auto-increment-is-a-terrible-idea/  <- good read
 
-    //
+  @Id
+  @GeneratedValue
+  @Column(columnDefinition = "uuid", updatable = false)
+  private UUID id;
+  // TODO research using naturalid for the uuid and let the id be the database managed id
+  // however there is no JPA equivalent to it..
+  // @NaturalId
+  // private UUID patientId;
+  // @Version
+  // private Long version;
+  @NotBlank
+  @Size(min = 2)
+  @Pattern(regexp = "^[A-Za-z0-9]+$")
+  private String givenName;
+  @Pattern(regexp = "^[A-Za-z0-9]+$")
+  private String additionalName;
+  @NotBlank
+  @Size(min = 2)
+  @Pattern(regexp = "^[A-Za-z0-9]+$")
+  private String familyName;
+  //@Past https://stackoverflow.com/questions/30249829/error-no-validator-could-be-found-for-type-java-time-localdate
+  @Access(AccessType.PROPERTY)
+  private LocalDate birthDate;
+  @Transient
+  private Integer age;
+  private Gender gender;
+  @Email
+  private String email;
+  @Min(0)
+  private Short height; // height in cm
+  @Min(0)
+  private Short weight; // weight in kg
 
-    @JsonIgnore
-    public UUID getId() {
-        return id;
-    }
+  //
 
-    public String get_id() {
-        return RESOURCE_PATH + "/" + id;
-    }
+  @JsonIgnore
+  public UUID getId() {
+    return id;
+  }
 
-    public String getGivenName() {
-        return givenName;
-    }
+  public String get_id() {
+    return RESOURCE_PATH + "/" + id;
+  }
 
-    public void setGivenName(String givenName) {
-        this.givenName = givenName;
-    }
+  public String getGivenName() {
+    return givenName;
+  }
 
-    public String getAdditionalName() {
-        return additionalName;
-    }
+  public void setGivenName(String givenName) {
+    this.givenName = givenName;
+  }
 
-    public void setAdditionalName(String additionalName) {
-        this.additionalName = additionalName;
-    }
+  public String getAdditionalName() {
+    return additionalName;
+  }
 
-    public String getFamilyName() {
-        return familyName;
-    }
+  public void setAdditionalName(String additionalName) {
+    this.additionalName = additionalName;
+  }
 
-    public void setFamilyName(String familyName) {
-        this.familyName = familyName;
-    }
+  public String getFamilyName() {
+    return familyName;
+  }
 
-    public LocalDate getBirthDate() {
-        return birthDate;
-    }
+  public void setFamilyName(String familyName) {
+    this.familyName = familyName;
+  }
 
-    public void setBirthDate(LocalDate birthDate) {
-        this.birthDate = birthDate;
-        this.age = birthDate == null ? null : Period.between(birthDate, LocalDate.now()).getYears();
-    }
+  public LocalDate getBirthDate() {
+    return birthDate;
+  }
 
-    public Integer getAge() {
-        return age;
-    }
+  public void setBirthDate(LocalDate birthDate) {
+    this.birthDate = birthDate;
+    this.age = birthDate == null ? null : Period.between(birthDate, LocalDate.now()).getYears();
+  }
 
-    public Gender getGender() {
-        return gender;
-    }
+  public Integer getAge() {
+    return age;
+  }
 
-    public void setGender(Gender gender) {
-        this.gender = gender;
-    }
+  public Gender getGender() {
+    return gender;
+  }
 
-    public String getEmail() {
-        return email;
-    }
+  public void setGender(Gender gender) {
+    this.gender = gender;
+  }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+  public String getEmail() {
+    return email;
+  }
 
-    public Short getHeight() {
-        return height;
-    }
+  public void setEmail(String email) {
+    this.email = email;
+  }
 
-    public void setHeight(Short height) {
-        this.height = height;
-    }
+  public Short getHeight() {
+    return height;
+  }
 
-    public Short getWeight() {
-        return weight;
-    }
+  public void setHeight(Short height) {
+    this.height = height;
+  }
 
-    public void setWeight(Short weight) {
-        this.weight = weight;
-    }
+  public Short getWeight() {
+    return weight;
+  }
 
+  public void setWeight(Short weight) {
+    this.weight = weight;
+  }
 
-    // TODO discuss equals and hashcode
-    // Plenty of articles discussing the issues/concerns:
-    // http://www.onjava.com/pub/a/onjava/2006/09/13/dont-let-hibernate-steal-your-identity.html?page=1
-    // https://developer.jboss.org/wiki/EqualsAndHashCode?_sscc=t
-    // https://stackoverflow.com/questions/5031614/the-jpa-hashcode-equals-dilemma
+  // TODO discuss equals and hashcode
+  // Plenty of articles discussing the issues/concerns:
+  // http://www.onjava.com/pub/a/onjava/2006/09/13/dont-let-hibernate-steal-your-identity.html?page=1
+  // https://developer.jboss.org/wiki/EqualsAndHashCode?_sscc=t
+  // https://stackoverflow.com/questions/5031614/the-jpa-hashcode-equals-dilemma
 }

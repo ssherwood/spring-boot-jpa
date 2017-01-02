@@ -15,69 +15,73 @@
  */
 package com.undertree.symptom.domain;
 
-import javax.persistence.*;
 import java.time.LocalDate;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.OneToOne;
 
 @Entity
 public class Prescription {
-    @Id
-    @GeneratedValue
-    private Long id;
-    private String description;
-    private LocalDate initialDate;
-    private LocalDate expirationDate;
-    // TODO Doctor doctor
-    @OneToOne
-    private Patient patient;
-    @OneToOne
-    private Medication medication;
 
-    // schedule?
-    // route?
+  @Id
+  @GeneratedValue
+  private Long id;
+  private String description;
+  private LocalDate initialDate;
+  private LocalDate expirationDate;
+  // TODO Doctor doctor
+  @OneToOne
+  private Patient patient;
+  @OneToOne
+  private Medication medication;
 
-    ///
+  // schedule?
+  // route?
 
-    public Long getId() {
-        return id;
-    }
+  ///
 
-    public String getDescription() {
-        return description;
-    }
+  public Long getId() {
+    return id;
+  }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+  public String getDescription() {
+    return description;
+  }
 
-    public Patient getPatient() {
-        return patient;
-    }
+  public void setDescription(String description) {
+    this.description = description;
+  }
 
-    public void setPatient(Patient patient) {
-        this.patient = patient;
-    }
+  public Patient getPatient() {
+    return patient;
+  }
 
-    public Medication getMedication() {
-        return medication;
-    }
+  public void setPatient(Patient patient) {
+    this.patient = patient;
+  }
 
-    public void setMedication(Medication medication) {
-        this.medication = medication;
-    }
+  public Medication getMedication() {
+    return medication;
+  }
 
-    public LocalDate getInitialDate() {
-        return initialDate;
-    }
+  public void setMedication(Medication medication) {
+    this.medication = medication;
+  }
 
-    public void setInitialDate(LocalDate initialDate) {
-        this.initialDate = initialDate;
-    }
+  public LocalDate getInitialDate() {
+    return initialDate;
+  }
 
-    public LocalDate getExpirationDate() {
-        return expirationDate;
-    }
+  public void setInitialDate(LocalDate initialDate) {
+    this.initialDate = initialDate;
+  }
 
-    public void setExpirationDate(LocalDate expirationDate) {
-        this.expirationDate = expirationDate;
-    }
+  public LocalDate getExpirationDate() {
+    return expirationDate;
+  }
+
+  public void setExpirationDate(LocalDate expirationDate) {
+    this.expirationDate = expirationDate;
+  }
 }

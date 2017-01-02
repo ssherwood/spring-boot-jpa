@@ -1368,6 +1368,9 @@ suspect there may be performance issues with millions of rows however...
 - Explain HIPA and PII concerns
 - Convert to Kotlin?
 - Discuss this JPA approach benefits has initial schema-less feel
+- Research https://github.com/FasterXML/jackson-datatype-hibernate
+- Google style https://github.com/google/styleguide
+
 
 # Additional Resources
 

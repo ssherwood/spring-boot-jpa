@@ -24,52 +24,53 @@ import javax.persistence.Id;
 
 @Entity
 public class Medication {
-    public static final String RESOURCE_PATH = "/medication";
-    public static final String RESOURCES_PATH = "/medications";
 
-    @Id
-    @GeneratedValue
-    private Long id;
-    private String tradeName;
-    private String genericName;
-    private DrugStrength strength;
-    private Integer rxNormCode;
+  public static final String RESOURCE_PATH = "/medication";
+  public static final String RESOURCES_PATH = "/medications";
 
-    ///
+  @Id
+  @GeneratedValue
+  private Long id;
+  private String tradeName;
+  private String genericName;
+  private DrugStrength strength;
+  private Integer rxNormCode;
 
-    public Long getId() {
-        return id;
-    }
+  ///
 
-    public String getTradeName() {
-        return tradeName;
-    }
+  public Long getId() {
+    return id;
+  }
 
-    public void setTradeName(String tradeName) {
-        this.tradeName = tradeName;
-    }
+  public String getTradeName() {
+    return tradeName;
+  }
 
-    public String getGenericName() {
-        return genericName;
-    }
+  public void setTradeName(String tradeName) {
+    this.tradeName = tradeName;
+  }
 
-    public void setGenericName(String genericName) {
-        this.genericName = genericName;
-    }
+  public String getGenericName() {
+    return genericName;
+  }
 
-    public DrugStrength getStrength() {
-        return strength;
-    }
+  public void setGenericName(String genericName) {
+    this.genericName = genericName;
+  }
 
-    public void setStrength(DrugStrength strength) {
-        this.strength = strength;
-    }
+  public DrugStrength getStrength() {
+    return strength;
+  }
 
-    public Integer getRxNormCode() {
-        return rxNormCode;
-    }
+  public void setStrength(DrugStrength strength) {
+    this.strength = strength;
+  }
 
-    public void setRxNormCode(Integer rxNormCode) {
-        this.rxNormCode = rxNormCode;
-    }
+  public Integer getRxNormCode() {
+    return rxNormCode;
+  }
+
+  public void setRxNormCode(Integer rxNormCode) {
+    this.rxNormCode = rxNormCode;
+  }
 }

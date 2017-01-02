@@ -21,16 +21,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.undertree.symptom.domain.Patient;
 import com.undertree.symptom.exceptions.NotFoundException;
 import com.undertree.symptom.repositories.PatientRepository;
-import java.beans.FeatureDescriptor;
+import com.undertree.symptom.utils.PojoUtils;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Stream;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
@@ -60,39 +57,35 @@ public class PatientController {
   private final PatientRepository patientRepository;
 
   @Autowired
-  public PatientController(PatientRepository patientRepository) {
+  public PatientController(final PatientRepository patientRepository) {
     this.patientRepository = patientRepository;
-  }
-
-  // TODO put in a more appropriate "Util" class or common base class
-  public static String[] getNullPropertyNames(Object source) {
-    final BeanWrapper wrappedSource = new BeanWrapperImpl(source);
-
-    return Stream.of(wrappedSource.getPropertyDescriptors())
-        .map(FeatureDescriptor::getName)
-        .filter(propertyName -> wrappedSource.getPropertyValue(propertyName) == null)
-        .toArray(String[]::new);
   }
 
   /**
    * Creates a new instance of the entity type.  For this use with JPA, the backing datasource will
    * provide the identity back to assist with further interactions.
+   *
+   * @param patient the Patient object to save
+   * @return
    */
   @PostMapping(Patient.RESOURCE_PATH)
-  public Patient addPatient(@Valid @RequestBody Patient patient) {
+  public Patient addPatient(@Valid @RequestBody final Patient patient) {
     return patientRepository.save(patient);
   }
 
   /**
    * Returns a single instance of the specific entity.  If a request for an entity can't be located
    * then a 404 error code should be returned to the client.
+   *
+   * @param patientId unique patient UUID to find
+   * @return
    */
   @GetMapping(Patient.RESOURCE_PATH + "/{id}")
-  public Patient getPatient(@PathVariable("id") UUID id) {
-    return patientRepository.findById(id)
+  public Patient getPatient(@PathVariable("id") final UUID patientId) {
+    return patientRepository.findByPatientId(patientId)
         .orElseThrow(() ->
             new NotFoundException(
-                String.format("Resource %s/%s not found", Patient.RESOURCE_PATH, id)));
+                String.format("Resource %s/%s not found", Patient.RESOURCE_PATH, patientId)));
   }
 
   /**
@@ -101,12 +94,12 @@ public class PatientController {
    * updated to null on the entity itself).
    */
   @PutMapping(Patient.RESOURCE_PATH + "/{id}")
-  public Patient updatePatientIncludingNulls(@PathVariable("id") UUID id,
-      @Valid @RequestBody Patient patient) {
-    Patient aPatient = patientRepository.findById(id)
+  public Patient updatePatientIncludingNulls(@PathVariable("id") final UUID patientId,
+      @Valid @RequestBody final Patient patient) {
+    Patient aPatient = patientRepository.findByPatientId(patientId)
         .orElseThrow(() ->
             new NotFoundException(
-                String.format("Resource %s/%s not found", Patient.RESOURCE_PATH, id)));
+                String.format("Resource %s/%s not found", Patient.RESOURCE_PATH, patientId)));
     // copy bean properties including nulls
     BeanUtils.copyProperties(patient, aPatient);
     return patientRepository.save(aPatient);
@@ -117,21 +110,16 @@ public class PatientController {
    * delta changes as opposed to an complete resource replacement.  Like PUT this operation verifies
    * that a resource exists by first loading it and them copies the non-null properties from the
    * RequestBody (i.e. any property that is set).
-   *
-   * TODO: I wonder if using the @Valid could cause issues later?  For example with "required"
-   * fields that don't need to be included as part of a delta.  Yes, I think this will cause
-   * problems... but I'm not sure exactly how to resolve it - validate only non-null fields?  How
-   * does one do that with Bean Validation?
    */
   @PatchMapping(Patient.RESOURCE_PATH + "/{id}")
-  public Patient updatePatientExcludingNulls(@PathVariable("id") UUID id, /*@Valid*/
-      @RequestBody Patient patient) {
-    Patient aPatient = patientRepository.findById(id)
+  public Patient updatePatientExcludingNulls(@PathVariable("id") final UUID patientId, /*@Valid*/
+      @RequestBody final Patient patient) {
+    Patient aPatient = patientRepository.findByPatientId(patientId)
         .orElseThrow(() ->
             new NotFoundException(
-                String.format("Resource %s/%s not found", Patient.RESOURCE_PATH, id)));
+                String.format("Resource %s/%s not found", Patient.RESOURCE_PATH, patientId)));
     // copy bean properties excluding nulls
-    BeanUtils.copyProperties(patient, aPatient, getNullPropertyNames(patient));
+    BeanUtils.copyProperties(patient, aPatient, PojoUtils.getNullPropertyNames(patient));
     return patientRepository.save(aPatient);
   }
 
@@ -145,10 +133,9 @@ public class PatientController {
    * implementation.
    */
   @DeleteMapping(Patient.RESOURCE_PATH + "/{id}")
-  public void deletePatient(@PathVariable("id") UUID id) {
-    if (patientRepository.findOne(id) != null) {
-      patientRepository.delete(id);
-    }
+  public void deletePatient(@PathVariable("id") final UUID patientId) {
+    patientRepository.findByPatientId(patientId)
+        .ifPresent(p -> patientRepository.delete(p.getId()));
   }
 
   /**
@@ -157,8 +144,8 @@ public class PatientController {
    * and size 20 however, we have overridden the default to 30 using @PagableDefault as an example.
    */
   @GetMapping(Patient.RESOURCE_PATH)
-  public List<Patient> getPatients(@PageableDefault(size = 30) Pageable pageable,
-      HttpServletResponse response) {
+  public List<Patient> getPatients(@PageableDefault(size = 30) final Pageable pageable,
+      final HttpServletResponse response) {
     Page<Patient> pagedResults = patientRepository.findAll(pageable);
 
     setMetadataResponseHeaders(response, pageable, pagedResults);

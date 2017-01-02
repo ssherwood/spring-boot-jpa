@@ -64,46 +64,65 @@ public class Patient {
 
   @Id
   @GeneratedValue
-  @Column(columnDefinition = "uuid", updatable = false)
-  private UUID id;
-  // TODO research using naturalid for the uuid and let the id be the database managed id
-  // however there is no JPA equivalent to it..
-  // @NaturalId
-  // private UUID patientId;
+  private Long id;
+
+  //@NaturalId
+  @Column(columnDefinition = "uuid", unique = true, updatable = false)
+  private UUID patientId;
+
   // @Version
   // private Long version;
+
   @NotBlank
   @Size(min = 2)
   @Pattern(regexp = "^[A-Za-z0-9]+$")
   private String givenName;
+
   @Pattern(regexp = "^[A-Za-z0-9]+$")
   private String additionalName;
+
   @NotBlank
   @Size(min = 2)
   @Pattern(regexp = "^[A-Za-z0-9]+$")
   private String familyName;
+
   //@Past https://stackoverflow.com/questions/30249829/error-no-validator-could-be-found-for-type-java-time-localdate
   @Access(AccessType.PROPERTY)
   private LocalDate birthDate;
+
   @Transient
   private Integer age;
+
   private Gender gender;
+
   @Email
   private String email;
+
   @Min(0)
   private Short height; // height in cm
+
   @Min(0)
   private Short weight; // weight in kg
 
-  //
+  /**
+   *
+   */
+  public Patient() {
+    patientId = UUID.randomUUID();
+  }
 
   @JsonIgnore
-  public UUID getId() {
+  public Long getId() {
     return id;
   }
 
+  @JsonIgnore
+  public UUID getPatientId() {
+    return patientId;
+  }
+
   public String get_id() {
-    return RESOURCE_PATH + "/" + id;
+    return RESOURCE_PATH + "/" + patientId;
   }
 
   public String getGivenName() {

@@ -150,7 +150,7 @@ public class PatientControllerWebTests {
 
     assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
     assertThat(entity.getBody()).isNotNull()
-        .isEqualToIgnoringGivenFields(patientToUpdate.getBody(), "id");
+        .isEqualToIgnoringGivenFields(patientToUpdate.getBody(), "id", "patientId");
   }
 
   @Test

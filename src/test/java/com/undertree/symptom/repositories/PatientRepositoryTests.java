@@ -52,10 +52,10 @@ public class PatientRepositoryTests {
   private TestEntityManager entityManager;
 
   @Test
-  public void test_PatientRepository_FindById_ExpectExists() throws Exception {
-    UUID patientId = entityManager.persistAndGetId(new TestPatientBuilder().build(), UUID.class);
-    Patient aPatient = patientRepository.findById(patientId).orElseThrow(NotFoundException::new);
-    assertThat(aPatient.getId()).isEqualTo(patientId);
+  public void test_PatientRepository_findByPatientId_ExpectExists() throws Exception {
+    Patient patient = entityManager.persistFlushFind(new TestPatientBuilder().build());
+    Patient aPatient = patientRepository.findByPatientId(patient.getPatientId()).orElseThrow(NotFoundException::new);
+    assertThat(aPatient).isEqualTo(patient);
   }
 
   @Test

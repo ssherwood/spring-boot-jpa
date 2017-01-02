@@ -48,7 +48,7 @@ public class PatientControllerTests {
 
   @Test
   public void test_MockPatient_Expect_ThatGuy() throws Exception {
-    given(mockPatientRepository.findById(UUID.fromString("e7a47ecd-4182-4209-911b-f7574ded1611")))
+    given(mockPatientRepository.findByPatientId(UUID.fromString("e7a47ecd-4182-4209-911b-f7574ded1611")))
         .willReturn(Optional.of(new TestPatientBuilder()
             .withGivenName("Guy")
             .withFamilyName("Stromboli")

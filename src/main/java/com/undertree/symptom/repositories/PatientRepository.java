@@ -28,11 +28,11 @@ import org.springframework.data.querydsl.QueryDslPredicateExecutor;
 /**
  * Spring Data JPA Repository for the Patient entity with QueryDsl support.
  */
-public interface PatientRepository extends JpaRepository<Patient, UUID>,
+public interface PatientRepository extends JpaRepository<Patient, Long>,
     QueryDslPredicateExecutor<Patient> {
 
-  Optional<Patient> findById(UUID id);
-  //Optional<Patient> findByIdAndVersion(UUID id, Long version);
+  Optional<Patient> findByPatientId(UUID patientId);
+  //Optional<Patient> findByPatientIdAndVersion(UUID id, Long version);
 
   class Predicates {
 

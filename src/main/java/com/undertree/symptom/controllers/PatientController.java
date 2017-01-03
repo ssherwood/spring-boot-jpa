@@ -21,11 +21,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.undertree.symptom.domain.Patient;
 import com.undertree.symptom.exceptions.NotFoundException;
 import com.undertree.symptom.repositories.PatientRepository;
-import com.undertree.symptom.utils.PojoUtils;
-import java.util.List;
+import com.undertree.symptom.utils.BeanUtilsUtils;
 import java.util.Map;
 import java.util.UUID;
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -119,7 +117,7 @@ public class PatientController {
             new NotFoundException(
                 String.format("Resource %s/%s not found", Patient.RESOURCE_PATH, patientId)));
     // copy bean properties excluding nulls
-    BeanUtils.copyProperties(patient, aPatient, PojoUtils.getNullPropertyNames(patient));
+    BeanUtils.copyProperties(patient, aPatient, BeanUtilsUtils.getNullPropertyNames(patient));
     return patientRepository.save(aPatient);
   }
 
@@ -144,17 +142,14 @@ public class PatientController {
    * and size 20 however, we have overridden the default to 30 using @PagableDefault as an example.
    */
   @GetMapping(Patient.RESOURCE_PATH)
-  public List<Patient> getPatients(@PageableDefault(size = 30) final Pageable pageable,
-      final HttpServletResponse response) {
+  public Page<Patient> getPatients(@PageableDefault(size = 30) final Pageable pageable) {
     Page<Patient> pagedResults = patientRepository.findAll(pageable);
-
-    setMetadataResponseHeaders(response, pageable, pagedResults);
 
     if (!pagedResults.hasContent()) {
       throw new NotFoundException(String.format("Resource %s not found", Patient.RESOURCE_PATH));
     }
 
-    return pagedResults.getContent();
+    return pagedResults;
   }
 
   ///
@@ -167,10 +162,8 @@ public class PatientController {
    * other APIs look like for this kind of functionality
    */
   @GetMapping(Patient.RESOURCE_PATH + "/queryByExample")
-  public List<Patient> getPatientsByExample(@RequestParam Map<String, Object> paramMap,
-      @PageableDefault(size = 30) Pageable pageable,
-      HttpServletResponse response,
-      ObjectMapper objectMapper) {
+  public Page<Patient> getPatientsByExample(@RequestParam Map<String, Object> paramMap,
+      @PageableDefault(size = 30) Pageable pageable, ObjectMapper objectMapper) {
     // TODO doesn't seem to handle the LocalDate conversion
     // copy the map of query params into a new instance of the Patient POJO
     Patient examplePatient = objectMapper.convertValue(paramMap, Patient.class);
@@ -178,21 +171,10 @@ public class PatientController {
     Page<Patient> pagedResults = patientRepository
         .findAll(Example.of(examplePatient, DEFAULT_MATCHER), pageable);
 
-    setMetadataResponseHeaders(response, pageable, pagedResults);
-
     if (!pagedResults.hasContent()) {
       throw new NotFoundException(String.format("Resource %s not found", Patient.RESOURCE_PATH));
     }
 
-    return pagedResults.getContent();
-  }
-
-  private void setMetadataResponseHeaders(HttpServletResponse response, Pageable pageable,
-      Page pagedResults) {
-    // TODO look into additional meta fields like first and last
-    response.setHeader("X-Meta-Pagination",
-        String.format("page-number=%d,page-size=%d,total-elements=%d,total-pages=%d",
-            pageable.getPageNumber(), pageable.getPageSize(),
-            pagedResults.getTotalElements(), pagedResults.getTotalPages()));
+    return pagedResults;
   }
 }

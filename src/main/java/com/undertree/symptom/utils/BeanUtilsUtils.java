@@ -8,11 +8,14 @@ import org.springframework.beans.BeanWrapperImpl;
 /**
  *
  */
-public class PojoUtils {
-  private PojoUtils() {
+public class BeanUtilsUtils {
+
+  private BeanUtilsUtils() {
   }
 
   /**
+   * Returns an array of fields from the given object that are null.  Useful in conjunction with
+   * BeanUtils.copyProperties() when you only want to copy the non-null values.
    *
    * @param source
    * @return

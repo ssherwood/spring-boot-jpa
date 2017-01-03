@@ -169,7 +169,7 @@ public class PatientController {
     Patient examplePatient = objectMapper.convertValue(paramMap, Patient.class);
 
     Page<Patient> pagedResults = patientRepository
-        .findAll(Example.of(examplePatient, DEFAULT_MATCHER), pageable);
+        .findAll(Example.of(examplePatient, DEFAULT_MATCHER.withIgnorePaths("patientId")), pageable);
 
     if (!pagedResults.hasContent()) {
       throw new NotFoundException(String.format("Resource %s not found", Patient.RESOURCE_PATH));

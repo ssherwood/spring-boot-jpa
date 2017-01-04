@@ -17,6 +17,7 @@ package com.undertree.symptom.repositories;
 
 import static com.undertree.symptom.domain.QPatient.patient;
 
+import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.undertree.symptom.domain.Patient;
 import java.time.LocalDate;
@@ -34,12 +35,16 @@ public interface PatientRepository extends JpaRepository<Patient, Long>,
   Optional<Patient> findByPatientId(UUID patientId);
   //Optional<Patient> findByPatientIdAndVersion(UUID id, Long version);
 
-  class Predicates {
+  interface Predicates {
 
-    private Predicates() {
+    // match string being contained on any "name" field
+    static BooleanExpression hasNameContaining(final String name) {
+      return patient.familyName.containsIgnoreCase(name)
+          .or(patient.givenName.containsIgnoreCase(name)
+              .or(patient.additionalName.containsIgnoreCase(name)));
     }
 
-    public static BooleanExpression hasBirthdayOn(final LocalDate date) {
+    static BooleanExpression hasBirthdayOn(final LocalDate date) {
       return patient.birthDate.month().eq(date.getMonthValue()).and(
           patient.birthDate.dayOfMonth().eq(date.getDayOfMonth()));
     }

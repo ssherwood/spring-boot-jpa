@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.undertree.symptom.domain.Patient;
 import com.undertree.symptom.exceptions.NotFoundException;
 import com.undertree.symptom.repositories.PatientRepository;
+import com.undertree.symptom.repositories.PatientRepository.Predicates;
 import com.undertree.symptom.utils.BeanUtilsUtils;
 import java.util.Map;
 import java.util.UUID;
@@ -49,14 +50,18 @@ import org.springframework.web.bind.annotation.RestController;
 public class PatientController {
 
   private static final ExampleMatcher DEFAULT_MATCHER = ExampleMatcher.matching()
+      .withIgnorePaths("patientId")
       .withStringMatcher(CONTAINING)
       .withIgnoreCase();
 
   private final PatientRepository patientRepository;
+  private final ObjectMapper jacksonObjectMapper;
 
   @Autowired
-  public PatientController(final PatientRepository patientRepository) {
+  public PatientController(final PatientRepository patientRepository,
+      final ObjectMapper jacksonObjectMapper) {
     this.patientRepository = patientRepository;
+    this.jacksonObjectMapper = jacksonObjectMapper;
   }
 
   /**
@@ -152,8 +157,6 @@ public class PatientController {
     return pagedResults;
   }
 
-  ///
-
   /**
    * Returns a "paged" collection of resources matching the input query params using default
    * matching rules for strings of "contains and ignores case".
@@ -163,16 +166,33 @@ public class PatientController {
    */
   @GetMapping(Patient.RESOURCE_PATH + "/queryByExample")
   public Page<Patient> getPatientsByExample(@RequestParam Map<String, Object> paramMap,
-      @PageableDefault(size = 30) Pageable pageable, ObjectMapper objectMapper) {
-    // TODO doesn't seem to handle the LocalDate conversion
-    // copy the map of query params into a new instance of the Patient POJO
-    Patient examplePatient = objectMapper.convertValue(paramMap, Patient.class);
+      @PageableDefault(size = 30) Pageable pageable) {
+    // naively copies map entries to matching properties in the Patient POJO
+    Patient examplePatient = jacksonObjectMapper.convertValue(paramMap, Patient.class);
 
     Page<Patient> pagedResults = patientRepository
-        .findAll(Example.of(examplePatient, DEFAULT_MATCHER.withIgnorePaths("patientId")), pageable);
+        .findAll(Example.of(examplePatient, DEFAULT_MATCHER), pageable);
 
     if (!pagedResults.hasContent()) {
-      throw new NotFoundException(String.format("Resource %s not found", Patient.RESOURCE_PATH));
+      throw new NotFoundException(String.format("Resource %s not found", Patient.RESOURCE_PATH + "/queryByExample"));
+    }
+
+    return pagedResults;
+  }
+
+  /**
+   *
+   * @param name
+   * @param pageable
+   * @return
+   */
+  @GetMapping(Patient.RESOURCE_PATH + "/search")
+  public Page<Patient> getPatientsByExample(@RequestParam("name") String name,
+      @PageableDefault(size = 30) Pageable pageable) {
+    Page<Patient> pagedResults = patientRepository.findAll(Predicates.hasNameContaining(name), pageable);
+
+    if (!pagedResults.hasContent()) {
+      throw new NotFoundException(String.format("Resource %s not found", Patient.RESOURCE_PATH + "/queryByExample"));
     }
 
     return pagedResults;

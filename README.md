@@ -1345,7 +1345,116 @@ UUID field and only allow GETs on the UUID.  This could lessen the impact on dat
 thus have issues with indexing randomized keys) by making it possible to periodically regenerate the index.  I still
 suspect there may be performance issues with millions of rows however...
 
-# Step X: 
+TODO: Need to rewrite this section and maybe earlier since I decided on combining the ideas (with the
+UUID being just a unique secondary field).
+
+# Step X: Refactor Paging Header Metadata with a Custom ResponseBodyAdvisor
+
+Generally, we want to avoid a lot of boilerplate code and keep with the DRY principle.  I was discovering
+that the paging metadata headers were going to be causing a lot of boilerplate.  I examined using inheritance
+on Controllers and Util classes but decided on a feature of Spring MVC that lets you create custom
+"advisors" that can intercept reponses of specific types and shape them as needed prior to Jackson
+marshalling.
+
+Create a class called `PageResponseBodyAdvisor` with the code:
+
+```java
+@ControllerAdvice
+public class PageResponseBodyAdvisor extends AbstractMappingJacksonResponseBodyAdvice {
+
+  public static final String PAGE_METADATA_FMT = "page-number=%d,page-size=%d,total-elements=%d,total-pages=%d,first-page=%b,last-page=%b";
+
+  @Override
+  public boolean supports(MethodParameter returnType,
+      Class<? extends HttpMessageConverter<?>> converterType) {
+    return super.supports(returnType, converterType) &&
+        Page.class.isAssignableFrom(returnType.getParameterType());
+  }
+
+  @Override
+  protected void beforeBodyWriteInternal(MappingJacksonValue bodyContainer, MediaType contentType,
+      MethodParameter returnType, ServerHttpRequest request, ServerHttpResponse response) {
+
+    Page<?> page = ((Page<?>)bodyContainer.getValue());
+
+    response.getHeaders().add("X-Meta-Pagination",
+        String.format(PAGE_METADATA_FMT, page.getNumber(), page.getSize(), page.getTotalElements(),
+            page.getTotalPages(), page.isFirst(), page.isLast()));
+
+    // finally, strip out the actual content and replace it as the body value
+    bodyContainer.setValue(page.getContent());
+  }
+}
+```
+
+This handily replaces the responses of type Page<?> by replacing the MappingJacksonValue container
+with the actual response type (which is a Collection of things) and uses the Page wrapper to create
+the custom Header metadata fields.
+
+Now by refactoring the existing code to return the raw Page result from the find queries we no longer
+have to worry about manually handling the specific pageable result.  We'll probably be able to use
+this mechanism again later when we want to add more header metadata or shape the responses in some
+way.
+
+# Step X: Add finder with Query By Example
+
+Spring Data recently added support for Query By Example.  Basically, QBE is a type of query that is
+dynamically built based on a reference object.  Fields that are provided are used in the resulting
+WHERE clause.  Typically, this can be rather limiting as many matches you want to use LIKE or greater
+than/less than which is why the API also allows for a customizable "Example Matcher" where you can
+add greater customization for specific fields.
+
+By default, you don't have to do anything extra to have the QBE operations on your Repositories,
+however, you'll probably want to implent them something like this:
+
+```java
+  @GetMapping(Patient.RESOURCE_PATH + "/queryByExample")
+  public Page<Patient> getPatientsByExample(@RequestParam Map<String, Object> paramMap,
+      @PageableDefault(size = 30) Pageable pageable, ObjectMapper objectMapper) {
+    // TODO doesn't seem to handle the LocalDate conversion
+    // copy the map of query params into a new instance of the Patient POJO
+    Patient examplePatient = objectMapper.convertValue(paramMap, Patient.class);
+
+    Page<Patient> pagedResults = patientRepository
+        .findAll(Example.of(examplePatient, DEFAULT_MATCHER.withIgnorePaths("patientId")), pageable);
+
+    if (!pagedResults.hasContent()) {
+      throw new NotFoundException(String.format("Resource %s not found", Patient.RESOURCE_PATH));
+    }
+
+    return pagedResults;
+  }
+```
+
+This is taking all passed in request parameters and putting them in a Map and then using a Jackson
+convenience method copying them into a POJO of the type specified.  This creates the "example" object
+that is used in the query construction.  Only fields that are provided are mapped and the Example.of
+only uses non-null values for matching.
+
+In this case I'm using a default matcher that is defined like this:
+
+```java
+  private static final ExampleMatcher DEFAULT_MATCHER = ExampleMatcher.matching()
+      .withStringMatcher(CONTAINING)
+      .withIgnoreCase();
+```
+
+This is telling Spring Data to construct an example query that matches on any String property as a
+"contains" (like %string%) and to ignore case.  This is a frequent user requirement for searches.
+However, I discovered a slight side-effect from the UUID field that posed problems.  Since the UUID
+is set as part of the constructor, it has a non-null value and, because it is unique it would cause
+all queries to fail to return results.  Adding the "withIgnorePath" causes the property to be ignored
+even if it has a value.  This is a bit of a compromise but I think the extra verboseness isn't too
+annoying.
+
+Also, unfortunately my trick with the Jackson object mapper fails to work for LocalDates (and
+probably most of the Joda/Java8 dates).  I think this must be a bug in Jackson but it makes it
+impossible to map dates to example queries at this time without work-around code.
+
+TODO need to isolate the issue with Jackson and submit a bug request.
+
+# Step X: Write tests for Query By Example
+
 
 ---
 
@@ -1380,7 +1489,7 @@ suspect there may be performance issues with millions of rows however...
 - [Hibernate Validator](http://hibernate.org/validator/)
 - [Jackson](http://wiki.fasterxml.com/JacksonHome)
 - [H2 Database](http://www.h2database.com/html/main.html)
-- [AsserjJ](https://joel-costigliola.github.io/assertj/)
+- [AssertjJ](https://joel-costigliola.github.io/assertj/)
 
 # Reference REST design guides:
 - https://github.com/Microsoft/api-guidelines/blob/master/Guidelines.md
@@ -1390,7 +1499,7 @@ suspect there may be performance issues with millions of rows however...
 # Good Blogs I've found on this journey
 
 - https://vladmihalcea.com/
-
+- https://www.petrikainulainen.net/blog/
 
 # License
 

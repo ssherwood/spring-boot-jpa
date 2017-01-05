@@ -1,82 +1,76 @@
-# Spring Boot JPA Reference Application
+# Spring Boot / Spring Data JPA Reference Application
 
 [![Build Status](https://travis-ci.org/ssherwood/spring-boot-jpa.svg?branch=master)](https://travis-ci.org/ssherwood/spring-boot-jpa)
 
-## Overview
+## Overview and History
 
-This project is a revisit an older one that I did a few years back when I took part in the
+This project is a revisit to an older one that I did a few years back when I took part in the
 [Coursera](https://www.coursera.org/) Specialization on [Android Development](https://www.coursera.org/specializations/android-app-development).
 
-During the final Capstone we were given the choice of several projects to implement and I chose one that was both
-interesting and personal: an application to help cancer patients self-report on their pain symptoms so their doctors
-can be notified of extended durations of persistent pain or inability to eat.
+During the final Capstone class we were given the choice of several projects to implement and I
+chose one that was both interesting and had a personal connection: an application to help cancer
+patients self-report on their pain symptoms so that their doctors could be notified of extended
+durations of persistent pain or inability to eat.  In theory, this could help doctors to directly
+interact with their patients much more quickly and hopefully identify issues before getting out of
+hand.
 
 A brief article about this specific project was published on the Vanderbilt School of Engineering's
 [web site](http://engineering.vanderbilt.edu/news/2014/capstone-app-project-for-mooc-aims-to-track-help-manage-cancer-patients-pain/).
 
-## History
-
-The original server-side implementation of the Capstone project was my first time using Spring Boot and since then I've
-felt that there were many ways to improve upon the original code.
-  
-Since the final Capstone project was only a few weeks long, I did not
-get as much time to dedicate to the server-side as I would have liked. I
-still had to implement a complete Android front-end for the application
-as well (something I had never done).
+My original server-side implementation of the Capstone project was my first real interaction with
+Spring Boot and since then, I've always felt that there many improvements that I could have made.
 
 ## Goals
 
-I'd like to re-design the original server-side implementation of the
-Capstone project and take this opportunity to document the process so I
-can use it as a reference application to share with other developers.
+I'd like to take this time to re-design the original implementation and document the process so
+that I can use it as a reference application to share with other developers.
+
+*WARNING* This means that this is still a work-in-progress, so you may find things broken or
+incomplete as I get time to work on fleshing out the essential use-cases.
 
 ---
 
 # Step 1: "Initializ" the application
 
 As with most Spring Boot apps, start with the [Spring Initializr](http://start.spring.io/)
-web site.  In the Dependencies section, type in: `Web, Actuator, JPA, H2, and Devtools`
-and click the Generate button (feel free to customize the Group and Artifact
-Id as you see fit).
+web site.  In the Dependencies section, type in: `Web, Actuator, JPA, H2, and Devtools` and click
+the Generate button (feel free to customize the Group and Artifact Id as you see fit).  At the time
+of this writing, the current stable version of Spring Boot is 1.4.3.
 
-Unzip the downloaded artifact and import the project into the IDE of
-your preference.
+Unzip the downloaded artifact and import the project into the IDE of your preference.
 
-Next, "Run" the application.  Depending on your IDE, this might be a
-right-click command on the Application class that was automatically
-generated from the Initializr.
+Next, "Run" the application.  Depending on your IDE, this might be a right-click command on the
+Application class that was automatically generated from the Initializr.
 
-If all goes well, you should see several INFO commands printed out to
-the Console and a Tomcat instance being started on port 8080.
+If all goes well, you should see several INFO commands printed out to the Console and a Tomcat
+instance being started on port 8080.
   
-Try it out now at: http://localhost:8080
+Try it out now at: [localhost:8080](http://localhost:8080)
 
-You should see the default "Whitelablel" error page.  
+You should see the default "White label" error page.  
 
-Don't worry, this is the Spring Boot default error page that is
-indicating that you've requested a resource that doesn't exist.  It
-doesn't exist because we haven't implemented anything yet.
+Don't worry, this is the Spring Boot default error page that is indicating that you've requested a
+resource that doesn't yet exist.  It doesn't exist because we haven't implemented anything yet.
 
-Side Note: If you use the `curl` command instead of the browser, you'll
-get a JSON response instead as Spring Boot is attempting to detect the
-origin of the caller and return the most appropriate response type.
-Ultimately, we'll create a custom error handler for these scenarios but
-for now lets jump into some actual coding.
+Side Note: If you use the `curl` command instead of the browser, you'll get a JSON response instead
+as Spring Boot is attempting to detect the origin of the caller and return the most appropriate
+response type.
+
+Ultimately, we'll create a custom error handler for these scenarios but for now, lets jump into
+some actual coding.
 
 # Step 2: Start with the Domain
 
-Lets start by creating a domain object.  By domain object, I'm referring
-to an object that represents the business entity we're trying to model.
-For more information on Domain Modeling, refer to Eric Evans' book on
+Lets start by creating a domain object.  By domain object, I'm referring to an object that
+represents the business entity we're trying to model.  For more information on Domain Modeling, 
+refer to Eric Evans' excellent book on
 [Domain Driven Design](https://www.amazon.com/Domain-Driven-Design-Tackling-Complexity-Software/dp/0321125215).
 
-In Java we can use the standard persistence API (called JPA) to
-implement this domain object.  These are basic Java classes that have a
-special `@Entity` annotation on them.
+In Java we can use the standard persistence API (also called JPA) to implement this domain object.
+These are basic Java data classes that have a special `@Entity` annotation on them.
 
-To create an entity, create a `domain` package under the default
-application package.  Then, create a Java class called `Patient` and add
-the following code:
+To create an entity, create a `domain` package under the default application package.  Then, create
+a Java class called `Patient` and add the following code:
 
 ```java
 @Entity
@@ -89,25 +83,23 @@ public class Patient {
 
 Restart the application in the IDE.
 
-If you watch the logs closely, you'll see some additional information
-being printed out from a library called Hibernate (this is Spring Boot's
-default JPA implementation).
+If you watch the logs closely, you'll see some additional information being printed out from a
+library called Hibernate (this is Spring Boot's default JPA implementation).
 
-What you may not have noticed however is that by including H2 as a
-dependency you are also running an in-memory database with a full web
-console at http://localhost:8080/h2-console
+What you may not have noticed however is that by including H2 library as a dependency you are also
+now running an in-memory database with a full web [console](http://localhost:8080/h2-console).
 
-FYI: Make sure you set the JDBC URL to 'jdbc:h2:mem:testdb' instead of 
-the default or else you won't see the PATIENT table that was create when
-we started the app (this is the Spring Boot default database URL).
+FYI: Make sure you set the JDBC URL to 'jdbc:h2:mem:testdb' instead of the default or else you
+won't see the PATIENT table that was create when we started the app (this is the Spring Boot default
+database URL).
 
-Sweet.  This is pretty nice but how do we get the application to be able
-to create, read, update and delete Patients?
+Sweet!  This is pretty nice but how do we get the application to be able to Create, Read, Update
+and Delete our Patients?
 
 # Step 3: Create a JPA Repository
 
-Create a package called `repositories` in the base package and create a
-`PatientRepository` Java interface class.
+Create a package called `repositories` in the base package and create a `PatientRepository` Java
+interface class.
   
 Finally, add the following code:
 
@@ -116,33 +108,31 @@ public interface PatientRepository extends JpaRepository<Patient, Long> {
 }
 ```
 
-That's not a lot of code but what does it do?
+That's not a lot of code but what does it actually do?
 
-By extending the JpaRepository class we creating a Spring "Repository"
-class that is automatically initialized with a JPA entity manager.  Not
-only is it automatically initialized, it also has several basic
-CRUD-type operations already pre-defined.
+By extending the JpaRepository class we creating a Spring "Repository" class that is automatically
+initialized with a JPA entity manager.  Not only is it automatically initialized, it also has
+several basic CRUD-type operations already provided.
 
-TODO: talk about why I'm not using @RestRepositories
+// TODO: talk about why I'm not using @RestRepositories - in short, I find Spring Data REST to be too opinionated
 
-Before we get too far ahead of ourselves, lets enable some basic
-configuration options that will help with debugging.  Edit the default
-`application.properties` file in the src/main/resources folder and add:
+Before we get too far ahead of ourselves, lets enable some basic configuration options that will
+help with future debugging.  Edit the default `application.properties` file in the
+`src/main/resources` folder and add:
 
 ```properties
 spring.jpa.show-sql=true
 spring.jpa.properties.hibernate.format_sql=true
 ```
 
-I *STRONGLY* recommend adding these properties and keeping them set for
-the duration of your local development lifecycle.  You will always want
-to review the SQL that is being created and executed on your behalf.
+I *STRONGLY* recommend adding these properties and keeping them set for the duration of your local
+development lifecycle.  You will want to frequently review the SQL that is being created and
+executed on your behalf.
 
 # Step 4: Set up a REST Controller
 
-Create a package called `controllers` in the default package and create
-a `PatientController` class within it.  Then add the following code to
-the class: 
+Create a package called `controllers` in the default package and create a `PatientController` class
+within it.  Then add the following code to the class: 
 
 ```java
 @RestController
@@ -164,17 +154,17 @@ public class PatientController {
 
 Restart the application.
 
-After the application restarted you should now be able to make "RESTful"
-calls against the /patients URL like this: http://localhost:8080/patients/1
+After the application restarted you should now be able to make "RESTful" calls against the
+`/patients` URL like this: [](http://localhost:8080/patients/1)
 
 However, you will notice that nothing is displayed... that's weird.
 
-TODO discuss findOne behavior of returning null
+// TODO discuss findOne default behavior of returning null
 
 # Step 5: Create a FindBy Implementation
 
-Since the default behavior really isn't all that desirable, lets add a
-more appropriate method to the Repository interface:
+Since the default behavior of `findOne` really isn't all that desirable, lets add a more
+appropriate method to the Repository interface:
 
 ```java
 public interface PatientRepository extends JpaRepository<Patient, Long> {
@@ -182,7 +172,7 @@ public interface PatientRepository extends JpaRepository<Patient, Long> {
 }
 ```
 
-and change the GET implementation in the controller to:
+And change the GET implementation in the controller to:
 
 ```java
     @GetMapping("/patients/{id}")
@@ -193,18 +183,18 @@ and change the GET implementation in the controller to:
 
 Apply these changes and restart.
 
-Now if we use curl again:
+Now if we `curl` again:
 
 ```
 curl -sS localhost:8080/patients/1 | jq
 ```
 
-we will at least get a 500 status error code.  However, that is not the
-most desirable response from a REST API.
+We will at least get a 500 status error code.  However, that is not the most desirable response
+from a REST API.
 
-TODO Discuss Spring's lack of standard http error exceptions and handlers
+// TODO Discuss Spring's lack of standard http error exceptions and handlers
 
-# Step 6
+# Step 6: Create a Custom Exception with @ResponseStatus
 
 Create a package called `exceptions` and add a Java class called `NotFoundException`
 with the following code:
@@ -222,7 +212,7 @@ public class NotFoundException extends RuntimeException {
 }
 ```
 
-and modify the GET implementation to throw this instead of the IllegalArgumentException:
+And modify the GET implementation to throw this instead of the IllegalArgumentException:
 
 ```java
         return patientRepository.findById(id)
@@ -242,13 +232,12 @@ Restart the application and attempt the `curl` command again.
 }
 ```
 
-That looks better!
+That looks much better!
 
 # Step 7:  Add a Patient via POST
 
-We have a functional GET but now we need a way to add a Patient.  Using
-REST semantics this should be expressed with a POST.  To support this,
-add the following code to the PatientController:
+We have a functional GET but now we need a way to add a Patient.  Using REST semantics this should
+be expressed with a POST.  To support this, add the following code to the PatientController:
 
 ```java
     @PostMapping("/patients")
@@ -259,24 +248,21 @@ add the following code to the PatientController:
 
 Restart and issue a `curl -H "Content-Type: application/json" -X POST localhost:8080/patient -d '{}'`
 
-Interestingly we get a "{}" back.  If we look at the logs we should be
-able to see that an insert did take place but where is the id of the
-entity we just created?
+Interestingly we get a "{}" back.  If we look at the logs we should be able to see that an insert
+did take place but where is the id of the entity we just created?
 
-If we open up the H2 console again, we should see that a row was created
-with the ID of 1.  If we use our GET operation, we should get the entity
-back right?
+If we open up the H2 console again, we should see that a row was created with the ID of 1.  If we
+use our GET operation, we should get the entity back right?
 
 ```
 curl -sS localhost:8080/patients/1 | jq
 ```
 
-Still the same empty empty object?
+Still the same empty empty JSON object?
 
-The reason we don't see the id field is that we failed to provide a getter
-method on the entity class.  The default Jackson library that Spring uses
-to convert the object to JSON needs getters and setters to be able to
-access object's internal values.
+The reason we don't see the id field is that we failed to provide a getter method on the entity
+class.  The default Jackson library that Spring uses to convert the object to JSON needs getters
+and setters to be able to access object's internal values.
 
 Modify the Patient class to add a getter for the id field:
 
@@ -292,9 +278,9 @@ Now when you execute the POST we can see an id field on the JSON object
 curl -sS -H "Content-Type: application/json" -X POST localhost:8080/patients -d '{}' | jq
 ```
 
-TODO discuss Lombok
+// TODO discuss Lombok
 
-# Step 8:  Lets make this Patient more interesting
+# Step 8:  Lets make this Patient a bit more interesting
 
 Add the following attributes to the Patient entity:
 
@@ -304,8 +290,7 @@ Add the following attributes to the Patient entity:
     private LocalDate birthDate;
 ```
 
-Add the associated getter/setters using your IDEs code generator if
-possible.
+Add the associated getter/setters using your IDEs code generator if possible.
 
 Using curl again submit a Patient add request:
 
@@ -313,10 +298,10 @@ Using curl again submit a Patient add request:
 curl -sS -H "Content-Type: application/json" -X POST localhost:8080/patients -d '{"givenName":"Max","familyName":"Colorado","birthDate":"1942-12-11"}' | jq
 ```
 
-400 Error?  So that LocalDate is causes a JsonMappingException.
-
-We need to add a Jackson dependency to the project so it knows how to
-handle JSR 310 Dates (introduced in Java 8).  Add this to the pom.xml:
+400 Error?  So that LocalDate is causes a JsonMappingException.  We need to add a Jackson module 
+dependency to the project so it knows how to handle JSR 310 Dates (introduced in Java 8).
+  
+Add this to the pom.xml:
 
 ```xml
 <dependency>
@@ -326,8 +311,9 @@ handle JSR 310 Dates (introduced in Java 8).  Add this to the pom.xml:
 
 ```
 
-Refresh the dependencies and restart the application.  Now we see an odd
-looking date structure:
+Refresh the dependencies and restart the application (Spring Boot will automatically register this
+module with the default Jackson ObjectMapper).  Now if we do a `curl` we see an odd looking date
+structure:
 
 ```json
 "birthDate": [
@@ -337,32 +323,33 @@ looking date structure:
   ]
 ```
 
-That isn't exactly what we want.
+That isn't exactly what we want either.
   
-There is yet another configuration change we need here to tell Jackson
-to format the date "correctly".  Update the application.properties and
-include:
+There is yet another configuration change we need here to tell Jackson to format the date
+"correctly".  Update the application.properties and include:
 
 ```properties
 spring.jackson.serialization.WRITE_DATES_AS_TIMESTAMPS=false
 ```
 
-Volia!
+This somewhat confusing configuration option tells Jackson to output Dates as ISO-8601 textual
+values (probably what you'll want for most applications).
 
-But wait.  If we look at how the date is actually stored in the database
-through the H2 console, it looks like a BLOB.  That isn't good since
-we might want to be able to query against it later.
+But wait.
+  
+If we look at how the date is actually stored in the database through the H2 console, it looks like
+a BLOB.  That isn't good since we might want to be able to query against it later.
 
-Why doesn't JPA support LocalDate?
+Why doesn't JPA support LocalDate yet?
 
 # Step 9: Create a JPA LocalDate Converter
 
-As of the time of writing, JPA still does not natively support the JSR
-310 dates.  It does, however, provide support for custom converters that
-can.
+As of the time of writing, JPA still does not natively support the JSR 310 dates.  It does,
+however, provide support for custom converters that can.
 
 Add a package called `converters` and add a class called `LocalDateAttributeConverter`.
- Then add the following code:
+
+Then add the following code:
  
 ```java
 @Converter(autoApply = true)
@@ -380,8 +367,8 @@ public class LocalDateAttributeConverter implements AttributeConverter<LocalDate
 }
 ```
 
-When you restart the application you might see in the logs that the
-table is now being create with a proper DATE type like this:
+When you restart the application you might see in the logs that the table is now being create with
+a proper DATE type like this:
 
 ```sql
 Hibernate: 
@@ -394,19 +381,18 @@ Hibernate:
     )
 ```
 
-That is a huge improvement!  If you use other Java 8 Date types, you'll
-need a converter for each (I can't believe no one has created a utility
-library for these yet).
+That is a huge improvement!  If you use other Java 8 Date types, you'll need a converter for each
+(I can't believe that no one has created a utility library for these yet).
 
 # Step 10:  Let's write some unit tests
 
-So far we've not written a lot of code but its still a good idea to get
-into the habit of writing unit tests.  Spring Boot 1.4 provides some new
-testing capabilities that we want to take advantage of.
+So far we've not written a lot of code but its still a good idea to get into the habit of writing
+unit tests.  Spring Boot 1.4 provides some new testing capabilities that we want to take advantage
+of.
 
-First, lets create a test for our PatientRepository.  In the test section,
-create a package called `repositories` and then add a Java class called
-`PatientRepositoryTests`.  In that class add the following code:
+First, lets create a test for our PatientRepository.  In the test section, create a package called
+`repositories` and then add a Java class called `PatientRepositoryTests`.  In that class add the
+following code:
 
 ```java
 @RunWith(SpringRunner.class)

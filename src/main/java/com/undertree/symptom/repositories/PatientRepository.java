@@ -38,7 +38,7 @@ public interface PatientRepository extends JpaRepository<Patient, Long>,
   interface Predicates {
 
     // match string being contained on any "name" field
-    static BooleanExpression hasNameContaining(final String name) {
+    static BooleanExpression hasAnyNameContaining(final String name) {
       return patient.familyName.containsIgnoreCase(name)
           .or(patient.givenName.containsIgnoreCase(name)
               .or(patient.additionalName.containsIgnoreCase(name)));

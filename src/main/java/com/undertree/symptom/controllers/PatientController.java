@@ -15,13 +15,13 @@
  */
 package com.undertree.symptom.controllers;
 
+import static com.undertree.symptom.repositories.PatientRepository.Predicates.hasAnyNameContaining;
 import static org.springframework.data.domain.ExampleMatcher.StringMatcher.CONTAINING;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.undertree.symptom.domain.Patient;
 import com.undertree.symptom.exceptions.NotFoundException;
 import com.undertree.symptom.repositories.PatientRepository;
-import com.undertree.symptom.repositories.PatientRepository.Predicates;
 import com.undertree.symptom.utils.BeanUtilsUtils;
 import java.util.Map;
 import java.util.UUID;
@@ -187,12 +187,12 @@ public class PatientController {
    * @return
    */
   @GetMapping(Patient.RESOURCE_PATH + "/search")
-  public Page<Patient> getPatientsByExample(@RequestParam("name") String name,
+  public Page<Patient> getPatientsHasAnyNameContaining(@RequestParam("name") String name,
       @PageableDefault(size = 30) Pageable pageable) {
-    Page<Patient> pagedResults = patientRepository.findAll(Predicates.hasNameContaining(name), pageable);
+    Page<Patient> pagedResults = patientRepository.findAll(hasAnyNameContaining(name), pageable);
 
     if (!pagedResults.hasContent()) {
-      throw new NotFoundException(String.format("Resource %s not found", Patient.RESOURCE_PATH + "/queryByExample"));
+      throw new NotFoundException(String.format("Resource %s not found", Patient.RESOURCE_PATH + "/search"));
     }
 
     return pagedResults;

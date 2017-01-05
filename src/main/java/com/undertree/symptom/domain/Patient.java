@@ -16,9 +16,12 @@
 package com.undertree.symptom.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import java.time.LocalDate;
 import java.time.Period;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 import javax.persistence.Access;
 import javax.persistence.AccessType;
@@ -26,6 +29,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Pattern;
@@ -66,7 +70,6 @@ public class Patient {
   @GeneratedValue
   private Long id;
 
-  //@NaturalId
   @Column(columnDefinition = "uuid", unique = true, updatable = false)
   private UUID patientId;
 
@@ -103,6 +106,9 @@ public class Patient {
 
   @Min(0)
   private Short weight; // weight in kg
+
+  @OneToMany
+  Set<Prescription> prescriptions = new HashSet<>();
 
   /**
    *
@@ -192,6 +198,14 @@ public class Patient {
 
   public void setWeight(Short weight) {
     this.weight = weight;
+  }
+
+  public Set<Prescription> getPrescriptions() {
+    return prescriptions;
+  }
+
+  public void setPrescriptions(Set<Prescription> prescriptions) {
+    this.prescriptions = prescriptions;
   }
 
   // TODO discuss equals and hashcode

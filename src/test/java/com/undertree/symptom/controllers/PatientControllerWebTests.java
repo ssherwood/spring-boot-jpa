@@ -31,6 +31,7 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
@@ -211,5 +212,33 @@ public class PatientControllerWebTests {
     assertThat(Arrays.asList(entity.getBody())).isNotNull()
         .extracting(Patient::getFamilyName)
         .contains("Spec", "Neubus", "Certify");
+  }
+
+  @Test
+  public void test_PatientController_getPatientsByExample_Expect_MatchingResult() throws Exception {
+    ResponseEntity<Patient[]> responseEntity = restTemplate
+        .getForEntity("/patients/queryByExample?birthDate={birthDate}", Patient[].class, "1962-02-15");
+
+    assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+    assertThat(responseEntity.getHeaders().containsKey("X-Meta-Pagination")).isTrue();
+
+    assertThat(Arrays.asList(responseEntity.getBody())).isNotNull()
+        .extracting(Patient::getFamilyName)
+        .first().isEqualTo("Neubus");
+  }
+
+  @Test
+  public void test_PatientController_() throws Exception {
+    ResponseEntity<Patient[]> responseEntity = restTemplate
+        .getForEntity("/patients/search?name={name}&sort=birthDate,desc", Patient[].class, "e");
+
+    assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+    assertThat(responseEntity.getHeaders().containsKey("X-Meta-Pagination")).isTrue();
+
+    assertThat(Arrays.asList(responseEntity.getBody())).isNotNull()
+        .extracting(Patient::getFamilyName)
+        // TODO having issues with records from previous tests hanging around...
+        //.containsExactly("Certify", "Spec", "Neubus");
+        .contains("Certify", "Spec", "Neubus");
   }
 }

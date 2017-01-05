@@ -15,6 +15,9 @@
  */
 package com.undertree.symptom;
 
+import com.fasterxml.jackson.databind.Module;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module;
 import java.util.Map;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -58,5 +61,18 @@ public class BootJpaApplication {
         return attributes;
       }
     };
+  }
+
+  // TODO move this to a more appropriate config class
+  // this module is not auto-registered with the Jackson Object Mapper by default
+  // this causes Jackson to be Hibernate "aware"
+  // this is useful to keep the Hibernate object graph from being auto-populated even for "lazy"
+  // collections (meaning you now have to navigate to the lazy collection with actual code
+  // before triggering the lazy fetch)
+  @Bean
+  public Module hibernateModule() {
+    Hibernate5Module module = new Hibernate5Module();
+    //module.enable(Hibernate5Module.Feature.FORCE_LAZY_LOADING);
+    return module;
   }
 }

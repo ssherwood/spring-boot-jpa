@@ -1442,6 +1442,9 @@ TODO need to isolate the issue with Jackson and submit a bug request.
 # Step X: Write tests for Query By Example
 
 
+
+
+
 ---
 
 ## TODOs
@@ -1465,7 +1468,7 @@ TODO need to isolate the issue with Jackson and submit a bug request.
 - Discuss this JPA approach benefits has initial schema-less feel
 - Research https://github.com/FasterXML/jackson-datatype-hibernate
 - Google style https://github.com/google/styleguide
-
+- Research QuerydslBinderCustomizer
 
 # Additional Resources
 

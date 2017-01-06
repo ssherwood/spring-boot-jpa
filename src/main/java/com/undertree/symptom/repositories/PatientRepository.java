@@ -19,21 +19,34 @@ import static com.undertree.symptom.domain.QPatient.patient;
 
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.StringPath;
 import com.undertree.symptom.domain.Patient;
+import com.undertree.symptom.domain.QPatient;
 import java.time.LocalDate;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.querydsl.QueryDslPredicateExecutor;
+import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
+import org.springframework.data.querydsl.binding.QuerydslBindings;
 
 /**
  * Spring Data JPA Repository for the Patient entity with QueryDsl support.
  */
 public interface PatientRepository extends JpaRepository<Patient, Long>,
-    QueryDslPredicateExecutor<Patient> {
+    QueryDslPredicateExecutor<Patient>, QuerydslBinderCustomizer<QPatient> {
 
   Optional<Patient> findByPatientId(UUID patientId);
   //Optional<Patient> findByPatientIdAndVersion(UUID id, Long version);
+
+
+  @Override
+  default void customize(QuerydslBindings bindings, QPatient root) {
+    bindings.bind(String.class)
+        .first((StringPath path, String value) -> path.containsIgnoreCase(value));
+
+    bindings.excluding(root.id);
+  }
 
   interface Predicates {
 

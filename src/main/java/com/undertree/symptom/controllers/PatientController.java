@@ -19,6 +19,7 @@ import static com.undertree.symptom.repositories.PatientRepository.Predicates.ha
 import static org.springframework.data.domain.ExampleMatcher.StringMatcher.CONTAINING;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.querydsl.core.types.Predicate;
 import com.undertree.symptom.domain.Patient;
 import com.undertree.symptom.exceptions.NotFoundException;
 import com.undertree.symptom.repositories.PatientRepository;
@@ -32,6 +33,7 @@ import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -181,11 +183,32 @@ public class PatientController {
   }
 
   /**
+   * Another alternative to QBE via QueryDsl Predicates
    *
-   * @param name
+   * And again there is an issue with parsing LocalDate... sigh...
+   *
+   * @param predicate
    * @param pageable
    * @return
    */
+  @GetMapping(Patient.RESOURCE_PATH + "/queryByPredicate")
+  public Page<Patient> getPatientsByPredicate(@QuerydslPredicate(root = Patient.class) Predicate predicate,
+      @PageableDefault(size = 30) Pageable pageable) {
+    Page<Patient> pagedResults = patientRepository.findAll(predicate, pageable);
+
+    if (!pagedResults.hasContent()) {
+      throw new NotFoundException(String.format("Resource %s not found", Patient.RESOURCE_PATH + "/query"));
+    }
+
+    return pagedResults;
+  }
+
+    /**
+     *
+     * @param name
+     * @param pageable
+     * @return
+     */
   @GetMapping(Patient.RESOURCE_PATH + "/search")
   public Page<Patient> getPatientsHasAnyNameContaining(@RequestParam("name") String name,
       @PageableDefault(size = 30) Pageable pageable) {

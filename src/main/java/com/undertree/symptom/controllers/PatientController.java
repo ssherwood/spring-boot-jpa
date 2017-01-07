@@ -42,16 +42,23 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 // https://spring.io/understanding/REST
 // http://www.restapitutorial.com/
 
+/**
+ *
+ */
 @RestController
+@RequestMapping(Patient.RESOURCE_PATH)
 public class PatientController {
 
-  private static final ExampleMatcher DEFAULT_MATCHER = ExampleMatcher.matching()
+  private static final int DEFAULT_PAGE_SZ = 30;
+  private static final ExampleMatcher DEFAULT_MATCHER = ExampleMatcher
+      .matching()
       .withIgnorePaths("patientId")
       .withStringMatcher(CONTAINING)
       .withIgnoreCase();
@@ -67,13 +74,14 @@ public class PatientController {
   }
 
   /**
-   * Creates a new instance of the entity type.  For this use with JPA, the backing datasource will
-   * provide the identity back to assist with further interactions.
+   * Creates a new instance of the entity type.  For this use with JPA, the
+   * backing datasource will provide the identity back to assist with further
+   * interactions.
    *
    * @param patient the Patient object to save
-   * @return
+   * @return An instance of the newly created Patient
    */
-  @PostMapping(Patient.RESOURCE_PATH)
+  @PostMapping
   public Patient addPatient(@Valid @RequestBody final Patient patient) {
     return patientRepository.save(patient);
   }
@@ -83,14 +91,14 @@ public class PatientController {
    * then a 404 error code should be returned to the client.
    *
    * @param patientId unique patient UUID to find
-   * @return
+   * @return A single patient with the matching patientId
    */
-  @GetMapping(Patient.RESOURCE_PATH + "/{id}")
+  @GetMapping("/{id}")
   public Patient getPatient(@PathVariable("id") final UUID patientId) {
     return patientRepository.findByPatientId(patientId)
         .orElseThrow(() ->
-            new NotFoundException(
-                String.format("Resource %s/%s not found", Patient.RESOURCE_PATH, patientId)));
+            new NotFoundException("Resource %s/%s not found",
+                Patient.RESOURCE_PATH, patientId));
   }
 
   /**
@@ -98,13 +106,13 @@ public class PatientController {
    * replaced with that provided with the RequestBody (this means that null or excluded fields are
    * updated to null on the entity itself).
    */
-  @PutMapping(Patient.RESOURCE_PATH + "/{id}")
+  @PutMapping("/{id}")
   public Patient updatePatientIncludingNulls(@PathVariable("id") final UUID patientId,
       @Valid @RequestBody final Patient patient) {
     Patient aPatient = patientRepository.findByPatientId(patientId)
         .orElseThrow(() ->
-            new NotFoundException(
-                String.format("Resource %s/%s not found", Patient.RESOURCE_PATH, patientId)));
+            new NotFoundException("Resource %s/%s not found",
+                Patient.RESOURCE_PATH, patientId));
     // copy bean properties including nulls
     BeanUtils.copyProperties(patient, aPatient);
     return patientRepository.save(aPatient);
@@ -116,13 +124,13 @@ public class PatientController {
    * that a resource exists by first loading it and them copies the non-null properties from the
    * RequestBody (i.e. any property that is set).
    */
-  @PatchMapping(Patient.RESOURCE_PATH + "/{id}")
+  @PatchMapping("/{id}")
   public Patient updatePatientExcludingNulls(@PathVariable("id") final UUID patientId, /*@Valid*/
       @RequestBody final Patient patient) {
     Patient aPatient = patientRepository.findByPatientId(patientId)
         .orElseThrow(() ->
-            new NotFoundException(
-                String.format("Resource %s/%s not found", Patient.RESOURCE_PATH, patientId)));
+            new NotFoundException("Resource %s/%s not found",
+                Patient.RESOURCE_PATH, patientId));
     // copy bean properties excluding nulls
     BeanUtils.copyProperties(patient, aPatient, BeanUtilsUtils.getNullPropertyNames(patient));
     return patientRepository.save(aPatient);
@@ -137,7 +145,7 @@ public class PatientController {
    * multiple clients attempt to remove the same resource at the same time with this
    * implementation.
    */
-  @DeleteMapping(Patient.RESOURCE_PATH + "/{id}")
+  @DeleteMapping("/{id}")
   public void deletePatient(@PathVariable("id") final UUID patientId) {
     patientRepository.findByPatientId(patientId)
         .ifPresent(p -> patientRepository.delete(p.getId()));
@@ -148,12 +156,12 @@ public class PatientController {
    * the request using "page=X" and "size=y" (ex. /patients?page=2&size=10).  The default is page 0
    * and size 20 however, we have overridden the default to 30 using @PagableDefault as an example.
    */
-  @GetMapping(Patient.RESOURCE_PATH)
-  public Page<Patient> getPatients(@PageableDefault(size = 30) final Pageable pageable) {
+  @GetMapping
+  public Page<Patient> getPatients(@PageableDefault(size = DEFAULT_PAGE_SZ) final Pageable pageable) {
     Page<Patient> pagedResults = patientRepository.findAll(pageable);
 
     if (!pagedResults.hasContent()) {
-      throw new NotFoundException(String.format("Resource %s not found", Patient.RESOURCE_PATH));
+      throw new NotFoundException("Resource %s not found", Patient.RESOURCE_PATH);
     }
 
     return pagedResults;
@@ -166,9 +174,9 @@ public class PatientController {
    * TODO I'm not exactly happy with the resource name "queryByExample".  Need to research more what
    * other APIs look like for this kind of functionality
    */
-  @GetMapping(Patient.RESOURCE_PATH + "/queryByExample")
+  @GetMapping("/queryByExample")
   public Page<Patient> getPatientsByExample(@RequestParam Map<String, Object> paramMap,
-      @PageableDefault(size = 30) Pageable pageable) {
+      @PageableDefault(size = DEFAULT_PAGE_SZ) Pageable pageable) {
     // naively copies map entries to matching properties in the Patient POJO
     Patient examplePatient = jacksonObjectMapper.convertValue(paramMap, Patient.class);
 
@@ -176,7 +184,8 @@ public class PatientController {
         .findAll(Example.of(examplePatient, DEFAULT_MATCHER), pageable);
 
     if (!pagedResults.hasContent()) {
-      throw new NotFoundException(String.format("Resource %s not found", Patient.RESOURCE_PATH + "/queryByExample"));
+      throw new NotFoundException("Resource %s/%s not found",
+          Patient.RESOURCE_PATH, "/queryByExample");
     }
 
     return pagedResults;
@@ -191,13 +200,14 @@ public class PatientController {
    * @param pageable
    * @return
    */
-  @GetMapping(Patient.RESOURCE_PATH + "/queryByPredicate")
-  public Page<Patient> getPatientsByPredicate(@QuerydslPredicate(root = Patient.class) Predicate predicate,
-      @PageableDefault(size = 30) Pageable pageable) {
+  @GetMapping("/queryByPredicate")
+  public Page<Patient> getPatientsByPredicate(@QuerydslPredicate(root = Patient.class) final Predicate predicate,
+      @PageableDefault(size = DEFAULT_PAGE_SZ) final Pageable pageable) {
     Page<Patient> pagedResults = patientRepository.findAll(predicate, pageable);
 
     if (!pagedResults.hasContent()) {
-      throw new NotFoundException(String.format("Resource %s not found", Patient.RESOURCE_PATH + "/query"));
+      throw new NotFoundException("Resource %s/%s not found",
+          Patient.RESOURCE_PATH, "query");
     }
 
     return pagedResults;
@@ -209,13 +219,15 @@ public class PatientController {
      * @param pageable
      * @return
      */
-  @GetMapping(Patient.RESOURCE_PATH + "/search")
-  public Page<Patient> getPatientsHasAnyNameContaining(@RequestParam("name") String name,
-      @PageableDefault(size = 30) Pageable pageable) {
+  @GetMapping("/search")
+  public Page<Patient> getPatientsHasAnyNameContaining(
+      @RequestParam("name") final String name,
+      @PageableDefault(size = DEFAULT_PAGE_SZ) final Pageable pageable) {
     Page<Patient> pagedResults = patientRepository.findAll(hasAnyNameContaining(name), pageable);
 
     if (!pagedResults.hasContent()) {
-      throw new NotFoundException(String.format("Resource %s not found", Patient.RESOURCE_PATH + "/search"));
+      throw new NotFoundException("Resource %s/%s not found",
+          Patient.RESOURCE_PATH, "search");
     }
 
     return pagedResults;

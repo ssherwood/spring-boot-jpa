@@ -16,7 +16,6 @@
 package com.undertree.symptom.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import java.time.LocalDate;
 import java.time.Period;
@@ -36,6 +35,8 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotBlank;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.format.annotation.DateTimeFormat.ISO;
 
 // https://health-lifesci.schema.org/Patient
 // http://www.openmhealth.org/documentation/#/schema-docs/schema-library
@@ -91,6 +92,7 @@ public class Patient {
 
   //@Past https://stackoverflow.com/questions/30249829/error-no-validator-could-be-found-for-type-java-time-localdate
   @Access(AccessType.PROPERTY)
+  @DateTimeFormat(iso = ISO.DATE)
   private LocalDate birthDate;
 
   @Transient

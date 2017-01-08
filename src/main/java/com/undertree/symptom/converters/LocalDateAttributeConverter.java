@@ -20,18 +20,23 @@ import java.time.LocalDate;
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
 
-// http://www.thoughts-on-java.org/persist-localdate-localdatetime-jpa/
-
+/**
+ * Converter for JSR-310 LocalDate.  Useful until the JPA specification is
+ * updated to support them.
+ *
+ * http://www.thoughts-on-java.org/persist-localdate-localdatetime-jpa/
+ */
 @Converter(autoApply = true)
-public class LocalDateAttributeConverter implements AttributeConverter<LocalDate, Date> {
+public class LocalDateAttributeConverter
+    implements AttributeConverter<LocalDate, Date> {
 
   @Override
-  public Date convertToDatabaseColumn(LocalDate localDate) {
-    return (localDate == null ? null : Date.valueOf(localDate));
+  public Date convertToDatabaseColumn(final LocalDate localDate) {
+    return localDate == null ? null : Date.valueOf(localDate);
   }
 
   @Override
-  public LocalDate convertToEntityAttribute(Date sqlDate) {
-    return (sqlDate == null ? null : sqlDate.toLocalDate());
+  public LocalDate convertToEntityAttribute(final Date sqlDate) {
+    return sqlDate == null ? null : sqlDate.toLocalDate();
   }
 }

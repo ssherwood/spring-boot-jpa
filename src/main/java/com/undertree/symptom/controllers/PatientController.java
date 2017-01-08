@@ -50,7 +50,10 @@ import org.springframework.web.bind.annotation.RestController;
 // http://www.restapitutorial.com/
 
 /**
+ * REST endpoint for the Patient resource.  Provides basic CRUD functionality
+ * as well as various searching capabilities.
  *
+ * @author Shawn Sherwood
  */
 @RestController
 @RequestMapping(Patient.RESOURCE_PATH)
@@ -193,8 +196,6 @@ public class PatientController {
 
   /**
    * Another alternative to QBE via QueryDsl Predicates
-   *
-   * And again there is an issue with parsing LocalDate... sigh...
    *
    * @param predicate
    * @param pageable

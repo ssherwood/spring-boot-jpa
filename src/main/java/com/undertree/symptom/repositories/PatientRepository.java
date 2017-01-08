@@ -39,7 +39,6 @@ public interface PatientRepository extends JpaRepository<Patient, Long>,
   Optional<Patient> findByPatientId(UUID patientId);
   //Optional<Patient> findByPatientIdAndVersion(UUID id, Long version);
 
-
   @Override
   default void customize(QuerydslBindings bindings, QPatient root) {
     bindings.bind(String.class)
@@ -48,16 +47,21 @@ public interface PatientRepository extends JpaRepository<Patient, Long>,
     bindings.excluding(root.id);
   }
 
-  interface Predicates {
+  /**
+   * QueryDsl Predicates for Patient
+   */
+  class Predicates {
+    private Predicates() {
+    }
 
     // match string being contained on any "name" field
-    static BooleanExpression hasAnyNameContaining(final String name) {
+    public static BooleanExpression hasAnyNameContaining(final String name) {
       return patient.familyName.containsIgnoreCase(name)
           .or(patient.givenName.containsIgnoreCase(name)
               .or(patient.additionalName.containsIgnoreCase(name)));
     }
 
-    static BooleanExpression hasBirthdayOn(final LocalDate date) {
+    public static BooleanExpression hasBirthdayOn(final LocalDate date) {
       return patient.birthDate.month().eq(date.getMonthValue()).and(
           patient.birthDate.dayOfMonth().eq(date.getDayOfMonth()));
     }

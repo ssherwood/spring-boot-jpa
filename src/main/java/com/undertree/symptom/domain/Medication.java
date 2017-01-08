@@ -18,6 +18,9 @@ package com.undertree.symptom.domain;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
+import org.hibernate.validator.constraints.NotBlank;
 
 // http://www.openmhealth.org/documentation/#/schema-docs/schema-library/schemas/omh_medication
 // https://rxnav.nlm.nih.gov/
@@ -25,13 +28,20 @@ import javax.persistence.Id;
 @Entity
 public class Medication {
 
-  public static final String RESOURCE_PATH = "/medication";
-  public static final String RESOURCES_PATH = "/medications";
+  public static final String RESOURCE_PATH = "/medications";
 
   @Id
   @GeneratedValue
   private Long id;
+
+  @NotBlank
+  @Size(min = 2)
+  @Pattern(regexp = "^[A-Za-z0-9]+$")
   private String tradeName;
+
+  @NotBlank
+  @Size(min = 2)
+  @Pattern(regexp = "^[A-Za-z0-9]+$")
   private String genericName;
   private DrugStrength strength;
   private Integer rxNormCode;

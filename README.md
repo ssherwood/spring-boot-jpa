@@ -1334,13 +1334,13 @@ suspect there may be performance issues with millions of rows however...
 TODO: Need to rewrite this section and maybe earlier since I decided on combining the ideas (with the
 UUID being just a unique secondary field).
 
-# Step X: Refactor Paging Header Metadata with a Custom ResponseBodyAdvisor
+# Step X: Refactor Paging Header Metadata with a Custom ResponseBodyAdvisor (and More)
 
-Generally, we want to avoid a lot of boilerplate code and keep with the DRY principle.  I was discovering
-that the paging metadata headers were going to be causing a lot of boilerplate.  I examined using inheritance
-on Controllers and Util classes but decided on a feature of Spring MVC that lets you create custom
-"advisors" that can intercept reponses of specific types and shape them as needed prior to Jackson
-marshalling.
+Generally, we want to avoid a lot of boilerplate code and keep with the DRY principle.  I realized
+that the paging metadata headers were going to be causing a lot of boilerplate.  I examined using
+inheritance on Controllers and/or "Util" classes but decided on a feature of Spring MVC that lets
+you create custom "advisors" that can intercept responses of specific types and shape them as
+needed prior to the actual Jackson JSON marshalling.
 
 Create a class called `PageResponseBodyAdvisor` with the code:
 
@@ -1373,14 +1373,59 @@ public class PageResponseBodyAdvisor extends AbstractMappingJacksonResponseBodyA
 }
 ```
 
-This handily replaces the responses of type Page<?> by replacing the MappingJacksonValue container
-with the actual response type (which is a Collection of things) and uses the Page wrapper to create
-the custom Header metadata fields.
+This conveniently replaces the responses of type `Page<?>` by replacing the `MappingJacksonValue`
+container with the actual response type (which is a Collection of things) and uses the Page wrapper
+to create the custom Header metadata fields.
 
-Now by refactoring the existing code to return the raw Page result from the find queries we no longer
-have to worry about manually handling the specific pageable result.  We'll probably be able to use
-this mechanism again later when we want to add more header metadata or shape the responses in some
-way.
+Now by refactoring the existing code to return the raw Page result from the find queries we no
+longer have to worry about manually handling the specific pageable result.  We'll probably be able
+to use this mechanism again later when we want to add more header metadata or shape the responses
+in some way.
+
+Additionally we can send back standard `Link` headers with path information for next, previous,
+first, and last:
+
+```java
+  public static final String LINK_STANDARD_FMT = "<%s>; rel=\"%s\"";
+  public static final String QUERY_PARAM_PAGE = "page";
+  public static final String LINK_HEADER_FIRST = "first";
+  public static final String LINK_HEADER_PREVIOUS = "prev";
+  public static final String LINK_HEADER_NEXT = "next";
+  public static final String LINK_HEADER_LAST = "last";
+  
+  private String getHttpHeaderLinksString(ServerHttpRequest request, Page<?> page) {
+    List<String> headerLinks = new ArrayList<>();
+
+    if (!page.isFirst()) {
+      headerLinks.add(String.format(LINK_STANDARD_FMT, UriComponentsBuilder.fromHttpRequest(request)
+          .replaceQueryParam(QUERY_PARAM_PAGE, 0)
+          .build(), LINK_HEADER_FIRST));
+    }
+
+    if (page.hasPrevious()) {
+      headerLinks.add(String.format(LINK_STANDARD_FMT, UriComponentsBuilder.fromHttpRequest(request)
+              .replaceQueryParam(QUERY_PARAM_PAGE, page.previousPageable().getPageNumber())
+              .build(), LINK_HEADER_PREVIOUS));
+    }
+
+    if (page.hasNext()) {
+      headerLinks.add(String.format(LINK_STANDARD_FMT, UriComponentsBuilder.fromHttpRequest(request)
+              .replaceQueryParam(QUERY_PARAM_PAGE, page.nextPageable().getPageNumber())
+              .build(), LINK_HEADER_NEXT));
+    }
+
+    if (!page.isLast()) {
+      headerLinks.add(String.format(LINK_STANDARD_FMT, UriComponentsBuilder.fromHttpRequest(request)
+          .replaceQueryParam(QUERY_PARAM_PAGE, page.getTotalPages() - 1)
+          .build(), LINK_HEADER_LAST));
+    }
+
+    return StringUtils.join(headerLinks, ", ");
+  }
+```
+
+Call this method as part of the `beforeBodyWriteInternal` and add it the the http response headers
+as a Link.  You can read more about Web Linking [here](https://tools.ietf.org/html/rfc5988).
 
 # Step X: Add finder with Query By Example
 
@@ -1394,53 +1439,67 @@ By default, you don't have to do anything extra to have the QBE operations on yo
 however, you'll probably want to implent them something like this:
 
 ```java
-  @GetMapping(Patient.RESOURCE_PATH + "/queryByExample")
+  @GetMapping("/queryByExample")
   public Page<Patient> getPatientsByExample(@RequestParam Map<String, Object> paramMap,
-      @PageableDefault(size = 30) Pageable pageable, ObjectMapper objectMapper) {
-    // TODO doesn't seem to handle the LocalDate conversion
-    // copy the map of query params into a new instance of the Patient POJO
-    Patient examplePatient = objectMapper.convertValue(paramMap, Patient.class);
+      @PageableDefault(size = DEFAULT_PAGE_SZ) Pageable pageable) {
+    // naively copies map entries to matching properties in the Patient POJO
+    Patient examplePatient = jacksonObjectMapper.convertValue(paramMap, Patient.class);
 
     Page<Patient> pagedResults = patientRepository
-        .findAll(Example.of(examplePatient, DEFAULT_MATCHER.withIgnorePaths("patientId")), pageable);
+        .findAll(Example.of(examplePatient, DEFAULT_MATCHER), pageable);
 
     if (!pagedResults.hasContent()) {
-      throw new NotFoundException(String.format("Resource %s not found", Patient.RESOURCE_PATH));
+      throw new NotFoundException("Resource %s/%s not found",
+          Patient.RESOURCE_PATH, "/queryByExample");
     }
 
     return pagedResults;
   }
 ```
 
-This is taking all passed in request parameters and putting them in a Map and then using a Jackson
-convenience method copying them into a POJO of the type specified.  This creates the "example" object
-that is used in the query construction.  Only fields that are provided are mapped and the Example.of
-only uses non-null values for matching.
+This is taking all passed in request parameters and putting them into a Map and then using a Jackson
+utility method to copying them into a POJO of the type specified.  This creates the "example" object
+that Spring Data uses in the query construction.  Only fields that are provided are mapped and the
+Example.of only uses non-null values for matching.
 
-In this case I'm using a default matcher that is defined like this:
+In this case I'm also using a default matcher that is defined like this:
 
 ```java
-  private static final ExampleMatcher DEFAULT_MATCHER = ExampleMatcher.matching()
+  private static final ExampleMatcher DEFAULT_MATCHER = ExampleMatcher
+      .matching()
       .withStringMatcher(CONTAINING)
       .withIgnoreCase();
 ```
 
 This is telling Spring Data to construct an example query that matches on any String property as a
-"contains" (like %string%) and to ignore case.  This is a frequent user requirement for searches.
-However, I discovered a slight side-effect from the UUID field that posed problems.  Since the UUID
-is set as part of the constructor, it has a non-null value and, because it is unique it would cause
-all queries to fail to return results.  Adding the "withIgnorePath" causes the property to be ignored
-even if it has a value.  This is a bit of a compromise but I think the extra verboseness isn't too
-annoying.
+"contains" (i.e. LIKE %string%) and to ignore case.  This type of matching are frequent user
+requirements for searches.
 
-Also, unfortunately my trick with the Jackson object mapper fails to work for LocalDates (and
-probably most of the Joda/Java8 dates).  I think this must be a bug in Jackson but it makes it
-impossible to map dates to example queries at this time without work-around code.
+However, I discovered a slight side-effect from the UUID field that posed a problem.  Since the UUID
+is set as part of the constructor, it has a non-null value and, because it is unique, it would cause
+all queries to 404 and fail to return results.  Adding the "withIgnorePath" to the DEFAULT_MATCHER
+seems to clear this up:
 
-TODO need to isolate the issue with Jackson and submit a bug request.
+```java
+      .withIgnorePaths("patientId")
+```
 
-# Step X: Write tests for Query By Example
+Now, lets finish by writing a test.  In the PatientControllerWebTests add an additional test case:
 
+```java
+  @Test
+  public void test_PatientController_getPatientsByExample_Expect_MatchingResult() throws Exception {
+    ResponseEntity<Patient[]> responseEntity = restTemplate
+        .getForEntity("/patients/queryByExample?birthDate={birthDate}", Patient[].class, "1962-02-15");
+
+    assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+    assertThat(responseEntity.getHeaders().containsKey("X-Meta-Pagination")).isTrue();
+
+    assertThat(Arrays.asList(responseEntity.getBody())).isNotNull()
+        .extracting(Patient::getFamilyName)
+        .first().isEqualTo("Neubus");
+  }
+```
 
 
 
@@ -1474,6 +1533,7 @@ TODO need to isolate the issue with Jackson and submit a bug request.
 
 - [Spring Boot Reference Guide](https://docs.spring.io/spring-boot/docs/current/reference/html/)
 - [Spring Data JPA](http://docs.spring.io/spring-data/jpa/docs/current/reference/html/)
+- [QueryDsl](http://www.querydsl.com/)
 - [Hibernate ORM](http://hibernate.org/orm/)
 - [Hibernate Validator](http://hibernate.org/validator/)
 - [Jackson](http://wiki.fasterxml.com/JacksonHome)
@@ -1481,8 +1541,10 @@ TODO need to isolate the issue with Jackson and submit a bug request.
 - [AssertjJ](https://joel-costigliola.github.io/assertj/)
 
 # Reference REST design guides:
+
 - https://github.com/Microsoft/api-guidelines/blob/master/Guidelines.md
-- https://docs.microsoft.com/en-us/azure/best-practices-api-design
+- http://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api
+- https://codeplanet.io/principles-good-restful-api-design/
 
 
 # Good Blogs I've found on this journey

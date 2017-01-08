@@ -15,9 +15,6 @@
  */
 package com.undertree.symptom.repositories;
 
-import static com.undertree.symptom.domain.QPatient.patient;
-
-import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.StringPath;
 import com.undertree.symptom.domain.Patient;
@@ -37,33 +34,35 @@ public interface PatientRepository extends JpaRepository<Patient, Long>,
     QueryDslPredicateExecutor<Patient>, QuerydslBinderCustomizer<QPatient> {
 
   Optional<Patient> findByPatientId(UUID patientId);
-  //Optional<Patient> findByPatientIdAndVersion(UUID id, Long version);
 
   @Override
   default void customize(QuerydslBindings bindings, QPatient root) {
-    bindings.bind(String.class)
-        .first((StringPath path, String value) -> path.containsIgnoreCase(value));
-
     bindings.excluding(root.id);
+    //bindings.excluding(root.patientId);
+    bindings.bind(String.class)
+        .first((StringPath path, String value) ->
+            path.containsIgnoreCase(value));
   }
 
   /**
-   * QueryDsl Predicates for Patient
+   * QueryDsl Predicates for Patient.
    */
   class Predicates {
+    static final QPatient $ = QPatient.patient;
+
     private Predicates() {
     }
 
     // match string being contained on any "name" field
     public static BooleanExpression hasAnyNameContaining(final String name) {
-      return patient.familyName.containsIgnoreCase(name)
-          .or(patient.givenName.containsIgnoreCase(name)
-              .or(patient.additionalName.containsIgnoreCase(name)));
+      return $.familyName.containsIgnoreCase(name)
+          .or($.givenName.containsIgnoreCase(name)
+              .or($.additionalName.containsIgnoreCase(name)));
     }
 
     public static BooleanExpression hasBirthdayOn(final LocalDate date) {
-      return patient.birthDate.month().eq(date.getMonthValue()).and(
-          patient.birthDate.dayOfMonth().eq(date.getDayOfMonth()));
+      return $.birthDate.month().eq(date.getMonthValue()).and(
+          $.birthDate.dayOfMonth().eq(date.getDayOfMonth()));
     }
   }
 }

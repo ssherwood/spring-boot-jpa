@@ -1226,7 +1226,7 @@ path to the entity.  Our results will now look something like this:
 We could also choose to just ignore the id/resourceId entirely and use a Link header with "self" described but this
 won't work quite as well for collection resources.
 
-Sidenote: I also update the JMeter script to run a Find All and rerun the scripts together.  After a few runs to warm
+Side Note: I also update the JMeter script to run a Find All and rerun the scripts together.  After a few runs to warm
 up the JVM we get pretty consistent sub millisecond responses.  So far it does not appear that we have had a negative
 impact on performance.
 
@@ -1528,6 +1528,9 @@ Now, lets finish by writing a test.  In the PatientControllerWebTests add an add
 - Research https://github.com/FasterXML/jackson-datatype-hibernate
 - Google style https://github.com/google/styleguide
 - Research QuerydslBinderCustomizer
+- Research Json Patch vs Http Patch vs my naive implementation 
+  - https://stackoverflow.com/questions/36907723/how-to-do-patch-properly-in-strongly-typed-languages-based-on-spring-example?rq=1
+
 
 # Additional Resources
 

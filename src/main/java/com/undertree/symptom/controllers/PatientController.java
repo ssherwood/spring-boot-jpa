@@ -112,13 +112,13 @@ public class PatientController {
   @PutMapping("/{id}")
   public Patient updatePatientIncludingNulls(@PathVariable("id") final UUID patientId,
       @Valid @RequestBody final Patient patient) {
-    Patient aPatient = patientRepository.findByPatientId(patientId)
+    Patient originalPatient = patientRepository.findByPatientId(patientId)
         .orElseThrow(() ->
             new NotFoundException("Resource %s/%s not found",
                 Patient.RESOURCE_PATH, patientId));
     // copy bean properties including nulls
-    BeanUtils.copyProperties(patient, aPatient);
-    return patientRepository.save(aPatient);
+    BeanUtils.copyProperties(patient, originalPatient);
+    return patientRepository.save(originalPatient);
   }
 
   /**
@@ -126,17 +126,30 @@ public class PatientController {
    * delta changes as opposed to an complete resource replacement.  Like PUT this operation verifies
    * that a resource exists by first loading it and them copies the non-null properties from the
    * RequestBody (i.e. any property that is set).
+   *
+   * This is a _naive_ implementation because it does not handle setting values to null nor does it
+   * support alternate formats like Json Patch (which I find somewhat too RPC-ish).  There appears
+   * to be quite the controversy in the community around the "correct" way to PATCH.
+   *
+   * There isn't a clean answer (to my knowledge) how to handle null since by the time we have the
+   * request body the Patient object is already marshalled and the difference between non-populated
+   * fields and null fields is lost.  Right now my answer to setting a value to null is to use a
+   * GET followed by a PUT (and since there aren't that many fields that allow null, it won't be
+   * needed frequently).
+   *
+   * TODO: we could change the RequestBody to just pass in the String and Json parse it... or use
+   * the Map trick from queryByExample... needs research
    */
   @PatchMapping("/{id}")
   public Patient updatePatientExcludingNulls(@PathVariable("id") final UUID patientId, /*@Valid*/
       @RequestBody final Patient patient) {
-    Patient aPatient = patientRepository.findByPatientId(patientId)
+    Patient originalPatient = patientRepository.findByPatientId(patientId)
         .orElseThrow(() ->
             new NotFoundException("Resource %s/%s not found",
                 Patient.RESOURCE_PATH, patientId));
     // copy bean properties excluding nulls
-    BeanUtils.copyProperties(patient, aPatient, BeanUtilsUtils.getNullPropertyNames(patient));
-    return patientRepository.save(aPatient);
+    BeanUtils.copyProperties(patient, originalPatient, BeanUtilsUtils.getNullPropertyNames(patient));
+    return patientRepository.save(originalPatient);
   }
 
   /**

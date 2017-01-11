@@ -24,14 +24,14 @@ public class DrugStrength {
 
   @NotNull
   @Min(0)
-  private Integer value;
+  private Double value;
   private String unit;
 
-  public Integer getValue() {
+  public Double getValue() {
     return value;
   }
 
-  public void setValue(Integer value) {
+  public void setValue(Double value) {
     this.value = value;
   }
 

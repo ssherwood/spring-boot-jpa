@@ -16,9 +16,15 @@
 package com.undertree.symptom.controllers;
 
 import com.undertree.symptom.domain.Medication;
+import com.undertree.symptom.domain.Patient;
+import com.undertree.symptom.exceptions.NotFoundException;
 import com.undertree.symptom.repositories.MedicationRepository;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,6 +41,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(Medication.RESOURCE_PATH)
 public class MedicationController {
 
+  private static final int DEFAULT_PAGE_SZ = 30;
+
   private final MedicationRepository medicationRepository;
 
   @Autowired
@@ -45,5 +53,16 @@ public class MedicationController {
   @PostMapping
   public Medication addMedication(@Valid @RequestBody final Medication medication) {
     return medicationRepository.save(medication);
+  }
+
+  @GetMapping
+  public Page<Medication> getPatients(@PageableDefault(size = DEFAULT_PAGE_SZ) final Pageable pageable) {
+    Page<Medication> pagedResults = medicationRepository.findAll(pageable);
+
+    if (!pagedResults.hasContent()) {
+      throw new NotFoundException("Resource %s not found", Medication.RESOURCE_PATH);
+    }
+
+    return pagedResults;
   }
 }

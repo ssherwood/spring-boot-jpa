@@ -1,29 +1,30 @@
-# Spring Boot / Spring Data JPA Reference Application
+# Spring Boot / Spring Data JPA: A Reference Application
 
 [![Build Status](https://travis-ci.org/ssherwood/spring-boot-jpa.svg?branch=master)](https://travis-ci.org/ssherwood/spring-boot-jpa)
 
 ## Overview and History
 
-This project is a revisit to an older one that I did a few years back when I took part in the
+This project is a revisit of one that I did a few years back in 2014 when I took part in the
 [Coursera](https://www.coursera.org/) Specialization on [Android Development](https://www.coursera.org/specializations/android-app-development).
 
-During the final Capstone class we were given the choice of several projects to implement and I
+During the final Capstone class, we were given the choice of several projects to implement and I
 chose one that was both interesting and had a personal connection: an application to help cancer
 patients self-report on their pain symptoms so that their doctors could be notified of extended
-durations of persistent pain or inability to eat.  In theory, this could help doctors to directly
-interact with their patients much more quickly and hopefully identify issues before getting out of
-hand.
+durations of persistent pain or the inability to eat.  In theory, this could help doctors to
+directly interact with their patients much more quickly and hopefully identify issues before
+letting them get out of control.
 
-A brief article about this specific project was published on the Vanderbilt School of Engineering's
+A brief article about the original project was published on the Vanderbilt School of Engineering's
 [web site](http://engineering.vanderbilt.edu/news/2014/capstone-app-project-for-mooc-aims-to-track-help-manage-cancer-patients-pain/).
 
-My original server-side implementation of the Capstone project was my first real interaction with
-Spring Boot and since then, I've always felt that there many improvements that I could have made.
+My original server-side implementation of the Capstone project was also my first real interaction
+with Spring Boot and since then, I've always felt that there many improvements that I could have
+made.
 
 ## Goals
 
-I'd like to take this time to re-design the original implementation and document the process so
-that I can use it as a reference application to share with other developers.
+I'd like to take the time to re-design the original implementation and document the process so that
+I can use it as a reference application for myself and to share with other Spring developers.
 
 *WARNING* This means that this is still a work-in-progress, so you may find things broken or
 incomplete as I get time to work on fleshing out the essential use-cases.
@@ -32,25 +33,26 @@ incomplete as I get time to work on fleshing out the essential use-cases.
 
 # Step 1: "Initializ" the application
 
-As with most Spring Boot apps, start with the [Spring Initializr](http://start.spring.io/)
-web site.  In the Dependencies section, type in: `Web, Actuator, JPA, H2, and Devtools` and click
+As with most Spring Boot applications, start with the [Spring Initializr](http://start.spring.io/)
+web site.  In the Dependencies section, type in: `web, actuator, jpa, h2` and `devtools` and click
 the Generate button (feel free to customize the Group and Artifact Id as you see fit).  At the time
 of this writing, the current stable version of Spring Boot is 1.4.3.
 
-Unzip the downloaded artifact and import the project into the IDE of your preference.
+Unzip the downloaded artifact and import the project into the development IDE of your choice.  I
+primarily use IntelliJ so the steps that I describe may not be exactly as you might use but they
+should be close.
 
-Next, "Run" the application.  Depending on your IDE, this might be a right-click command on the
-Application class that was automatically generated from the Initializr.
+Next, click "Run" the application.  Depending on your IDE, this might be a right-click command on
+the Application class that was automatically generated from the Initializr.
 
-If all goes well, you should see several INFO commands printed out to the Console and a Tomcat
-instance being started on port 8080.
+If all goes well (and it should), you should see several INFO commands printed out to the Console
+and a Tomcat instance being started on port 8080.
   
 Try it out now at: [localhost:8080](http://localhost:8080)
 
-You should see the default "White label" error page.  
-
-Don't worry, this is the Spring Boot default error page that is indicating that you've requested a
-resource that doesn't yet exist.  It doesn't exist because we haven't implemented anything yet.
+You should see the default "White label" error page.  Don't worry, this is the Spring Boot default
+error page that is indicating that you've requested a resource that doesn't yet exist.  It doesn't
+exist because we haven't implemented anything yet.
 
 Side Note: If you use the `curl` command instead of the browser, you'll get a JSON response instead
 as Spring Boot is attempting to detect the origin of the caller and return the most appropriate
@@ -61,16 +63,15 @@ some actual coding.
 
 # Step 2: Start with the Domain
 
-Lets start by creating a domain object.  By domain object, I'm referring to an object that
-represents the business entity we're trying to model.  For more information on Domain Modeling, 
-refer to Eric Evans' excellent book on
+Lets start by creating a domain object.  By a domain object, I'm referring to an object that closely
+represents a business entity thate we're trying to model.  For more information on Domain Modeling, 
+please refer to Eric Evans' excellent book on
 [Domain Driven Design](https://www.amazon.com/Domain-Driven-Design-Tackling-Complexity-Software/dp/0321125215).
 
-In Java we can use the standard persistence API (also called JPA) to implement this domain object.
-These are basic Java data classes that have a special `@Entity` annotation on them.
-
-To create an entity, create a `domain` package under the default application package.  Then, create
-a Java class called `Patient` and add the following code:
+In Java we can use the standard persistence API (also called JPA) to further implement this domain
+object.  These are basic Java data classes that have a special `@Entity` annotation on them.  To
+create an entity, create a `domain` package under the default application package.  Then, create a
+Java class called `Patient` and add the following code:
 
 ```java
 @Entity
@@ -89,6 +90,9 @@ library called Hibernate (this is Spring Boot's default JPA implementation).
 What you may not have noticed however is that by including H2 library as a dependency you are also
 now running an in-memory database with a full web [console](http://localhost:8080/h2-console).
 
+// TODO: this isn't correct, you have to enable it with the property `spring.h2.console.enabled=true`
+and I'm not entirely sure why mine is enable by default...
+
 FYI: Make sure you set the JDBC URL to 'jdbc:h2:mem:testdb' instead of the default or else you
 won't see the PATIENT table that was create when we started the app (this is the Spring Boot default
 database URL).
@@ -99,9 +103,7 @@ and Delete our Patients?
 # Step 3: Create a JPA Repository
 
 Create a package called `repositories` in the base package and create a `PatientRepository` Java
-interface class.
-  
-Finally, add the following code:
+interface class.  Finally, add the following code:
 
 ```java
 public interface PatientRepository extends JpaRepository<Patient, Long> {
@@ -110,14 +112,15 @@ public interface PatientRepository extends JpaRepository<Patient, Long> {
 
 That's not a lot of code but what does it actually do?
 
-By extending the JpaRepository class we creating a Spring "Repository" class that is automatically
-initialized with a JPA entity manager.  Not only is it automatically initialized, it also has
-several basic CRUD-type operations already provided.
+By extending the JpaRepository class we are creating a Spring "Repository" class that is
+automatically initialized with a JPA entity manager.  Not only is it automatically initialized, it
+also has several basic CRUD-type operations already provided.
 
-// TODO: talk about why I'm not using @RestRepositories - in short, I find Spring Data REST to be too opinionated
+// TODO: talk about why I'm not using @RestRepositories - in short, I find Spring Data REST to be
+too opinionated
 
 Before we get too far ahead of ourselves, lets enable some basic configuration options that will
-help with future debugging.  Edit the default `application.properties` file in the
+help with future debugging: edit the default `application.properties` file in the
 `src/main/resources` folder and add:
 
 ```properties
@@ -157,7 +160,7 @@ Restart the application.
 After the application restarted you should now be able to make "RESTful" calls against the
 `/patients` URL like this: [](http://localhost:8080/patients/1)
 
-However, you will notice that nothing is displayed... that's weird.
+However, you will notice that nothing is displayed... and that is weird.
 
 // TODO discuss findOne default behavior of returning null
 
@@ -692,6 +695,11 @@ client.  We could probably clean this up a bit.
 I did waste some time trying to customized the ValidationMessages and
 had a little success but it didn't feel as clean as I would have liked
 so I need to do more research there as well.
+
+TODO: refer to http://www.bbenson.co/post/spring-validations-with-examples/
+Thanks Josh!
+
+# More Unit Tests
 
 Lets run or test cases just to be sure everything is working as
 expected.  Wait, there was an error:

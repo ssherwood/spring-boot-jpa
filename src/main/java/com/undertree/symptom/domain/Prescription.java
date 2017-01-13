@@ -84,4 +84,7 @@ public class Prescription {
   public void setExpirationDate(LocalDate expirationDate) {
     this.expirationDate = expirationDate;
   }
+
+  // TODO equals and hashcode
+
 }

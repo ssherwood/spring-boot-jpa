@@ -1342,6 +1342,52 @@ suspect there may be performance issues with millions of rows however...
 TODO: Need to rewrite this section and maybe earlier since I decided on combining the ideas (with the
 UUID being just a unique secondary field).
 
+
+# Step X: Add equals() and hashcode() in the Patient Entity
+
+A lot of good information has already written about how and why to override the equals() and 
+hashcode() methods for objects.  For objects that are used as part of an ORM solution, which our
+@Entity classes are, we need to take additional care due to the nature of proxies.
+
+- https://developer.jboss.org/wiki/EqualsandHashCode
+- http://www.onjava.com/pub/a/onjava/2006/09/13/dont-let-hibernate-steal-your-identity.html
+- https://stackoverflow.com/questions/5031614/the-jpa-hashcode-equals-dilemma
+- https://vladmihalcea.com/2016/06/06/how-to-implement-equals-and-hashcode-using-the-jpa-entity-identifier/
+
+Suffice it to say, defining object identity can be *really* hard to do correctly.  In our Patient
+we now have a business key (patientId) that is a UUID.  This makes a good candidate for being used
+in both equal and hashcode.
+
+In Patient add the following code:
+
+```java
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof Patient)) {
+      return false;
+    }
+    Patient patient = (Patient) o;
+    return Objects.equals(getPatientId(), patient.getPatientId());
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(getPatientId());
+  }
+```
+
+The final question is do we really need to do this and the Hibernate docs say that you do *IF*
+you intend to:
+
+- Put instances of persistent classes in a Set (the recommended way to represent many-valued associations)
+- Use reattachment of detached instances
+
+We haven't done this yet so we are perhaps a bit premature in making this assumption but we'll
+probably run into a need to do this when we get to mapping Doctor to Patient relationships.
+
 # Step X: Refactor Paging Header Metadata with a Custom ResponseBodyAdvisor (and More)
 
 Generally, we want to avoid a lot of boilerplate code and keep with the DRY principle.  I realized
@@ -1520,7 +1566,6 @@ Now, lets finish by writing a test.  In the PatientControllerWebTests add an add
 - Add more example mocking tests (when and why)
 - Add equals/hashcodes
 - Add better performance tests
-- Add Query by Example examples
 - Add QueryDsl support
 - Add Optimistic Locking support with @Version
 - Add more data to the patients.csv

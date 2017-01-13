@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import javax.persistence.Access;
@@ -113,10 +114,19 @@ public class Patient {
   Set<Prescription> prescriptions = new HashSet<>();
 
   /**
-   *
+   * Default constructor sets the patientId to a random UUID
    */
   public Patient() {
-    patientId = UUID.randomUUID();
+    this(UUID.randomUUID());
+  }
+
+  /**
+   * Optional constructor that allows UUID to be supplied
+   *
+   * @param patientId the explicit UUID to use
+   */
+  public Patient(final UUID patientId) {
+    this.patientId = patientId;
   }
 
   @JsonIgnore
@@ -210,9 +220,20 @@ public class Patient {
     this.prescriptions = prescriptions;
   }
 
-  // TODO discuss equals and hashcode
-  // Plenty of articles discussing the issues/concerns:
-  // http://www.onjava.com/pub/a/onjava/2006/09/13/dont-let-hibernate-steal-your-identity.html?page=1
-  // https://developer.jboss.org/wiki/EqualsAndHashCode?_sscc=t
-  // https://stackoverflow.com/questions/5031614/the-jpa-hashcode-equals-dilemma
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof Patient)) {
+      return false;
+    }
+    Patient patient = (Patient) o;
+    return Objects.equals(getPatientId(), patient.getPatientId());
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(getPatientId());
+  }
 }

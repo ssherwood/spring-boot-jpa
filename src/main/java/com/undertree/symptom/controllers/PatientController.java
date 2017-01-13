@@ -160,6 +160,8 @@ public class PatientController {
    * Note: From a concurrency/transactional perspective it is still possible to get an error if
    * multiple clients attempt to remove the same resource at the same time with this
    * implementation.
+   *
+   * @param patientId the unique Id of the Patient to be removed
    */
   @DeleteMapping("/{id}")
   public void deletePatient(@PathVariable("id") final UUID patientId) {
@@ -215,7 +217,8 @@ public class PatientController {
    * @return
    */
   @GetMapping("/queryByPredicate")
-  public Page<Patient> getPatientsByPredicate(@QuerydslPredicate(root = Patient.class) final Predicate predicate,
+  public Page<Patient> getPatientsByPredicate(
+      @QuerydslPredicate(root = Patient.class) final Predicate predicate,
       @PageableDefault(size = DEFAULT_PAGE_SZ) final Pageable pageable) {
     Page<Patient> pagedResults = patientRepository.findAll(predicate, pageable);
 

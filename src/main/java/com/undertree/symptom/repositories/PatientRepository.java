@@ -29,12 +29,36 @@ import org.springframework.data.querydsl.binding.QuerydslBindings;
 
 /**
  * Spring Data JPA Repository for the Patient entity with QueryDsl support.
+ *
+ * @author Shawn Sherwood
  */
 public interface PatientRepository extends JpaRepository<Patient, Long>,
     QueryDslPredicateExecutor<Patient>, QuerydslBinderCustomizer<QPatient> {
 
+  /**
+   * Standard reference on QueryDsl QPatient.
+   * (FYI - I got the $ idea from
+   * http://blog.mysema.com/2011/08/querydsl-in-wild.html
+   * and I'm still not sure I'm okay with it).
+   */
+  QPatient $ = QPatient.patient;
+
+  /**
+   * Return an Optional instance of a Patient with the given UUID.  Optional
+   * helps clean up some of the uglier null checking due to the fact that the
+   * lower level code returns null when no match is found.
+   *
+   * @param patientId the unique UUID of the patient to return
+   * @return a Patient with the UUID provided
+   */
   Optional<Patient> findByPatientId(UUID patientId);
 
+  /**
+   * Override default QueryDsl bindings.
+   *
+   * @param bindings
+   * @param root
+   */
   @Override
   default void customize(QuerydslBindings bindings, QPatient root) {
     bindings.excluding(root.id);
@@ -45,24 +69,28 @@ public interface PatientRepository extends JpaRepository<Patient, Long>,
   }
 
   /**
-   * QueryDsl Predicates for Patient.
+   * Constructs a BooleanExpression for matching on a String with any name
+   * the Patient has (ignoring case).
+   *
+   * @param name String to match on
+   * @return Expression combining all Patient name fields
    */
-  class Predicates {
-    static final QPatient $ = QPatient.patient;
+  static BooleanExpression hasAnyNameContaining(final String name) {
+    return $.familyName.containsIgnoreCase(name).or(
+           $.givenName.containsIgnoreCase(name).or(
+           $.additionalName.containsIgnoreCase(name)));
+  }
 
-    private Predicates() {
-    }
-
-    // match string being contained on any "name" field
-    public static BooleanExpression hasAnyNameContaining(final String name) {
-      return $.familyName.containsIgnoreCase(name)
-          .or($.givenName.containsIgnoreCase(name)
-              .or($.additionalName.containsIgnoreCase(name)));
-    }
-
-    public static BooleanExpression hasBirthdayOn(final LocalDate date) {
-      return $.birthDate.month().eq(date.getMonthValue()).and(
-          $.birthDate.dayOfMonth().eq(date.getDayOfMonth()));
-    }
+  /**
+   * A BooleanExpression for matching an Entity with a specific Month and
+   * Day of any give year to test for a birth day.  Specifically, this
+   * ignores the given year as a wider birthday test.
+   *
+   * @param date a given LocalDate to mach with
+   * @return Expression to match on the month/day for a possible birth day
+   */
+  static BooleanExpression hasBirthdayOn(final LocalDate date) {
+    return $.birthDate.month().eq(date.getMonthValue()).and(
+           $.birthDate.dayOfMonth().eq(date.getDayOfMonth()));
   }
 }

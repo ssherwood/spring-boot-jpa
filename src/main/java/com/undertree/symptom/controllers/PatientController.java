@@ -15,7 +15,7 @@
  */
 package com.undertree.symptom.controllers;
 
-import static com.undertree.symptom.repositories.PatientRepository.Predicates.hasAnyNameContaining;
+import static com.undertree.symptom.repositories.PatientRepository.hasAnyNameContaining;
 import static org.springframework.data.domain.ExampleMatcher.StringMatcher.CONTAINING;
 
 import com.fasterxml.jackson.databind.ObjectMapper;

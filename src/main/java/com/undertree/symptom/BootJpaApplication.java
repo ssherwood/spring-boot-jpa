@@ -15,9 +15,6 @@
  */
 package com.undertree.symptom;
 
-import com.fasterxml.jackson.databind.Module;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module;
 import java.util.Map;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -28,13 +25,15 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.context.request.RequestAttributes;
 
 /**
- * Basic Spring Boot Application originally generated from the Spring Initializr.
+ * Basic Spring Boot Application originally generated from the Spring
+ * Initializr.
  */
 @SpringBootApplication
 public class BootJpaApplication {
 
   /**
-   * Default application main to bootstrap the Spring Boot application container.
+   * Default application main to bootstrap the Spring Boot application
+   * container.
    *
    * @param args default command line args
    */
@@ -42,37 +41,32 @@ public class BootJpaApplication {
     SpringApplication.run(BootJpaApplication.class, args);
   }
 
-  // TODO move this to a more appropriate config class
+  /**
+   * Customized ErrorAttribute bean.
+   * We really need to find a cleaner way of handling these error messages.
+   *
+   * @return customized ErrorAttributes
+   */
   @Bean
   public ErrorAttributes errorAttributes() {
     return new DefaultErrorAttributes() {
 
       @Override
-      public Map<String, Object> getErrorAttributes(RequestAttributes requestAttributes,
-          boolean includeStackTrace) {
+      public Map<String, Object> getErrorAttributes(
+          final RequestAttributes requestAttributes,
+          final boolean includeStackTrace) {
         Map<String, Object> attributes = super
             .getErrorAttributes(requestAttributes, includeStackTrace);
         Throwable error = getError(requestAttributes);
+
         if (error instanceof MethodArgumentNotValidException) {
-          MethodArgumentNotValidException ex = ((MethodArgumentNotValidException) error);
-          // todo need to find a cleaner way of handling these error messages
+          MethodArgumentNotValidException ex =
+              ((MethodArgumentNotValidException) error);
           attributes.put("errors", ex.getMessage());
         }
+
         return attributes;
       }
     };
-  }
-
-  // TODO move this to a more appropriate config class
-  // this module is not auto-registered with the Jackson Object Mapper by default
-  // this causes Jackson to be Hibernate "aware"
-  // this is useful to keep the Hibernate object graph from being auto-populated even for "lazy"
-  // collections (meaning you now have to navigate to the lazy collection with actual code
-  // before triggering the lazy fetch)
-  @Bean
-  public Module hibernateModule() {
-    Hibernate5Module module = new Hibernate5Module();
-    //module.enable(Hibernate5Module.Feature.FORCE_LAZY_LOADING);
-    return module;
   }
 }

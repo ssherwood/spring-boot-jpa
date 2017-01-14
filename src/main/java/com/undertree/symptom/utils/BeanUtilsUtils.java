@@ -21,26 +21,34 @@ import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 
 /**
+ * I am always ashamed of any Utils class I create.
  *
+ * @author Shawn Sherwood
  */
-public class BeanUtilsUtils {
+public final class BeanUtilsUtils {
 
+  /**
+   * Ignore this constructor.
+   */
   private BeanUtilsUtils() {
+    throw new AssertionError("Invalid object construction");
   }
 
   /**
-   * Returns an array of fields from the given object that are null.  Useful in conjunction with
-   * BeanUtils.copyProperties() when you only want to copy the non-null values.
+   * Returns an array of fields from the given object that are null.  Useful
+   * in conjunction with BeanUtils.copyProperties() when you only want to
+   * copy the non-null values.
    *
-   * @param source
-   * @return
+   * @param source Object to test for null properties
+   * @return array of String field names of properties that are null
    */
   public static String[] getNullPropertyNames(final Object source) {
     final BeanWrapper wrappedSource = new BeanWrapperImpl(source);
 
     return Stream.of(wrappedSource.getPropertyDescriptors())
         .map(FeatureDescriptor::getName)
-        .filter(propertyName -> wrappedSource.getPropertyValue(propertyName) == null)
+        .filter(propertyName ->
+            wrappedSource.getPropertyValue(propertyName) == null)
         .toArray(String[]::new);
   }
 }

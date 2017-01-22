@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suppressions xmlns="https://www.owasp.org/index.php/OWASP_Dependency_Check_Suppression">
+  <suppress>
+    <notes><![CDATA[
+   file name: spring-boot-1.4.3.RELEASE.jar
+   Known false positive: https://github.com/jeremylong/DependencyCheck/issues/642
+   ]]></notes>
+    <gav regex="true">^org\.springframework\.boot:spring-boot:.*$</gav>
+    <cve>CVE-2016-9878</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   file name: spring-boot-starter-data-jpa-1.4.3.RELEASE.jar
+   Likely false positive matching on the Boot "Starter" instead of actual Data JPA
+   ]]></notes>
+    <gav regex="true">^org\.springframework\.boot:spring-boot-starter-data-jpa:.*$</gav>
+    <cve>CVE-2016-6652</cve>
+  </suppress>
+</suppressions>

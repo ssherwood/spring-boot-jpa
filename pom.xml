@@ -119,7 +119,11 @@
       <plugin>
         <groupId>org.owasp</groupId>
         <artifactId>dependency-check-maven</artifactId>
-        <version>1.4.4</version>
+        <version>1.4.4.1</version>
+        <configuration>
+          <failBuildOnCVSS>7</failBuildOnCVSS>
+          <suppressionFile>${basedir}/dependency-check-suppressions.xml</suppressionFile>
+        </configuration>
         <executions>
           <execution>
             <goals>

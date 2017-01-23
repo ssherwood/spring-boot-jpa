@@ -16,4 +16,20 @@
     <gav regex="true">^org\.springframework\.boot:spring-boot-starter-data-jpa:.*$</gav>
     <cve>CVE-2016-6652</cve>
   </suppress>
+
+  <suppress>
+    <notes><![CDATA[
+   file name: tomcat-embed-core-8.5.6.jar
+   ]]></notes>
+    <gav regex="true">^org\.apache\.tomcat\.embed:tomcat-embed-core:.*$</gav>
+    <cve>CVE-2016-6325</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   file name: tomcat-embed-core-8.5.6.jar
+   ]]></notes>
+    <gav regex="true">^org\.apache\.tomcat\.embed:tomcat-embed-core:.*$</gav>
+    <cve>CVE-2016-5425</cve>
+  </suppress>
+
 </suppressions>

@@ -8,6 +8,7 @@
     <gav regex="true">^org\.springframework\.boot:spring-boot:.*$</gav>
     <cve>CVE-2016-9878</cve>
   </suppress>
+
   <suppress>
     <notes><![CDATA[
    file name: spring-boot-starter-data-jpa-1.4.3.RELEASE.jar
@@ -17,19 +18,16 @@
     <cve>CVE-2016-6652</cve>
   </suppress>
 
+  <!-- From reading the links provided by these CVEs this exploit is specific to the
+  installed Tomcat packages on Linux.  The CPEs reference tomcat-embed-core which is
+  a jar (i.e. embedded tomcat) and not part of the vulnerable packaging -->
   <suppress>
     <notes><![CDATA[
    file name: tomcat-embed-core-8.5.6.jar
+   info: http://securityaffairs.co/wordpress/52156/hacking/cve-2016-5425-apache-tomcat.html
    ]]></notes>
     <gav regex="true">^org\.apache\.tomcat\.embed:tomcat-embed-core:.*$</gav>
     <cve>CVE-2016-6325</cve>
-  </suppress>
-  <suppress>
-    <notes><![CDATA[
-   file name: tomcat-embed-core-8.5.6.jar
-   ]]></notes>
-    <gav regex="true">^org\.apache\.tomcat\.embed:tomcat-embed-core:.*$</gav>
     <cve>CVE-2016-5425</cve>
   </suppress>
-
 </suppressions>

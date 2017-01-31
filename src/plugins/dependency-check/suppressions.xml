@@ -2,15 +2,6 @@
 <suppressions xmlns="https://www.owasp.org/index.php/OWASP_Dependency_Check_Suppression">
   <suppress>
     <notes><![CDATA[
-   file name: spring-boot-1.4.3.RELEASE.jar
-   Known false positive: https://github.com/jeremylong/DependencyCheck/issues/642
-   ]]></notes>
-    <gav regex="true">^org\.springframework\.boot:spring-boot:.*$</gav>
-    <cve>CVE-2016-9878</cve>
-  </suppress>
-
-  <suppress>
-    <notes><![CDATA[
    file name: spring-boot-starter-data-jpa-1.4.3.RELEASE.jar
    Likely false positive matching on the Boot "Starter" instead of actual Data JPA
    ]]></notes>
@@ -23,10 +14,10 @@
   a jar (i.e. embedded tomcat) and not part of the vulnerable packaging -->
   <suppress>
     <notes><![CDATA[
-   file name: tomcat-embed-core-8.5.6.jar
+   file name: tomcat-embed-core-8.5.11.jar
    info: http://securityaffairs.co/wordpress/52156/hacking/cve-2016-5425-apache-tomcat.html
    ]]></notes>
-    <gav regex="true">^org\.apache\.tomcat\.embed:tomcat-embed-core:.*$</gav>
+    <gav regex="true">^org\.apache\.tomcat\.embed:tomcat-embed-.*:.*$</gav>
     <cve>CVE-2016-6325</cve>
     <cve>CVE-2016-5425</cve>
   </suppress>

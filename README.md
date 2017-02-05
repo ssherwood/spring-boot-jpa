@@ -31,7 +31,7 @@ incomplete as I get time to work on fleshing out the essential use-cases.
 
 ---
 
-# Step 1: "Initializ" the application
+# "Initializ" the application
 
 As with most Spring Boot applications, start with the [Spring Initializr](http://start.spring.io/)
 web site.  In the Dependencies section, type in: `web, actuator, jpa, h2` and `devtools` and click
@@ -61,7 +61,7 @@ response type.
 Ultimately, we'll create a custom error handler for these scenarios but for now, lets jump into
 some actual coding.
 
-# Step 2: Start with the Domain
+# Start with the Domain
 
 Lets start by creating a domain object.  By a domain object, I'm referring to an object that closely
 represents a business entity thate we're trying to model.  For more information on Domain Modeling, 
@@ -100,7 +100,7 @@ database URL).
 Sweet!  This is pretty nice but how do we get the application to be able to Create, Read, Update
 and Delete our Patients?
 
-# Step 3: Create a JPA Repository
+# Create a JPA Repository
 
 Create a package called `repositories` in the base package and create a `PatientRepository` Java
 interface class.  Finally, add the following code:
@@ -132,7 +132,7 @@ I *STRONGLY* recommend adding these properties and keeping them set for the dura
 development lifecycle.  You will want to frequently review the SQL that is being created and
 executed on your behalf.
 
-# Step 4: Set up a REST Controller
+# Set up a REST Controller
 
 Create a package called `controllers` in the default package and create a `PatientController` class
 within it.  Then add the following code to the class: 
@@ -164,7 +164,7 @@ However, you will notice that nothing is displayed... and that is weird.
 
 // TODO discuss findOne default behavior of returning null
 
-# Step 5: Create a FindBy Implementation
+# Create a FindBy Implementation
 
 Since the default behavior of `findOne` really isn't all that desirable, lets add a more
 appropriate method to the Repository interface:
@@ -197,7 +197,7 @@ from a REST API.
 
 // TODO Discuss Spring's lack of standard http error exceptions and handlers
 
-# Step 6: Create a Custom Exception with @ResponseStatus
+# Create a Custom Exception with @ResponseStatus
 
 Create a package called `exceptions` and add a Java class called `NotFoundException`
 with the following code:
@@ -237,7 +237,7 @@ Restart the application and attempt the `curl` command again.
 
 That looks much better!
 
-# Step 7:  Add a Patient via POST
+# Add a Patient via POST
 
 We have a functional GET but now we need a way to add a Patient.  Using REST semantics this should
 be expressed with a POST.  To support this, add the following code to the PatientController:
@@ -283,7 +283,7 @@ curl -sS -H "Content-Type: application/json" -X POST localhost:8080/patients -d 
 
 // TODO discuss Lombok
 
-# Step 8:  Lets make this Patient a bit more interesting
+# Lets make this Patient a bit more interesting
 
 Add the following attributes to the Patient entity:
 
@@ -345,7 +345,7 @@ a BLOB.  That isn't good since we might want to be able to query against it late
 
 Why doesn't JPA support LocalDate yet?
 
-# Step 9: Create a JPA LocalDate Converter
+# Create a JPA LocalDate Converter
 
 As of the time of writing, JPA still does not natively support the JSR 310 dates.  It does,
 however, provide support for custom converters that can.
@@ -387,7 +387,7 @@ Hibernate:
 That is a huge improvement!  If you use other Java 8 Date types, you'll need a converter for each
 (I can't believe that no one has created a utility library for these yet).
 
-# Step 10:  Let's write some unit tests
+# Let's write some unit tests
 
 So far we've not written a lot of code but its still a good idea to get into the habit of writing
 unit tests.  Spring Boot 1.4 provides some new testing capabilities that we want to take advantage
@@ -534,7 +534,7 @@ succeed with a green bar!
 
 Yeah!
 
-# Step 11:  What about performance?
+# What about performance?
 
 TODO setup a performance test.
 https://github.com/jmeter-maven-plugin/jmeter-maven-plugin
@@ -561,7 +561,7 @@ practice.
 
 Finally, consider introducing the jmeter plugin to the maven POM.
 
-# Step 12: Bean Validation JSR 309/3
+# Bean Validation JSR 309/3
 
 There a a few types of validations that we can add to our application
 for the entity classes.
@@ -890,7 +890,7 @@ the `@Valid` is working:
     }
 ```
 
-# Step 13 - More Attributions
+# More Attributions
 
 The patient needs some more attribution.  Let's add a few new fields that will help round out the `Patient`:
 
@@ -1048,7 +1048,7 @@ Add a few more tests to the PatientControllerWebTests class:
     }
 ```
 
-# Step X:  Add Remaining "CRUD" Operations to the Patient
+# Add Remaining "CRUD" Operations to the Patient
 
 So far we have the CR of CRUD implemented.  This seems like a good opportunity to add the remaining lifecycle
 operations.  In the `PatientController` add the following code:
@@ -1085,7 +1085,7 @@ Add the following to the `PatientControllerWebTests`:
     }
 ```
 
-# Step X: Returning a Collection of Resources
+# Returning a Collection of Resources
 
 So far all of our resource interactions are with single entities but we frequently want to retrieve collections of
 resources.  Spring Data provides some basic ones for JPA by default, so lets see what that might look like in our
@@ -1197,7 +1197,7 @@ X-Meta-Pagination: page-number=0,page-size=30,total-elements=3,total-pages=1
 This is pretty useful and non-intrusive on the client.  There are probably a lot of other pieces of metadata that could
 prove useful and we will explore them further over time.
 
-# Step X: Change Response to not return "raw" ids
+# Change Response to not return "raw" ids
 
 It can be argued that returning the raw database id isn't a good RESTful design (or secure).  We should probably
 introduce a UUID instead and use that as the reference.  But first, lets replace the raw id with the path representation
@@ -1280,7 +1280,7 @@ following code:
     }
 ```
 
-# Step X: Refactor Patient to use UUIDs as Primary Keys
+# Refactor Patient to use UUIDs as Primary Keys
 
 After reading several articles and counter articles I decided to switch the Patient table to use a UUID instead of a
 sequential Long.
@@ -1343,7 +1343,7 @@ TODO: Need to rewrite this section and maybe earlier since I decided on combinin
 UUID being just a unique secondary field).
 
 
-# Step X: Add equals() and hashcode() in the Patient Entity
+# Add equals() and hashcode() in the Patient Entity
 
 A lot of good information has already written about how and why to override the equals() and 
 hashcode() methods for objects.  For objects that are used as part of an ORM solution, which our
@@ -1388,7 +1388,7 @@ you intend to:
 We haven't done this yet so we are perhaps a bit premature in making this assumption but we'll
 probably run into a need to do this when we get to mapping Doctor to Patient relationships.
 
-# Step X: Refactor Paging Header Metadata with a Custom ResponseBodyAdvisor (and More)
+# Refactor Paging Header Metadata with a Custom ResponseBodyAdvisor (and More)
 
 Generally, we want to avoid a lot of boilerplate code and keep with the DRY principle.  I realized
 that the paging metadata headers were going to be causing a lot of boilerplate.  I examined using
@@ -1481,7 +1481,7 @@ first, and last:
 Call this method as part of the `beforeBodyWriteInternal` and add it the the http response headers
 as a Link.  You can read more about Web Linking [here](https://tools.ietf.org/html/rfc5988).
 
-# Step X: Add finder with Query By Example
+# Add finder with Query By Example
 
 Spring Data recently added support for Query By Example.  Basically, QBE is a type of query that is
 dynamically built based on a reference object.  Fields that are provided are used in the resulting
@@ -1554,9 +1554,6 @@ Now, lets finish by writing a test.  In the PatientControllerWebTests add an add
         .first().isEqualTo("Neubus");
   }
 ```
-
-
-
 
 ---
 

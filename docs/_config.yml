@@ -1,1 +1,7 @@
+title: 'A Spring Boot JPA Application'
+author: Shawn Sherwood
+description: >
+  A running developer's journal on developing a somewhat realistic application using Spring Boot
+  with JPA.
+
 theme: jekyll-theme-tactile

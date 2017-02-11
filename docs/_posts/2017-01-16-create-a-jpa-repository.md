@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Create a JPA Repository"
-date: 2017-01-09 12:00:00 -0500
+date: 2017-01-16 12:00:00 -0500
 categories: jpa spring-data
 ---
 

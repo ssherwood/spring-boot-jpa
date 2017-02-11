@@ -2,7 +2,7 @@
 layout: post
 title:  "Start with the Domain Model"
 date: 2017-01-09 12:00:00 -0500
-categories: domain-drive-design jpa h2
+categories: domain-driven-design jpa h2
 ---
 
 Lets start by creating a domain object.  By a domain object, I'm referring to an object that closely
@@ -39,5 +39,5 @@ FYI: Make sure you set the JDBC URL to 'jdbc:h2:mem:testdb' instead of the defau
 won't see the PATIENT table that was create when we started the app (this is the Spring Boot default
 database URL).
 
-Sweet!  This is pretty nice but how do we get the application to be able to Create, Read, Update
-and Delete our Patients?
+This is pretty nice but how do we get the application to be able to Create, Read, Update and Delete
+our Patients?

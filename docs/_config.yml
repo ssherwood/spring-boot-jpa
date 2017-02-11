@@ -1,7 +1,6 @@
-title: 'A Spring Boot JPA Application'
+title: 'A Spring Boot Application using Spring Data JPA'
 author: Shawn Sherwood
 description: >
-  A running developer's journal on developing a somewhat realistic application using Spring Boot
-  with JPA.
-
+  a developer journal to building a (somewhat) realistic application using Spring Boot and
+  Spring Data JPA.
 theme: jekyll-theme-tactile

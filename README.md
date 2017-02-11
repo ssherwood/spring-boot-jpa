@@ -1,6 +1,7 @@
 # Spring Boot / Spring Data JPA: A Reference Application
 
 [![Build Status](https://travis-ci.org/ssherwood/spring-boot-jpa.svg)](https://travis-ci.org/ssherwood/spring-boot-jpa)
+[![Dependency Status](https://www.versioneye.com/user/projects/589f261a940b23003d2b00fc/badge.svg)](https://www.versioneye.com/user/projects/589f261a940b23003d2b00fc)
 [![License](https://img.shields.io/badge/license-Apache%20License%202.0-brightgreen.svg)](http://www.apache.org/licenses/LICENSE-2.0.html)
 
 ## Overview and History

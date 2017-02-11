@@ -23,7 +23,11 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <java.version>1.8</java.version>
+    <maven.test.skip>false</maven.test.skip>
+    <apt-maven-plugin.version>1.1.3</apt-maven-plugin.version>
     <commons-lang3.version>3.5</commons-lang3.version>
+    <dependency-check-maven.version>1.4.5</dependency-check-maven.version>
+    <jacoco-maven-plugin.version>0.7.8</jacoco-maven-plugin.version>
   </properties>
 
   <dependencies>
@@ -50,6 +54,11 @@
     <dependency>
       <groupId>com.querydsl</groupId>
       <artifactId>querydsl-jpa</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.querydsl</groupId>
+      <artifactId>querydsl-apt</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
@@ -92,34 +101,28 @@
         <groupId>pl.project13.maven</groupId>
         <artifactId>git-commit-id-plugin</artifactId>
       </plugin>
+      <!-- -->
       <plugin>
         <groupId>com.mysema.maven</groupId>
         <artifactId>apt-maven-plugin</artifactId>
-        <version>1.1.3</version>
-        <dependencies>
-          <dependency>
-            <groupId>com.querydsl</groupId>
-            <artifactId>querydsl-apt</artifactId>
-            <version>${querydsl.version}</version>
-          </dependency>
-        </dependencies>
+        <version>${apt-maven-plugin.version}</version>
         <executions>
           <execution>
             <goals>
               <goal>process</goal>
             </goals>
             <configuration>
-              <outputDirectory>target/generated-sources/java</outputDirectory>
               <processor>com.querydsl.apt.jpa.JPAAnnotationProcessor</processor>
+              <outputDirectory>target/generated-sources/java</outputDirectory>
             </configuration>
           </execution>
         </executions>
       </plugin>
-      <!-- -->
+      <!-- http://www.eclemma.org/jacoco/trunk/doc/maven.html -->
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
-        <version>0.7.8</version>
+        <version>${jacoco-maven-plugin.version}</version>
         <configuration>
           <skip>${maven.test.skip}</skip>
           <output>file</output>
@@ -145,7 +148,7 @@
       <plugin>
         <groupId>org.owasp</groupId>
         <artifactId>dependency-check-maven</artifactId>
-        <version>1.4.5</version>
+        <version>${dependency-check-maven.version}</version>
         <configuration>
           <failBuildOnCVSS>4</failBuildOnCVSS>
           <suppressionFile>${basedir}/src/plugins/dependency-check/suppressions.xml</suppressionFile>

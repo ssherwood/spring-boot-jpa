@@ -5,20 +5,20 @@ date: 2017-01-09 12:00:00 -0500
 categories: domain-driven-design ddd jpa hibernate h2
 ---
 
-Lets creating a domain object.  By a domain object, I mean an object that we will use to represent
-the business entity that we want to model.  To do this, we will use a design technique called
-Domain-Driven Design.  The Wikipedia entry for
+Lets start by creating a domain object.  By a domain object, I mean an object that we will use to
+represent the business entity that we want to model.  To do this, we will use a design technique
+called Domain-Driven Design.  The Wikipedia entry for
 [Domain-Driven Design](https://en.wikipedia.org/wiki/Domain-driven_design) states:
-                                                            
+                                                     
 > Domain-driven design (DDD) is an approach to software development for complex needs by connecting the implementation to an evolving model.
 
 That sounds quite abstract, but in practice, it will become apparent that DDD is just a set of
-concepts that are technology agnostic and will help provide a ubiquitous language that can be used
-to help solve many types of complex problems.
+concepts that are technology agnostic and help to provide a ubiquitous language that can be used
+solve many types of complex problems.
   
 You are not required to be an expert in DDD, but it does help to understand the basics.  The
-Wikipedia article above is a great start, but for more information, please refer to Eric Evans'
-excellent book: [Domain-Driven Design: Tackling Complexity in the Heart of Software](https://www.amazon.com/Domain-Driven-Design-Tackling-Complexity-Software/dp/0321125215).
+Wikipedia article linked above is a great start, but for more information, please refer to Eric
+Evans' excellent book: [Domain-Driven Design: Tackling Complexity in the Heart of Software](https://www.amazon.com/Domain-Driven-Design-Tackling-Complexity-Software/dp/0321125215).
 Or, for the more impatient reader [Domain-Driven Design Distilled](https://www.amazon.com/Domain-Driven-Design-Distilled-Vaughn-Vernon/dp/0134434420)
 by Vaughn Vernon.
 

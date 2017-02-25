@@ -4,13 +4,10 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.undertree</groupId>
-  <artifactId>boot-jpa</artifactId>
+  <groupId>io.undertree</groupId>
+  <artifactId>spring-boot-jpa</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
-
-  <name>boot-jpa</name>
-  <description>Demo project for Spring Boot</description>
 
   <parent>
     <groupId>org.springframework.boot</groupId>
@@ -19,15 +16,26 @@
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
 
+  <name>Spring Boot JPA</name>
+  <description>Spring Boot project using Spring Data JPA</description>
+
+  <licenses>
+    <license>
+      <name>Apache 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <java.version>1.8</java.version>
     <maven.test.skip>false</maven.test.skip>
     <apt-maven-plugin.version>1.1.3</apt-maven-plugin.version>
-    <commons-lang3.version>3.5</commons-lang3.version>
     <dependency-check-maven.version>1.4.5</dependency-check-maven.version>
     <jacoco-maven-plugin.version>0.7.8</jacoco-maven-plugin.version>
+    <commons-lang3.version>3.5</commons-lang3.version>
   </properties>
 
   <dependencies>
@@ -151,7 +159,8 @@
         <version>${dependency-check-maven.version}</version>
         <configuration>
           <failBuildOnCVSS>4</failBuildOnCVSS>
-          <suppressionFile>${basedir}/src/plugins/dependency-check/suppressions.xml</suppressionFile>
+          <suppressionFile>${basedir}/src/plugins/dependency-check/suppressions.xml
+          </suppressionFile>
         </configuration>
         <executions>
           <execution>

@@ -32,7 +32,7 @@ When Spring manages the Repository, it can generate JPA queries based on the Ent
 it is typed to and we will rarely have to deal with JPA directly.
 
 // TODO: talk about why I'm not using @RestRepositories.  In short, I find Spring Data REST to be
-too opinionated and harder to customize.  
+a little too opinionated and harder to customize.
 
 Before we get too far ahead of ourselves, lets enable some basic configuration options that will
 help with future debugging:

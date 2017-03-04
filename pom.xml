@@ -12,7 +12,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>1.5.1.RELEASE</version>
+    <version>1.5.2.RELEASE</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
 
@@ -51,13 +51,12 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
     </dependency>
-    <!-- include java8 (jsr310) date converters -->
+    <!-- include Java8 (jsr310) date converters -->
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-java8</artifactId>
-      <version>${hibernate.version}</version>
     </dependency>
-    <!-- Jackson specific includes -->
+    <!-- include Jackson extensions -->
     <dependency>
       <groupId>com.fasterxml.jackson.datatype</groupId>
       <artifactId>jackson-datatype-jsr310</artifactId>
@@ -66,6 +65,7 @@
       <groupId>com.fasterxml.jackson.datatype</groupId>
       <artifactId>jackson-datatype-hibernate5</artifactId>
     </dependency>
+    <!-- include QueryDsl: http://www.querydsl.com/ -->
     <dependency>
       <groupId>com.querydsl</groupId>
       <artifactId>querydsl-jpa</artifactId>
@@ -75,6 +75,7 @@
       <artifactId>querydsl-apt</artifactId>
       <scope>provided</scope>
     </dependency>
+    <!-- include Apache Commons Lang: https://commons.apache.org/proper/commons-lang/ -->
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
@@ -84,7 +85,7 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-devtools</artifactId>
-      <scope>runtime</scope>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>com.h2database</groupId>

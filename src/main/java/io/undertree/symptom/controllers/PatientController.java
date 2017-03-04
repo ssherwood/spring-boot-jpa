@@ -99,8 +99,8 @@ public class PatientController {
   public Patient getPatient(@PathVariable("id") final UUID patientId) {
     return patientRepository.findByPatientId(patientId)
         .orElseThrow(() ->
-            new NotFoundException("Resource %s/%s not found",
-                Patient.RESOURCE_PATH, patientId));
+            new NotFoundException(Patient.RESOURCE_PATH,
+                String.format("Patient resource %s not found", patientId)));
   }
 
   /**
@@ -113,8 +113,8 @@ public class PatientController {
       @Valid @RequestBody final Patient patient) {
     Patient originalPatient = patientRepository.findByPatientId(patientId)
         .orElseThrow(() ->
-            new NotFoundException("Resource %s/%s not found",
-                Patient.RESOURCE_PATH, patientId));
+            new NotFoundException(Patient.RESOURCE_PATH,
+                String.format("Patient resource %s not found", patientId)));
     // copy bean properties including nulls
     BeanUtils.copyProperties(patient, originalPatient);
     return patientRepository.save(originalPatient);
@@ -144,10 +144,11 @@ public class PatientController {
       @RequestBody final Patient patient) {
     Patient originalPatient = patientRepository.findByPatientId(patientId)
         .orElseThrow(() ->
-            new NotFoundException("Resource %s/%s not found",
-                Patient.RESOURCE_PATH, patientId));
+            new NotFoundException(Patient.RESOURCE_PATH,
+                String.format("Patient resource %s not found", patientId)));
     // copy bean properties excluding nulls
-    BeanUtils.copyProperties(patient, originalPatient, BeanUtilsUtils.getNullPropertyNames(patient));
+    BeanUtils
+        .copyProperties(patient, originalPatient, BeanUtilsUtils.getNullPropertyNames(patient));
     return patientRepository.save(originalPatient);
   }
 
@@ -174,11 +175,12 @@ public class PatientController {
    * and size 20 however, we have overridden the default to 30 using @PagableDefault as an example.
    */
   @GetMapping
-  public Page<Patient> getPatients(@PageableDefault(size = DEFAULT_PAGE_SZ) final Pageable pageable) {
+  public Page<Patient> getPatients(
+      @PageableDefault(size = DEFAULT_PAGE_SZ) final Pageable pageable) {
     Page<Patient> pagedResults = patientRepository.findAll(pageable);
 
     if (!pagedResults.hasContent()) {
-      throw new NotFoundException("Resource %s not found", Patient.RESOURCE_PATH);
+      throw new NotFoundException(Patient.RESOURCE_PATH, "Patient resources not found");
     }
 
     return pagedResults;
@@ -201,8 +203,8 @@ public class PatientController {
         .findAll(Example.of(examplePatient, DEFAULT_MATCHER), pageable);
 
     if (!pagedResults.hasContent()) {
-      throw new NotFoundException("Resource %s/%s not found",
-          Patient.RESOURCE_PATH, "/queryByExample");
+      throw new NotFoundException(Patient.RESOURCE_PATH,
+          "No Patients found matching example query " + examplePatient);
     }
 
     return pagedResults;
@@ -210,10 +212,6 @@ public class PatientController {
 
   /**
    * Another alternative to QBE via QueryDsl Predicates
-   *
-   * @param predicate
-   * @param pageable
-   * @return
    */
   @GetMapping("/queryByPredicate")
   public Page<Patient> getPatientsByPredicate(
@@ -222,28 +220,29 @@ public class PatientController {
     Page<Patient> pagedResults = patientRepository.findAll(predicate, pageable);
 
     if (!pagedResults.hasContent()) {
-      throw new NotFoundException("Resource %s/%s not found",
-          Patient.RESOURCE_PATH, "query");
+      throw new NotFoundException(Patient.RESOURCE_PATH,
+          "No Patients found matching predicate " + predicate);
     }
 
     return pagedResults;
   }
 
-    /**
-     *
-     * @param name
-     * @param pageable
-     * @return
-     */
+  /**
+   *
+   * @param name
+   * @param pageable
+   * @return
+   */
   @GetMapping("/search")
   public Page<Patient> getPatientsHasAnyNameContaining(
       @RequestParam("name") final String name,
       @PageableDefault(size = DEFAULT_PAGE_SZ) final Pageable pageable) {
-    Page<Patient> pagedResults = patientRepository.findAll(PatientRepository.hasAnyNameContaining(name), pageable);
+    Page<Patient> pagedResults = patientRepository
+        .findAll(PatientRepository.hasAnyNameContaining(name), pageable);
 
     if (!pagedResults.hasContent()) {
-      throw new NotFoundException("Resource %s/%s not found",
-          Patient.RESOURCE_PATH, "search");
+      throw new NotFoundException(Patient.RESOURCE_PATH,
+          "No Patients found matching predicate " + PatientRepository.hasAnyNameContaining(name));
     }
 
     return pagedResults;

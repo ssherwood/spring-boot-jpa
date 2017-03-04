@@ -15,21 +15,24 @@
  */
 package io.undertree.symptom.exceptions;
 
-import org.springframework.http.HttpStatus;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
+
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-@ResponseStatus(HttpStatus.NOT_FOUND)
-public class NotFoundException extends RuntimeException {
+@ResponseStatus(code = NOT_FOUND)
+public class NotFoundException extends HttpException {
+
+  static final long serialVersionUID = 20170227L;
 
   public NotFoundException() {
-    super();
+    super(NOT_FOUND.getReasonPhrase());
   }
 
-  public NotFoundException(String message) {
-    super(message);
+  public NotFoundException(String resource, String message) {
+    super(resource, message);
   }
 
-  public NotFoundException(String message, Object... args) {
-    super(String.format(message, args));
+  public NotFoundException(String resource, String message, Throwable cause) {
+    super(resource, message, cause);
   }
 }

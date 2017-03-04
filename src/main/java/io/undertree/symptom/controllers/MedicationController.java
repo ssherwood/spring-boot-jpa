@@ -59,7 +59,7 @@ public class MedicationController {
     Page<Medication> pagedResults = medicationRepository.findAll(pageable);
 
     if (!pagedResults.hasContent()) {
-      throw new NotFoundException("Resource %s not found", Medication.RESOURCE_PATH);
+      throw new NotFoundException(Medication.RESOURCE_PATH, "Medication resources not found");
     }
 
     return pagedResults;

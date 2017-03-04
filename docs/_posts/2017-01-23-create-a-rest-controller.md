@@ -134,7 +134,7 @@ Restart the application and attempt the `curl` command again.
   "timestamp": 1481488691203,
   "status": 404,
   "error": "Not Found",
-  "exception": "com.undertree.symptom.exceptions.NotFoundException",
+  "exception": "io.undertree.symptom.exceptions.NotFoundException",
   "message": "Patient 1 not found",
   "path": "/patients/1"
 }

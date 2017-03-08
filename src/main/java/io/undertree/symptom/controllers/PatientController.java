@@ -20,9 +20,9 @@ import static org.springframework.data.domain.ExampleMatcher.StringMatcher.CONTA
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.querydsl.core.types.Predicate;
 import io.undertree.symptom.domain.Patient;
+import io.undertree.symptom.exceptions.ConflictException;
 import io.undertree.symptom.exceptions.NotFoundException;
 import io.undertree.symptom.repositories.PatientRepository;
-import io.undertree.symptom.utils.BeanUtilsUtils;
 import java.util.Map;
 import java.util.UUID;
 import javax.validation.Valid;
@@ -121,34 +121,35 @@ public class PatientController {
   }
 
   /**
-   * Applies changes to an existing resource.  Unlike PUT, the PATCH operation is intended apply
-   * delta changes as opposed to an complete resource replacement.  Like PUT this operation verifies
-   * that a resource exists by first loading it and them copies the non-null properties from the
-   * RequestBody (i.e. any property that is set).
+   * Applies changes to an existing resource as described by the JSON Merge Patch RFC
+   * (https://tools.ietf.org/html/rfc7386).
    *
-   * This is a _naive_ implementation because it does not handle setting values to null nor does it
-   * support alternate formats like Json Patch (which I find somewhat too RPC-ish).  There appears
-   * to be quite the controversy in the community around the "correct" way to PATCH.
+   * Unlike PUT, the PATCH operation is intended apply delta changes as opposed to a complete
+   * resource replacement.  Like PUT this operation verifies that a resource exists by first
+   * loading it and then copies the properties from the RequestBody Map (i.e. any property that is
+   * set including null values).
    *
-   * There isn't a clean answer (to my knowledge) how to handle null since by the time we have the
-   * request body the Patient object is already marshalled and the difference between non-populated
-   * fields and null fields is lost.  Right now my answer to setting a value to null is to use a
-   * GET followed by a PUT (and since there aren't that many fields that allow null, it won't be
-   * needed frequently).
+   * TODO needs more testing to verify that it complies with the RFC
    *
-   * TODO: we could change the RequestBody to just pass in the String and Json parse it... or use
-   * the Map trick from queryByExample... needs research
+   * @param patientId the UUID of the Patient to patch
+   * @param patientMap a JSON map of properties to use as the merge patch source
+   * @return the Patient as modified by the merge patch
    */
   @PatchMapping("/{id}")
-  public Patient updatePatientExcludingNulls(@PathVariable("id") final UUID patientId, /*@Valid*/
-      @RequestBody final Patient patient) {
+  public Patient updatePatientExcludingNulls(@PathVariable("id") final UUID patientId,
+      @RequestBody final Map<String, Object> patientMap) {
     Patient originalPatient = patientRepository.findByPatientId(patientId)
         .orElseThrow(() ->
             new NotFoundException(Patient.RESOURCE_PATH,
                 String.format("Patient resource %s not found", patientId)));
-    // copy bean properties excluding nulls
-    BeanUtils
-        .copyProperties(patient, originalPatient, BeanUtilsUtils.getNullPropertyNames(patient));
+
+    try {
+      org.apache.commons.beanutils.BeanUtils.copyProperties(originalPatient, patientMap);
+    } catch (Exception ex) {
+      throw new ConflictException(Patient.RESOURCE_PATH,
+          String.format("Unable to patch resource %s", patientId.toString()), ex);
+    }
+
     return patientRepository.save(originalPatient);
   }
 

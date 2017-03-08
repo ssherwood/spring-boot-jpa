@@ -23,10 +23,11 @@ import io.undertree.symptom.domain.Patient;
 import io.undertree.symptom.exceptions.ConflictException;
 import io.undertree.symptom.exceptions.NotFoundException;
 import io.undertree.symptom.repositories.PatientRepository;
+import java.io.Serializable;
 import java.util.Map;
 import java.util.UUID;
 import javax.validation.Valid;
-import org.springframework.beans.BeanUtils;
+import org.apache.commons.beanutils.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
@@ -111,13 +112,29 @@ public class PatientController {
   @PutMapping("/{id}")
   public Patient updatePatientIncludingNulls(@PathVariable("id") final UUID patientId,
       @Valid @RequestBody final Patient patient) {
-    Patient originalPatient = patientRepository.findByPatientId(patientId)
-        .orElseThrow(() ->
-            new NotFoundException(Patient.RESOURCE_PATH,
-                String.format("Patient resource %s not found", patientId)));
-    // copy bean properties including nulls
-    BeanUtils.copyProperties(patient, originalPatient);
+    Patient originalPatient = this.getPatient(patientId);
+    updateProperties(patientId, originalPatient, patient);
     return patientRepository.save(originalPatient);
+  }
+
+  /**
+   * FYI - It is important that there are no setter methods for fields on the objTo that you don't
+   * want to be changed (e.g. ids).
+   *
+   * TODO - move to EntityUtils?  Needs a little more design work...
+   *
+   * @param id
+   * @param objTo
+   * @param objFrom
+   * @param <T>
+   */
+  static <T, ID extends Serializable> void updateProperties(ID id, T objTo, Object objFrom) {
+    try {
+      BeanUtils.copyProperties(objTo, objFrom);
+    } catch (Exception ex) {
+      throw new ConflictException(Patient.RESOURCE_PATH,
+          String.format("Unable to update resource %s", id.toString()), ex);
+    }
   }
 
   /**
@@ -127,7 +144,7 @@ public class PatientController {
    * Unlike PUT, the PATCH operation is intended apply delta changes as opposed to a complete
    * resource replacement.  Like PUT this operation verifies that a resource exists by first
    * loading it and then copies the properties from the RequestBody Map (i.e. any property that is
-   * set including null values).
+   * in the map -- null values can be set using this technique).
    *
    * TODO needs more testing to verify that it complies with the RFC
    *
@@ -138,18 +155,8 @@ public class PatientController {
   @PatchMapping("/{id}")
   public Patient updatePatientExcludingNulls(@PathVariable("id") final UUID patientId,
       @RequestBody final Map<String, Object> patientMap) {
-    Patient originalPatient = patientRepository.findByPatientId(patientId)
-        .orElseThrow(() ->
-            new NotFoundException(Patient.RESOURCE_PATH,
-                String.format("Patient resource %s not found", patientId)));
-
-    try {
-      org.apache.commons.beanutils.BeanUtils.copyProperties(originalPatient, patientMap);
-    } catch (Exception ex) {
-      throw new ConflictException(Patient.RESOURCE_PATH,
-          String.format("Unable to patch resource %s", patientId.toString()), ex);
-    }
-
+    Patient originalPatient = this.getPatient(patientId);
+    updateProperties(patientId, originalPatient, patientMap);
     return patientRepository.save(originalPatient);
   }
 

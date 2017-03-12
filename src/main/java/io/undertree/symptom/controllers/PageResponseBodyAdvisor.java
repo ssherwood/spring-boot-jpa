@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Shawn Sherwood
+ * Copyright 2016-2017 Shawn Sherwood
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.undertree.symptom.controllers;
 
 import java.util.ArrayList;
@@ -40,18 +41,20 @@ import org.springframework.web.util.UriComponentsBuilder;
  * <p>
  * This Advisor unwraps the Page container and allows the raw collection to be marshalled but adds
  * a custom HTTP header with the original page metadata.
+ *
+ * @author Shawn Sherwood
  */
 @ControllerAdvice
 public class PageResponseBodyAdvisor extends AbstractMappingJacksonResponseBodyAdvice {
 
-	public static final String QUERY_PARAM_PAGE = "page";
-	public static final String PAGE_METADATA_FMT = "page-number=%d,page-size=%d,total-elements=%d,total-pages=%d,first-page=%b,last-page=%b";
-	public static final String LINK_STANDARD_FMT = "<%s>; rel=\"%s\"";
-	public static final String LINK_HEADER_FIRST = "first";
-	public static final String LINK_HEADER_PREVIOUS = "prev";
-	public static final String LINK_HEADER_NEXT = "next";
-	public static final String LINK_HEADER_LAST = "last";
-	public static final String CUSTOM_HEADER_META_PAGINATION = "X-Meta-Pagination";
+	private static final String QUERY_PARAM_PAGE = "page";
+	private static final String PAGE_METADATA_FMT = "page-number=%d,page-size=%d,total-elements=%d,total-pages=%d,first-page=%b,last-page=%b";
+	private static final String LINK_STANDARD_FMT = "<%s>; rel=\"%s\"";
+	private static final String LINK_HEADER_FIRST = "first";
+	private static final String LINK_HEADER_PREVIOUS = "prev";
+	private static final String LINK_HEADER_NEXT = "next";
+	private static final String LINK_HEADER_LAST = "last";
+	private static final String CUSTOM_HEADER_META_PAGINATION = "X-Meta-Pagination";
 
 	@Override
 	public boolean supports(MethodParameter returnType,

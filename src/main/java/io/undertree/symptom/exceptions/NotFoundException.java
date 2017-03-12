@@ -13,19 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.undertree.symptom.exceptions;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import static org.springframework.http.HttpStatus.NOT_FOUND;
-
-@ResponseStatus(code = NOT_FOUND)
+/**
+ * The origin server did not find a current representation for the target
+ * resource or is not willing to disclose that one exists.
+ *
+ * See HTTP Status <a href="https://httpstatuses.com/404>404</a>.
+ *
+ * @author Shawn Sherwood
+ */
+@ResponseStatus(code = HttpStatus.NOT_FOUND)
 public class NotFoundException extends HttpException {
 
 	static final long serialVersionUID = 20170227L;
 
 	public NotFoundException() {
-		super(NOT_FOUND.getReasonPhrase());
+		super(HttpStatus.NOT_FOUND.getReasonPhrase());
 	}
 
 	public NotFoundException(String resource, String message) {

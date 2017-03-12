@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.undertree.symptom.domain;
 
 import java.time.LocalDate;
@@ -21,6 +22,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+
 import javax.persistence.Access;
 import javax.persistence.AccessType;
 import javax.persistence.Column;
@@ -54,10 +56,19 @@ import org.springframework.format.annotation.DateTimeFormat.ISO;
 // JPA to use the getter/setter methods provided, allowing us to introduce the
 // age calculation, and marking the age field @Transient so that it is not
 // considered as part of the actual persistence object.
+
+/**
+ * The Patient entity.
+ *
+ * @author Shawn Sherwood
+ */
 @Entity
 @JsonPropertyOrder({"_id"})
 public class Patient {
 
+	/**
+	 * Resource name to use for Patients.
+	 */
 	public static final String RESOURCE_PATH = "/patients";
 
 	// TODO need to research further possible performance impact of using a UUID instead
@@ -106,14 +117,14 @@ public class Patient {
 	private Short weight; // weight in kg
 
 	/**
-	 * Default constructor sets the patientId to a random UUID
+	 * Default constructor sets the patientId to a random UUID.
 	 */
 	public Patient() {
 		this(UUID.randomUUID());
 	}
 
 	/**
-	 * Optional constructor that allows UUID to be supplied
+	 * Optional constructor that allows UUID to be supplied.
 	 *
 	 * @param patientId the explicit UUID to use
 	 */
@@ -123,20 +134,20 @@ public class Patient {
 
 	@JsonIgnore
 	public Long getId() {
-		return id;
+		return this.id;
 	}
 
 	@JsonIgnore
 	public UUID getPatientId() {
-		return patientId;
+		return this.patientId;
 	}
 
 	public String get_id() {
-		return RESOURCE_PATH + "/" + patientId;
+		return RESOURCE_PATH + "/" + this.patientId;
 	}
 
 	public String getGivenName() {
-		return givenName;
+		return this.givenName;
 	}
 
 	public void setGivenName(String givenName) {
@@ -144,7 +155,7 @@ public class Patient {
 	}
 
 	public String getAdditionalName() {
-		return additionalName;
+		return this.additionalName;
 	}
 
 	public void setAdditionalName(String additionalName) {
@@ -152,7 +163,7 @@ public class Patient {
 	}
 
 	public String getFamilyName() {
-		return familyName;
+		return this.familyName;
 	}
 
 	public void setFamilyName(String familyName) {
@@ -160,7 +171,7 @@ public class Patient {
 	}
 
 	public LocalDate getBirthDate() {
-		return birthDate;
+		return this.birthDate;
 	}
 
 	public void setBirthDate(LocalDate birthDate) {
@@ -169,11 +180,11 @@ public class Patient {
 	}
 
 	public Integer getAge() {
-		return age;
+		return this.age;
 	}
 
 	public Gender getGender() {
-		return gender;
+		return this.gender;
 	}
 
 	public void setGender(Gender gender) {
@@ -181,7 +192,7 @@ public class Patient {
 	}
 
 	public String getEmail() {
-		return email;
+		return this.email;
 	}
 
 	public void setEmail(String email) {
@@ -189,7 +200,7 @@ public class Patient {
 	}
 
 	public Short getHeight() {
-		return height;
+		return this.height;
 	}
 
 	public void setHeight(Short height) {
@@ -197,7 +208,7 @@ public class Patient {
 	}
 
 	public Short getWeight() {
-		return weight;
+		return this.weight;
 	}
 
 	public void setWeight(Short weight) {
@@ -205,7 +216,7 @@ public class Patient {
 	}
 
 	public Set<Prescription> getPrescriptions() {
-		return prescriptions;
+		return this.prescriptions;
 	}
 
 	public void setPrescriptions(Set<Prescription> prescriptions) {

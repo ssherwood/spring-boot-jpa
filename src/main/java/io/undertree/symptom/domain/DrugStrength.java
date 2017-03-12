@@ -13,12 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.undertree.symptom.domain;
 
 import javax.persistence.Embeddable;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
+/**
+ * Identify drug strength.
+ *
+ * @author Shawn Sherwood
+ */
 @Embeddable
 public class DrugStrength {
 
@@ -28,7 +34,7 @@ public class DrugStrength {
 	private String unit;
 
 	public Double getValue() {
-		return value;
+		return this.value;
 	}
 
 	public void setValue(Double value) {
@@ -36,7 +42,7 @@ public class DrugStrength {
 	}
 
 	public String getUnit() {
-		return unit;
+		return this.unit;
 	}
 
 	public void setUnit(String unit) {

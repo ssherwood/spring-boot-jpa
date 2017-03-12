@@ -13,14 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.undertree.symptom.domain;
 
 import java.time.LocalDate;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
 
+/**
+ * Prescription entity.
+ *
+ * @author Shawn Sherwood
+ */
 @Entity
 public class Prescription {
 
@@ -42,11 +49,11 @@ public class Prescription {
 	///
 
 	public Long getId() {
-		return id;
+		return this.id;
 	}
 
 	public String getDescription() {
-		return description;
+		return this.description;
 	}
 
 	public void setDescription(String description) {
@@ -54,7 +61,7 @@ public class Prescription {
 	}
 
 	public Patient getPatient() {
-		return patient;
+		return this.patient;
 	}
 
 	public void setPatient(Patient patient) {
@@ -62,7 +69,7 @@ public class Prescription {
 	}
 
 	public Medication getMedication() {
-		return medication;
+		return this.medication;
 	}
 
 	public void setMedication(Medication medication) {
@@ -70,7 +77,7 @@ public class Prescription {
 	}
 
 	public LocalDate getInitialDate() {
-		return initialDate;
+		return this.initialDate;
 	}
 
 	public void setInitialDate(LocalDate initialDate) {
@@ -78,7 +85,7 @@ public class Prescription {
 	}
 
 	public LocalDate getExpirationDate() {
-		return expirationDate;
+		return this.expirationDate;
 	}
 
 	public void setExpirationDate(LocalDate expirationDate) {
@@ -86,5 +93,4 @@ public class Prescription {
 	}
 
 	// TODO equals and hashcode
-
 }

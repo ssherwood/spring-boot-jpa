@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.undertree.symptom.domain;
 
 import javax.persistence.Entity;
@@ -24,12 +25,19 @@ import javax.validation.constraints.Size;
 
 import org.hibernate.validator.constraints.NotBlank;
 
-// http://www.openmhealth.org/documentation/#/schema-docs/schema-library/schemas/omh_medication
-// https://rxnav.nlm.nih.gov/
-
+/**
+ * See also:
+ * http://www.openmhealth.org/documentation/#/schema-docs/schema-library/schemas/omh_medication
+ * https://rxnav.nlm.nih.gov/.
+ *
+ * @author Shawn Sherwood
+ */
 @Entity
 public class Medication {
 
+	/**
+	 * The resource name for medications.
+	 */
 	public static final String RESOURCE_PATH = "/medications";
 
 	@Id
@@ -54,11 +62,11 @@ public class Medication {
 	///
 
 	public Long getId() {
-		return id;
+		return this.id;
 	}
 
 	public String getTradeName() {
-		return tradeName;
+		return this.tradeName;
 	}
 
 	public void setTradeName(String tradeName) {
@@ -66,7 +74,7 @@ public class Medication {
 	}
 
 	public String getGenericName() {
-		return genericName;
+		return this.genericName;
 	}
 
 	public void setGenericName(String genericName) {
@@ -74,7 +82,7 @@ public class Medication {
 	}
 
 	public DrugStrength getStrength() {
-		return strength;
+		return this.strength;
 	}
 
 	public void setStrength(DrugStrength strength) {
@@ -82,7 +90,7 @@ public class Medication {
 	}
 
 	public Integer getRxNormCode() {
-		return rxNormCode;
+		return this.rxNormCode;
 	}
 
 	public void setRxNormCode(Integer rxNormCode) {

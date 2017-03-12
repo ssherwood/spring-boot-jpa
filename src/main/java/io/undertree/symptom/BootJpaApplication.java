@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.undertree.symptom;
 
 import java.util.Map;
@@ -28,6 +29,8 @@ import org.springframework.web.context.request.RequestAttributes;
 /**
  * Basic Spring Boot Application originally generated from the Spring
  * Initializr.
+ *
+ * @author Shawn Sherwood
  */
 @SpringBootApplication
 public class BootJpaApplication {

@@ -13,11 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.undertree.symptom.controllers;
 
 import java.io.Serializable;
 import java.util.Map;
 import java.util.UUID;
+
 import javax.validation.Valid;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -46,8 +48,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import static org.springframework.data.domain.ExampleMatcher.StringMatcher.CONTAINING;
-
 // https://spring.io/understanding/REST
 // http://www.restapitutorial.com/
 
@@ -65,7 +65,7 @@ public class PatientController {
 	private static final ExampleMatcher DEFAULT_MATCHER = ExampleMatcher
 			.matching()
 			.withIgnorePaths("patientId")
-			.withStringMatcher(CONTAINING)
+			.withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING)
 			.withIgnoreCase();
 
 	private final PatientRepository patientRepository;
@@ -84,10 +84,11 @@ public class PatientController {
 	 * <p>
 	 * TODO - move to EntityUtils?  Needs a little more design work...
 	 *
-	 * @param id
-	 * @param objTo
-	 * @param objFrom
-	 * @param <T>
+	 * @param id the resource Id
+	 * @param objTo the object to merge copy to
+	 * @param objFrom the object to merge copy from
+	 * @param <T> the resource type
+	 * @param <ID> the resource id type
 	 */
 	static <T, ID extends Serializable> void updateProperties(ID id, T objTo, Object objFrom) {
 		try {
@@ -109,7 +110,7 @@ public class PatientController {
 	 */
 	@PostMapping
 	public Patient addPatient(@Valid @RequestBody final Patient patient) {
-		return patientRepository.save(patient);
+		return this.patientRepository.save(patient);
 	}
 
 	/**
@@ -121,7 +122,7 @@ public class PatientController {
 	 */
 	@GetMapping("/{id}")
 	public Patient getPatient(@PathVariable("id") final UUID patientId) {
-		return patientRepository.findByPatientId(patientId)
+		return this.patientRepository.findByPatientId(patientId)
 				.orElseThrow(() ->
 						new NotFoundException(Patient.RESOURCE_PATH,
 								String.format("Patient resource %s not found", patientId)));
@@ -131,13 +132,17 @@ public class PatientController {
 	 * Update an existing resource with a new representation.  The entire state of the entity is
 	 * replaced with that provided with the RequestBody (this means that null or excluded fields are
 	 * updated to null on the entity itself).
+	 *
+	 * @param patientId unique patient UUID to find
+	 * @param patient the Patient to update with
+	 * @return the Patient as modified by the update
 	 */
 	@PutMapping("/{id}")
 	public Patient updatePatientIncludingNulls(@PathVariable("id") final UUID patientId,
 			@Valid @RequestBody final Patient patient) {
 		Patient originalPatient = this.getPatient(patientId);
 		updateProperties(patientId, originalPatient, patient);
-		return patientRepository.save(originalPatient);
+		return this.patientRepository.save(originalPatient);
 	}
 
 	/**
@@ -160,7 +165,7 @@ public class PatientController {
 			@RequestBody final Map<String, Object> patientMap) {
 		Patient originalPatient = this.getPatient(patientId);
 		updateProperties(patientId, originalPatient, patientMap);
-		return patientRepository.save(originalPatient);
+		return this.patientRepository.save(originalPatient);
 	}
 
 	/**
@@ -176,19 +181,22 @@ public class PatientController {
 	 */
 	@DeleteMapping("/{id}")
 	public void deletePatient(@PathVariable("id") final UUID patientId) {
-		patientRepository.findByPatientId(patientId)
-				.ifPresent(p -> patientRepository.delete(p.getId()));
+		this.patientRepository.findByPatientId(patientId)
+				.ifPresent(p -> this.patientRepository.delete(p.getId()));
 	}
 
 	/**
 	 * Returns a "paged" collection of resources.  Pagination requests are captured as parameters on
 	 * the request using "page=X" and "size=y" (ex. /patients?page=2&size=10).  The default is page 0
 	 * and size 20 however, we have overridden the default to 30 using @PagableDefault as an example.
+	 *
+	 * @param pageable a Pageable to restrict results
+	 * @return A paged result of matching Patients
 	 */
 	@GetMapping
 	public Page<Patient> getPatients(
 			@PageableDefault(size = DEFAULT_PAGE_SZ) final Pageable pageable) {
-		Page<Patient> pagedResults = patientRepository.findAll(pageable);
+		Page<Patient> pagedResults = this.patientRepository.findAll(pageable);
 
 		if (!pagedResults.hasContent()) {
 			throw new NotFoundException(Patient.RESOURCE_PATH, "Patient resources not found");
@@ -203,14 +211,18 @@ public class PatientController {
 	 * <p>
 	 * TODO I'm not exactly happy with the resource name "queryByExample".  Need to research more what
 	 * other APIs look like for this kind of functionality
+	 *
+	 * @param paramMap a Map of fields to use to search with
+	 * @param pageable a Pageable to restrict results
+	 * @return A paged result of matching Patients
 	 */
 	@GetMapping("/queryByExample")
 	public Page<Patient> getPatientsByExample(@RequestParam Map<String, Object> paramMap,
 			@PageableDefault(size = DEFAULT_PAGE_SZ) Pageable pageable) {
 		// naively copies map entries to matching properties in the Patient POJO
-		Patient examplePatient = jacksonObjectMapper.convertValue(paramMap, Patient.class);
+		Patient examplePatient = this.jacksonObjectMapper.convertValue(paramMap, Patient.class);
 
-		Page<Patient> pagedResults = patientRepository
+		Page<Patient> pagedResults = this.patientRepository
 				.findAll(Example.of(examplePatient, DEFAULT_MATCHER), pageable);
 
 		if (!pagedResults.hasContent()) {
@@ -222,13 +234,17 @@ public class PatientController {
 	}
 
 	/**
-	 * Another alternative to QBE via QueryDsl Predicates
+	 * Another alternative to QBE via QueryDsl Predicates.
+	 *
+	 * @param predicate the Predicate to use to query with
+	 * @param pageable a Pageable to restrict results
+	 * @return A paged result of matching Patients
 	 */
 	@GetMapping("/queryByPredicate")
 	public Page<Patient> getPatientsByPredicate(
 			@QuerydslPredicate(root = Patient.class) final Predicate predicate,
 			@PageableDefault(size = DEFAULT_PAGE_SZ) final Pageable pageable) {
-		Page<Patient> pagedResults = patientRepository.findAll(predicate, pageable);
+		Page<Patient> pagedResults = this.patientRepository.findAll(predicate, pageable);
 
 		if (!pagedResults.hasContent()) {
 			throw new NotFoundException(Patient.RESOURCE_PATH,
@@ -239,15 +255,17 @@ public class PatientController {
 	}
 
 	/**
-	 * @param name
-	 * @param pageable
-	 * @return
+	 * Search for Patients by name.
+	 *
+	 * @param name the name to search on
+	 * @param pageable a Pageable to restrict results
+	 * @return A paged result of matching Patients
 	 */
 	@GetMapping("/search")
 	public Page<Patient> getPatientsHasAnyNameContaining(
 			@RequestParam("name") final String name,
 			@PageableDefault(size = DEFAULT_PAGE_SZ) final Pageable pageable) {
-		Page<Patient> pagedResults = patientRepository
+		Page<Patient> pagedResults = this.patientRepository
 				.findAll(PatientRepository.hasAnyNameContaining(name), pageable);
 
 		if (!pagedResults.hasContent()) {

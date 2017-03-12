@@ -13,15 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.undertree.symptom.domain;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 
-// https://en.wikipedia.org/wiki/ISO/IEC_5218
+/**
+ * Represent Gender for Entities.
+ *
+ * See also https://en.wikipedia.org/wiki/ISO/IEC_5218
+ * @author Shawn Sherwood
+ */
 public enum Gender {
+	/** Not known. */
 	NOT_KNOWN(0, "Not Known"),
+	/** Male. */
 	MALE(1, "Male"),
+	/** Female. */
 	FEMALE(2, "Female"),
+	/** Not applicable. */
 	NOT_APPLICABLE(9, "Not Applicable");
 
 	private final int code;
@@ -33,11 +43,11 @@ public enum Gender {
 	}
 
 	public int getCode() {
-		return code;
+		return this.code;
 	}
 
 	@JsonValue
 	public String toJson() {
-		return jsonValue;
+		return this.jsonValue;
 	}
 }

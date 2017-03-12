@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.undertree.symptom.repositories;
 
 import java.time.LocalDate;
@@ -84,8 +85,8 @@ public interface PatientRepository extends JpaRepository<Patient, Long>,
 	/**
 	 * Override default QueryDsl bindings.
 	 *
-	 * @param bindings
-	 * @param root
+	 * @param bindings a QueryDslBindings to use
+	 * @param root the QPatient root
 	 */
 	@Override
 	default void customize(QuerydslBindings bindings, QPatient root) {

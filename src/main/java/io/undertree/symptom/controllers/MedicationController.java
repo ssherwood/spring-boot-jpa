@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Shawn Sherwood
+ * Copyright 2016-2017 Shawn Sherwood
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.undertree.symptom.controllers;
 
 import javax.validation.Valid;
@@ -53,12 +54,12 @@ public class MedicationController {
 
 	@PostMapping
 	public Medication addMedication(@Valid @RequestBody final Medication medication) {
-		return medicationRepository.save(medication);
+		return this.medicationRepository.save(medication);
 	}
 
 	@GetMapping
 	public Page<Medication> getPatients(@PageableDefault(size = DEFAULT_PAGE_SZ) final Pageable pageable) {
-		Page<Medication> pagedResults = medicationRepository.findAll(pageable);
+		Page<Medication> pagedResults = this.medicationRepository.findAll(pageable);
 
 		if (!pagedResults.hasContent()) {
 			throw new NotFoundException(Medication.RESOURCE_PATH, "Medication resources not found");

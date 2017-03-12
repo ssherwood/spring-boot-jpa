@@ -13,19 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.undertree.symptom.exceptions;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import static org.springframework.http.HttpStatus.CONFLICT;
-
-@ResponseStatus(code = CONFLICT)
+/**
+ * The request could not be completed due to a conflict with the current state
+ * of the target resource. This code is used in situations where the user might
+ * be able to resolve the conflict and resubmit the request.
+ *
+ * See HTTP Status <a href="https://httpstatuses.com/409>409</a>.
+ *
+ * @author Shawn Sherwood
+ */
+@ResponseStatus(code = HttpStatus.CONFLICT)
 public class ConflictException extends HttpException {
 
 	static final long serialVersionUID = 20170307L;
 
 	public ConflictException() {
-		super(CONFLICT.getReasonPhrase());
+		super(HttpStatus.CONFLICT.getReasonPhrase());
 	}
 
 	public ConflictException(String resource, String message) {

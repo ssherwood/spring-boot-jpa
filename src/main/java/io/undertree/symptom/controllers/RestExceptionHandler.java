@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.undertree.symptom.controllers;
 
 import javax.servlet.http.HttpServletResponse;
@@ -22,14 +23,20 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 
-//@RestControllerAdvice
+/**
+ * WIP.
+ *
+ * @author Shawn Sherwood
+ */
+// @RestControllerAdvice
 public class RestExceptionHandler {
 
-	@ExceptionHandler(value = {MethodArgumentNotValidException.class})
+	@ExceptionHandler({MethodArgumentNotValidException.class})
 	public void handleException(MethodArgumentNotValidException ex,
 			WebRequest request, HttpServletResponse response) throws Exception {
 		response.sendError(HttpStatus.BAD_REQUEST.value(), ex.getBindingResult().getModel().toString());
 	}
+
 	/*
 	public ResponseEntity<Map<String, String>> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex,
                                                                                      WebRequest request, HttpServletResponse response) {

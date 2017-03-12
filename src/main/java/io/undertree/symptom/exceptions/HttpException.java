@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Shawn Sherwood
+ * Copyright 2016-2017 Shawn Sherwood
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.undertree.symptom.exceptions;
 
 /**
+ * Base Exception class for extension.
+ *
+ * @author Shawn Sherwood
  */
 abstract class HttpException extends RuntimeException {
 
@@ -23,21 +27,21 @@ abstract class HttpException extends RuntimeException {
 
 	private final String resource;
 
-	public HttpException(String message) {
+	HttpException(String message) {
 		this(null, message);
 	}
 
-	public HttpException(String resource, String message) {
+	HttpException(String resource, String message) {
 		super(message);
 		this.resource = resource;
 	}
 
-	public HttpException(String resource, String message, Throwable cause) {
+	HttpException(String resource, String message, Throwable cause) {
 		super(message, cause);
 		this.resource = resource;
 	}
 
 	public String getResource() {
-		return resource;
+		return this.resource;
 	}
 }

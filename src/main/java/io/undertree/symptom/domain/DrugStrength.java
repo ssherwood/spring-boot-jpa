@@ -22,24 +22,24 @@ import javax.validation.constraints.NotNull;
 @Embeddable
 public class DrugStrength {
 
-  @NotNull
-  @Min(0)
-  private Double value;
-  private String unit;
+	@NotNull
+	@Min(0)
+	private Double value;
+	private String unit;
 
-  public Double getValue() {
-    return value;
-  }
+	public Double getValue() {
+		return value;
+	}
 
-  public void setValue(Double value) {
-    this.value = value;
-  }
+	public void setValue(Double value) {
+		this.value = value;
+	}
 
-  public String getUnit() {
-    return unit;
-  }
+	public String getUnit() {
+		return unit;
+	}
 
-  public void setUnit(String unit) {
-    this.unit = unit;
-  }
+	public void setUnit(String unit) {
+		this.unit = unit;
+	}
 }

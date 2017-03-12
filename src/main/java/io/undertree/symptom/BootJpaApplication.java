@@ -16,6 +16,7 @@
 package io.undertree.symptom;
 
 import java.util.Map;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.web.DefaultErrorAttributes;
@@ -31,42 +32,42 @@ import org.springframework.web.context.request.RequestAttributes;
 @SpringBootApplication
 public class BootJpaApplication {
 
-  /**
-   * Default application main to bootstrap the Spring Boot application
-   * container.
-   *
-   * @param args default command line args
-   */
-  public static void main(final String[] args) {
-    SpringApplication.run(BootJpaApplication.class, args);
-  }
+	/**
+	 * Default application main to bootstrap the Spring Boot application
+	 * container.
+	 *
+	 * @param args default command line args
+	 */
+	public static void main(final String[] args) {
+		SpringApplication.run(BootJpaApplication.class, args);
+	}
 
-  /**
-   * Customized ErrorAttribute bean.
-   * We really need to find a cleaner way of handling these error messages.
-   *
-   * @return customized ErrorAttributes
-   */
-  @Bean
-  public ErrorAttributes errorAttributes() {
-    return new DefaultErrorAttributes() {
+	/**
+	 * Customized ErrorAttribute bean.
+	 * We really need to find a cleaner way of handling these error messages.
+	 *
+	 * @return customized ErrorAttributes
+	 */
+	@Bean
+	public ErrorAttributes errorAttributes() {
+		return new DefaultErrorAttributes() {
 
-      @Override
-      public Map<String, Object> getErrorAttributes(
-          final RequestAttributes requestAttributes,
-          final boolean includeStackTrace) {
-        Map<String, Object> attributes = super
-            .getErrorAttributes(requestAttributes, includeStackTrace);
-        Throwable error = getError(requestAttributes);
+			@Override
+			public Map<String, Object> getErrorAttributes(
+					final RequestAttributes requestAttributes,
+					final boolean includeStackTrace) {
+				Map<String, Object> attributes = super
+						.getErrorAttributes(requestAttributes, includeStackTrace);
+				Throwable error = getError(requestAttributes);
 
-        if (error instanceof MethodArgumentNotValidException) {
-          MethodArgumentNotValidException ex =
-              ((MethodArgumentNotValidException) error);
-          attributes.put("errors", ex.getMessage());
-        }
+				if (error instanceof MethodArgumentNotValidException) {
+					MethodArgumentNotValidException ex =
+							((MethodArgumentNotValidException) error);
+					attributes.put("errors", ex.getMessage());
+				}
 
-        return attributes;
-      }
-    };
-  }
+				return attributes;
+			}
+		};
+	}
 }

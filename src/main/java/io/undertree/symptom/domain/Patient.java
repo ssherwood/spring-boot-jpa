@@ -15,8 +15,6 @@
  */
 package io.undertree.symptom.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.HashSet;
@@ -34,10 +32,14 @@ import javax.persistence.Transient;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotBlank;
+
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 
@@ -56,191 +58,179 @@ import org.springframework.format.annotation.DateTimeFormat.ISO;
 @JsonPropertyOrder({"_id"})
 public class Patient {
 
-  public static final String RESOURCE_PATH = "/patients";
+	public static final String RESOURCE_PATH = "/patients";
 
-  // TODO need to research further possible performance impact of using a UUID instead
-  // the info so far indicates not using a UUID on clustered indexes since UUIDs are not sequential
-  // some databases seem to have "native" support for UUIDs and others do not so this could cause
-  // issues with some.
-  // https://dba.stackexchange.com/questions/322/what-are-the-drawbacks-with-using-uuid-or-guid-as-a-primary-key
-  // http://blog.xebia.com/jpa-implementation-patterns-using-uuids-as-primary-keys/
-  // https://vladmihalcea.com/2014/07/01/hibernate-and-uuid-identifiers/
-  // https://mariadb.com/kb/en/mariadb/guiduuid-performance/
-  // http://www.thoughts-on-java.org/generate-uuids-primary-keys-hibernate/
-  // http://www.starkandwayne.com/blog/uuid-primary-keys-in-postgresql/
-  // https://www.clever-cloud.com/blog/engineering/2015/05/20/why-auto-increment-is-a-terrible-idea/  <- good read
+	// TODO need to research further possible performance impact of using a UUID instead
+	// the info so far indicates not using a UUID on clustered indexes since UUIDs are not sequential
+	// some databases seem to have "native" support for UUIDs and others do not so this could cause
+	// issues with some.
+	// https://dba.stackexchange.com/questions/322/what-are-the-drawbacks-with-using-uuid-or-guid-as-a-primary-key
+	// http://blog.xebia.com/jpa-implementation-patterns-using-uuids-as-primary-keys/
+	// https://vladmihalcea.com/2014/07/01/hibernate-and-uuid-identifiers/
+	// https://mariadb.com/kb/en/mariadb/guiduuid-performance/
+	// http://www.thoughts-on-java.org/generate-uuids-primary-keys-hibernate/
+	// http://www.starkandwayne.com/blog/uuid-primary-keys-in-postgresql/
+	// https://www.clever-cloud.com/blog/engineering/2015/05/20/why-auto-increment-is-a-terrible-idea/  <- good read
+	@OneToMany
+	Set<Prescription> prescriptions = new HashSet<>();
+	@Id
+	@GeneratedValue
+	private Long id;
 
-  @Id
-  @GeneratedValue
-  private Long id;
+	// @Version
+	// private Long version;
+	@Column(columnDefinition = "uuid", unique = true, updatable = false)
+	private UUID patientId;
+	@NotBlank
+	@Size(min = 2)
+	@Pattern(regexp = "^[A-Za-z0-9]+$")
+	private String givenName;
+	@Pattern(regexp = "^[A-Za-z0-9]+$")
+	private String additionalName;
+	@NotBlank
+	@Size(min = 2)
+	@Pattern(regexp = "^[A-Za-z0-9]+$")
+	private String familyName;
+	//@Past https://stackoverflow.com/questions/30249829/error-no-validator-could-be-found-for-type-java-time-localdate
+	@Access(AccessType.PROPERTY)
+	@DateTimeFormat(iso = ISO.DATE)
+	private LocalDate birthDate;
+	@Transient
+	private Integer age;
+	private Gender gender;
+	@Email
+	private String email;
+	@Min(0)
+	private Short height; // height in cm
+	@Min(0)
+	private Short weight; // weight in kg
 
-  @Column(columnDefinition = "uuid", unique = true, updatable = false)
-  private UUID patientId;
+	/**
+	 * Default constructor sets the patientId to a random UUID
+	 */
+	public Patient() {
+		this(UUID.randomUUID());
+	}
 
-  // @Version
-  // private Long version;
+	/**
+	 * Optional constructor that allows UUID to be supplied
+	 *
+	 * @param patientId the explicit UUID to use
+	 */
+	public Patient(final UUID patientId) {
+		this.patientId = patientId;
+	}
 
-  @NotBlank
-  @Size(min = 2)
-  @Pattern(regexp = "^[A-Za-z0-9]+$")
-  private String givenName;
+	@JsonIgnore
+	public Long getId() {
+		return id;
+	}
 
-  @Pattern(regexp = "^[A-Za-z0-9]+$")
-  private String additionalName;
+	@JsonIgnore
+	public UUID getPatientId() {
+		return patientId;
+	}
 
-  @NotBlank
-  @Size(min = 2)
-  @Pattern(regexp = "^[A-Za-z0-9]+$")
-  private String familyName;
+	public String get_id() {
+		return RESOURCE_PATH + "/" + patientId;
+	}
 
-  //@Past https://stackoverflow.com/questions/30249829/error-no-validator-could-be-found-for-type-java-time-localdate
-  @Access(AccessType.PROPERTY)
-  @DateTimeFormat(iso = ISO.DATE)
-  private LocalDate birthDate;
+	public String getGivenName() {
+		return givenName;
+	}
 
-  @Transient
-  private Integer age;
+	public void setGivenName(String givenName) {
+		this.givenName = givenName;
+	}
 
-  private Gender gender;
+	public String getAdditionalName() {
+		return additionalName;
+	}
 
-  @Email
-  private String email;
+	public void setAdditionalName(String additionalName) {
+		this.additionalName = additionalName;
+	}
 
-  @Min(0)
-  private Short height; // height in cm
+	public String getFamilyName() {
+		return familyName;
+	}
 
-  @Min(0)
-  private Short weight; // weight in kg
+	public void setFamilyName(String familyName) {
+		this.familyName = familyName;
+	}
 
-  @OneToMany
-  Set<Prescription> prescriptions = new HashSet<>();
+	public LocalDate getBirthDate() {
+		return birthDate;
+	}
 
-  /**
-   * Default constructor sets the patientId to a random UUID
-   */
-  public Patient() {
-    this(UUID.randomUUID());
-  }
+	public void setBirthDate(LocalDate birthDate) {
+		this.birthDate = birthDate;
+		this.age = birthDate == null ? null : Period.between(birthDate, LocalDate.now()).getYears();
+	}
 
-  /**
-   * Optional constructor that allows UUID to be supplied
-   *
-   * @param patientId the explicit UUID to use
-   */
-  public Patient(final UUID patientId) {
-    this.patientId = patientId;
-  }
+	public Integer getAge() {
+		return age;
+	}
 
-  @JsonIgnore
-  public Long getId() {
-    return id;
-  }
+	public Gender getGender() {
+		return gender;
+	}
 
-  @JsonIgnore
-  public UUID getPatientId() {
-    return patientId;
-  }
+	public void setGender(Gender gender) {
+		this.gender = gender;
+	}
 
-  public String get_id() {
-    return RESOURCE_PATH + "/" + patientId;
-  }
+	public String getEmail() {
+		return email;
+	}
 
-  public String getGivenName() {
-    return givenName;
-  }
+	public void setEmail(String email) {
+		this.email = email;
+	}
 
-  public void setGivenName(String givenName) {
-    this.givenName = givenName;
-  }
+	public Short getHeight() {
+		return height;
+	}
 
-  public String getAdditionalName() {
-    return additionalName;
-  }
+	public void setHeight(Short height) {
+		this.height = height;
+	}
 
-  public void setAdditionalName(String additionalName) {
-    this.additionalName = additionalName;
-  }
+	public Short getWeight() {
+		return weight;
+	}
 
-  public String getFamilyName() {
-    return familyName;
-  }
+	public void setWeight(Short weight) {
+		this.weight = weight;
+	}
 
-  public void setFamilyName(String familyName) {
-    this.familyName = familyName;
-  }
+	public Set<Prescription> getPrescriptions() {
+		return prescriptions;
+	}
 
-  public LocalDate getBirthDate() {
-    return birthDate;
-  }
+	public void setPrescriptions(Set<Prescription> prescriptions) {
+		this.prescriptions = prescriptions;
+	}
 
-  public void setBirthDate(LocalDate birthDate) {
-    this.birthDate = birthDate;
-    this.age = birthDate == null ? null : Period.between(birthDate, LocalDate.now()).getYears();
-  }
+	@Override
+	public boolean equals(final Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (!(o instanceof Patient)) {
+			return false;
+		}
+		Patient patient = (Patient) o;
+		return Objects.equals(getPatientId(), patient.getPatientId());
+	}
 
-  public Integer getAge() {
-    return age;
-  }
+	@Override
+	public int hashCode() {
+		return Objects.hash(getPatientId());
+	}
 
-  public Gender getGender() {
-    return gender;
-  }
-
-  public void setGender(Gender gender) {
-    this.gender = gender;
-  }
-
-  public String getEmail() {
-    return email;
-  }
-
-  public void setEmail(String email) {
-    this.email = email;
-  }
-
-  public Short getHeight() {
-    return height;
-  }
-
-  public void setHeight(Short height) {
-    this.height = height;
-  }
-
-  public Short getWeight() {
-    return weight;
-  }
-
-  public void setWeight(Short weight) {
-    this.weight = weight;
-  }
-
-  public Set<Prescription> getPrescriptions() {
-    return prescriptions;
-  }
-
-  public void setPrescriptions(Set<Prescription> prescriptions) {
-    this.prescriptions = prescriptions;
-  }
-
-  @Override
-  public boolean equals(final Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (!(o instanceof Patient)) {
-      return false;
-    }
-    Patient patient = (Patient) o;
-    return Objects.equals(getPatientId(), patient.getPatientId());
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(getPatientId());
-  }
-
-  @Override
-  public String toString() {
-    return ReflectionToStringBuilder.toString(this, ToStringStyle.JSON_STYLE);
-  }
+	@Override
+	public String toString() {
+		return ReflectionToStringBuilder.toString(this, ToStringStyle.JSON_STYLE);
+	}
 }

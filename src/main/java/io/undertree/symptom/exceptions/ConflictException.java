@@ -15,25 +15,24 @@
  */
 package io.undertree.symptom.exceptions;
 
-import static org.springframework.http.HttpStatus.CONFLICT;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
-
 import org.springframework.web.bind.annotation.ResponseStatus;
+
+import static org.springframework.http.HttpStatus.CONFLICT;
 
 @ResponseStatus(code = CONFLICT)
 public class ConflictException extends HttpException {
 
-  static final long serialVersionUID = 20170307L;
+	static final long serialVersionUID = 20170307L;
 
-  public ConflictException() {
-    super(CONFLICT.getReasonPhrase());
-  }
+	public ConflictException() {
+		super(CONFLICT.getReasonPhrase());
+	}
 
-  public ConflictException(String resource, String message) {
-    super(resource, message);
-  }
+	public ConflictException(String resource, String message) {
+		super(resource, message);
+	}
 
-  public ConflictException(String resource, String message, Throwable cause) {
-    super(resource, message, cause);
-  }
+	public ConflictException(String resource, String message, Throwable cause) {
+		super(resource, message, cause);
+	}
 }

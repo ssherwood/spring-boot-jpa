@@ -15,10 +15,12 @@
  */
 package io.undertree.symptom.controllers;
 
+import javax.validation.Valid;
+
 import io.undertree.symptom.domain.Medication;
 import io.undertree.symptom.exceptions.NotFoundException;
 import io.undertree.symptom.repositories.MedicationRepository;
-import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -31,7 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * REST endpoint for the Medication resource.
- *
+ * <p>
  * Provides basic CRUD functionality as well as various searching capabilities.
  *
  * @author Shawn Sherwood
@@ -40,28 +42,28 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(Medication.RESOURCE_PATH)
 public class MedicationController {
 
-  private static final int DEFAULT_PAGE_SZ = 30;
+	private static final int DEFAULT_PAGE_SZ = 30;
 
-  private final MedicationRepository medicationRepository;
+	private final MedicationRepository medicationRepository;
 
-  @Autowired
-  public MedicationController(final MedicationRepository medicationRepository) {
-    this.medicationRepository = medicationRepository;
-  }
+	@Autowired
+	public MedicationController(final MedicationRepository medicationRepository) {
+		this.medicationRepository = medicationRepository;
+	}
 
-  @PostMapping
-  public Medication addMedication(@Valid @RequestBody final Medication medication) {
-    return medicationRepository.save(medication);
-  }
+	@PostMapping
+	public Medication addMedication(@Valid @RequestBody final Medication medication) {
+		return medicationRepository.save(medication);
+	}
 
-  @GetMapping
-  public Page<Medication> getPatients(@PageableDefault(size = DEFAULT_PAGE_SZ) final Pageable pageable) {
-    Page<Medication> pagedResults = medicationRepository.findAll(pageable);
+	@GetMapping
+	public Page<Medication> getPatients(@PageableDefault(size = DEFAULT_PAGE_SZ) final Pageable pageable) {
+		Page<Medication> pagedResults = medicationRepository.findAll(pageable);
 
-    if (!pagedResults.hasContent()) {
-      throw new NotFoundException(Medication.RESOURCE_PATH, "Medication resources not found");
-    }
+		if (!pagedResults.hasContent()) {
+			throw new NotFoundException(Medication.RESOURCE_PATH, "Medication resources not found");
+		}
 
-    return pagedResults;
-  }
+		return pagedResults;
+	}
 }

@@ -21,6 +21,7 @@ import javax.persistence.Id;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
+
 import org.hibernate.validator.constraints.NotBlank;
 
 // http://www.openmhealth.org/documentation/#/schema-docs/schema-library/schemas/omh_medication
@@ -29,62 +30,62 @@ import org.hibernate.validator.constraints.NotBlank;
 @Entity
 public class Medication {
 
-  public static final String RESOURCE_PATH = "/medications";
+	public static final String RESOURCE_PATH = "/medications";
 
-  @Id
-  @GeneratedValue
-  private Long id;
+	@Id
+	@GeneratedValue
+	private Long id;
 
-  @NotNull
-  private Integer rxNormCode;
+	@NotNull
+	private Integer rxNormCode;
 
-  @NotBlank
-  @Size(min = 2)
-  @Pattern(regexp = "^[A-Za-z0-9]+$")
-  private String genericName;
+	@NotBlank
+	@Size(min = 2)
+	@Pattern(regexp = "^[A-Za-z0-9]+$")
+	private String genericName;
 
-  @NotBlank
-  @Size(min = 2)
-  @Pattern(regexp = "^[A-Za-z0-9]+$")
-  private String tradeName;
+	@NotBlank
+	@Size(min = 2)
+	@Pattern(regexp = "^[A-Za-z0-9]+$")
+	private String tradeName;
 
-  private DrugStrength strength;
+	private DrugStrength strength;
 
-  ///
+	///
 
-  public Long getId() {
-    return id;
-  }
+	public Long getId() {
+		return id;
+	}
 
-  public String getTradeName() {
-    return tradeName;
-  }
+	public String getTradeName() {
+		return tradeName;
+	}
 
-  public void setTradeName(String tradeName) {
-    this.tradeName = tradeName;
-  }
+	public void setTradeName(String tradeName) {
+		this.tradeName = tradeName;
+	}
 
-  public String getGenericName() {
-    return genericName;
-  }
+	public String getGenericName() {
+		return genericName;
+	}
 
-  public void setGenericName(String genericName) {
-    this.genericName = genericName;
-  }
+	public void setGenericName(String genericName) {
+		this.genericName = genericName;
+	}
 
-  public DrugStrength getStrength() {
-    return strength;
-  }
+	public DrugStrength getStrength() {
+		return strength;
+	}
 
-  public void setStrength(DrugStrength strength) {
-    this.strength = strength;
-  }
+	public void setStrength(DrugStrength strength) {
+		this.strength = strength;
+	}
 
-  public Integer getRxNormCode() {
-    return rxNormCode;
-  }
+	public Integer getRxNormCode() {
+		return rxNormCode;
+	}
 
-  public void setRxNormCode(Integer rxNormCode) {
-    this.rxNormCode = rxNormCode;
-  }
+	public void setRxNormCode(Integer rxNormCode) {
+		this.rxNormCode = rxNormCode;
+	}
 }

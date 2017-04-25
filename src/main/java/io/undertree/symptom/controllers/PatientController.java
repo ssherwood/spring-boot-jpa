@@ -216,7 +216,7 @@ public class PatientController {
 	 * @param pageable a Pageable to restrict results
 	 * @return A paged result of matching Patients
 	 */
-	@GetMapping("/queryByExample")
+	@GetMapping("/search/by-example")
 	public Page<Patient> getPatientsByExample(@RequestParam Map<String, Object> paramMap,
 			@PageableDefault(size = DEFAULT_PAGE_SZ) Pageable pageable) {
 		// naively copies map entries to matching properties in the Patient POJO
@@ -240,7 +240,7 @@ public class PatientController {
 	 * @param pageable a Pageable to restrict results
 	 * @return A paged result of matching Patients
 	 */
-	@GetMapping("/queryByPredicate")
+	@GetMapping("/search/predicate")
 	public Page<Patient> getPatientsByPredicate(
 			@QuerydslPredicate(root = Patient.class) final Predicate predicate,
 			@PageableDefault(size = DEFAULT_PAGE_SZ) final Pageable pageable) {
@@ -261,7 +261,7 @@ public class PatientController {
 	 * @param pageable a Pageable to restrict results
 	 * @return A paged result of matching Patients
 	 */
-	@GetMapping("/search")
+	@GetMapping("/search/by-name")
 	public Page<Patient> getPatientsHasAnyNameContaining(
 			@RequestParam("name") final String name,
 			@PageableDefault(size = DEFAULT_PAGE_SZ) final Pageable pageable) {

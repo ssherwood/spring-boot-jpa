@@ -26,17 +26,20 @@ import java.util.UUID;
 import javax.persistence.Access;
 import javax.persistence.AccessType;
 import javax.persistence.Column;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Transient;
+import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.validator.constraints.Email;
@@ -92,10 +95,18 @@ public class Patient {
 	// private Long version;
 	@Column(columnDefinition = "uuid", unique = true, updatable = false)
 	private UUID patientId;
+
+	/*
 	@NotBlank
 	@Size(min = 2)
 	@Pattern(regexp = "^[A-Za-z0-9]+$")
 	private String givenName;
+	*/
+	@Valid
+	@Embedded
+	@JsonUnwrapped
+	private GivenName givenName;
+
 	@Pattern(regexp = "^[A-Za-z0-9]+$")
 	private String additionalName;
 	@NotBlank
@@ -146,11 +157,11 @@ public class Patient {
 		return RESOURCE_PATH + "/" + this.patientId;
 	}
 
-	public String getGivenName() {
+	public GivenName getGivenName() {
 		return this.givenName;
 	}
 
-	public void setGivenName(String givenName) {
+	public void setGivenName(GivenName givenName) {
 		this.givenName = givenName;
 	}
 

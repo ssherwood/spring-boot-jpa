@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import io.undertree.symptom.domain.GivenName;
 import io.undertree.symptom.domain.Patient;
 import io.undertree.symptom.domain.TestPatientBuilder;
 import org.junit.Rule;
@@ -58,7 +59,7 @@ public class PatientControllerWebTests {
 
 		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(entity.getBody()).isNotNull()
-				.hasFieldOrPropertyWithValue("givenName", "Phillip")
+				.hasFieldOrPropertyWithValue("givenName.givenName", "Phillip")
 				.hasFieldOrPropertyWithValue("familyName", "Spec")
 				.hasFieldOrPropertyWithValue("birthDate", LocalDate.of(1972, 5, 5));
 	}
@@ -100,8 +101,9 @@ public class PatientControllerWebTests {
 	@Test
 	public void test_PatientController_addPatient_WithEmptyGivenName_Expect_BadRequest()
 			throws Exception {
-		ResponseEntity<String> json = restTemplate.postForEntity("/patients",
-				new TestPatientBuilder().withGivenName("").build(), String.class);
+		Patient build = new TestPatientBuilder().withGivenName(new GivenName("")).build();
+
+		ResponseEntity<String> json = restTemplate.postForEntity("/patients", build, String.class);
 
 		assertThat(json.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
 		JSONAssert.assertEquals(
@@ -218,7 +220,7 @@ public class PatientControllerWebTests {
 	@Test
 	public void test_PatientController_getPatientsByExample_WithBirthdate_Expect_MatchingResult() throws Exception {
 		ResponseEntity<Patient[]> responseEntity = restTemplate
-				.getForEntity("/patients/queryByExample?birthDate={birthDate}", Patient[].class, "1962-02-15");
+				.getForEntity("/patients/search/by-example?birthDate={birthDate}", Patient[].class, "1962-02-15");
 
 		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(responseEntity.getHeaders().containsKey("X-Meta-Pagination")).isTrue();
@@ -231,7 +233,7 @@ public class PatientControllerWebTests {
 	@Test
 	public void test_PatientController_() throws Exception {
 		ResponseEntity<Patient[]> responseEntity = restTemplate
-				.getForEntity("/patients/search?name={name}&sort=birthDate,desc", Patient[].class, "e");
+				.getForEntity("/patients/search/by-name?name={name}&sort=birthDate,desc", Patient[].class, "e");
 
 		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(responseEntity.getHeaders().containsKey("X-Meta-Pagination")).isTrue();

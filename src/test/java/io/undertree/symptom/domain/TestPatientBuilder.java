@@ -28,7 +28,7 @@ public class TestPatientBuilder {
 
 	public TestPatientBuilder() {
 		// Start out with a valid randomized patient
-		testPatient.setGivenName(RandomStringUtils.randomAlphabetic(2, 30));
+		testPatient.setGivenName(new GivenName(RandomStringUtils.randomAlphabetic(2, 30)));
 		testPatient.setAdditionalName(RandomStringUtils.randomAlphabetic(2, 30));
 		testPatient.setFamilyName(RandomStringUtils.randomAlphabetic(2, 30));
 		LocalDate start = LocalDate.of(1949, Month.JANUARY, 1);
@@ -41,7 +41,7 @@ public class TestPatientBuilder {
 		testPatient.setWeight((short) RandomUtils.nextInt(50, 90));
 	}
 
-	public TestPatientBuilder withGivenName(String givenName) {
+	public TestPatientBuilder withGivenName(GivenName givenName) {
 		testPatient.setGivenName(givenName);
 		return this;
 	}

@@ -19,6 +19,7 @@ import java.time.LocalDate;
 import java.util.Optional;
 import java.util.UUID;
 
+import io.undertree.symptom.domain.GivenName;
 import io.undertree.symptom.domain.TestPatientBuilder;
 import io.undertree.symptom.repositories.PatientRepository;
 import org.junit.Test;
@@ -50,7 +51,7 @@ public class PatientControllerTests {
 	public void test_MockPatient_Expect_ThatGuy() throws Exception {
 		given(mockPatientRepository.findByPatientId(UUID.fromString("e7a47ecd-4182-4209-911b-f7574ded1611")))
 				.willReturn(Optional.of(new TestPatientBuilder()
-						.withGivenName("Guy")
+						.withGivenName(new GivenName("Guy"))
 						.withFamilyName("Stromboli")
 						.withBirthDate(LocalDate.of(1942, 11, 21))
 						.build()));

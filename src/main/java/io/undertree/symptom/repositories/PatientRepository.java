@@ -55,7 +55,7 @@ public interface PatientRepository extends JpaRepository<Patient, Long>,
 	 */
 	static BooleanExpression hasAnyNameContaining(final String name) {
 		return $.familyName.containsIgnoreCase(name).or(
-				$.givenName.containsIgnoreCase(name).or(
+				$.givenName.givenName.containsIgnoreCase(name).or(
 						$.additionalName.containsIgnoreCase(name)));
 	}
 

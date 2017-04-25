@@ -21,4 +21,21 @@
         <cve>CVE-2016-6325</cve>
         <cve>CVE-2016-5425</cve>
     </suppress>
+
+    <!-- These seem to impact Debian-specific build of Tomcat.  I have not been
+     able to recreate this problem in Spring Boot -->
+    <suppress>
+        <notes><![CDATA[
+   file name: tomcat-embed-core-8.5.11.jar
+   ]]></notes>
+        <gav regex="true">^org\.apache\.tomcat\.embed:tomcat-embed-core:.*$</gav>
+        <cve>CVE-2017-6056</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: tomcat-embed-websocket-8.5.11.jar
+   ]]></notes>
+        <gav regex="true">^org\.apache\.tomcat\.embed:tomcat-embed-websocket:.*$</gav>
+        <cve>CVE-2017-6056</cve>
+    </suppress>
 </suppressions>

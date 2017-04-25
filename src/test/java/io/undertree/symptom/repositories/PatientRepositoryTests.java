@@ -17,6 +17,7 @@ package io.undertree.symptom.repositories;
 
 import javax.validation.ConstraintViolationException;
 
+import io.undertree.symptom.domain.GivenName;
 import io.undertree.symptom.domain.Patient;
 import io.undertree.symptom.domain.TestPatientBuilder;
 import io.undertree.symptom.exceptions.NotFoundException;
@@ -75,8 +76,11 @@ public class PatientRepositoryTests {
 	@Test
 	public void test_PatientRepository_SaveWithEmptyGivenName_ExpectException() throws Exception {
 		thrown.expect(ConstraintViolationException.class);
-		thrown.expectMessage(allOf(containsString("givenName"), containsString("'may not be empty'")));
-		patientRepository.saveAndFlush(new TestPatientBuilder().withGivenName("").build());
+		thrown.expectMessage(allOf(containsString("givenName.givenName"),
+				containsString("'The given name should only contain alphanumeric values.'")));
+		thrown.expectMessage(allOf(containsString("givenName.givenName"),
+				containsString("'size must be between 2 and 50'")));
+		patientRepository.saveAndFlush(new TestPatientBuilder().withGivenName(new GivenName("")).build());
 	}
 
 	@Test
@@ -91,7 +95,7 @@ public class PatientRepositoryTests {
 		thrown.expect(ConstraintViolationException.class);
 		thrown.expectMessage(
 				allOf(containsString("givenName"), containsString("'size must be between 2 and")));
-		patientRepository.saveAndFlush(new TestPatientBuilder().withGivenName("A").build());
+		patientRepository.saveAndFlush(new TestPatientBuilder().withGivenName(new GivenName("A")).build());
 	}
 
 	@Test

@@ -21,7 +21,8 @@ import com.fasterxml.jackson.annotation.JsonValue;
 /**
  * Represent Gender for Entities.
  *
- * See also https://en.wikipedia.org/wiki/ISO/IEC_5218
+ * See also https://en.wikipedia.org/wiki/ISO/IEC_5218.
+ *
  * @author Shawn Sherwood
  */
 public enum Gender {

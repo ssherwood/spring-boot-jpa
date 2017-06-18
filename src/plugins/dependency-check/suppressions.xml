@@ -38,4 +38,45 @@
         <gav regex="true">^org\.apache\.tomcat\.embed:tomcat-embed-websocket:.*$</gav>
         <cve>CVE-2017-6056</cve>
     </suppress>
+
+
+    <!--
+    XmlMapper in the Jackson XML dataformat component (aka jackson-dataformat-xml) before 2.7.8 and 2.8.x before 2.8.4 allows remote attackers to conduct server-side request forgery (SSRF) attacks via vectors related to a DTD
+    NOTE: Suppressing because we are > 2.8.4
+     -->
+    <suppress>
+        <notes><![CDATA[
+   file name: jackson-core-2.8.8.jar
+   ]]></notes>
+        <gav regex="true">^com\.fasterxml\.jackson\.core:jackson-core:.*$</gav>
+        <cve>CVE-2016-7051</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: jackson-annotations-2.8.0.jar
+   ]]></notes>
+        <gav regex="true">^com\.fasterxml\.jackson\.core:jackson-annotations:.*$</gav>
+        <cve>CVE-2016-7051</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: jackson-databind-2.8.8.jar
+   ]]></notes>
+        <gav regex="true">^com\.fasterxml\.jackson\.core:jackson-databind:.*$</gav>
+        <cve>CVE-2016-7051</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: jackson-datatype-jsr310-2.8.8.jar
+   ]]></notes>
+        <gav regex="true">^com\.fasterxml\.jackson\.datatype:jackson-datatype-jsr310:.*$</gav>
+        <cve>CVE-2016-7051</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: jackson-datatype-hibernate5-2.8.8.jar
+   ]]></notes>
+        <gav regex="true">^com\.fasterxml\.jackson\.datatype:jackson-datatype-hibernate5:.*$</gav>
+        <cve>CVE-2016-7051</cve>
+    </suppress>
 </suppressions>

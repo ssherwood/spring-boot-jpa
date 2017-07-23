@@ -1,76 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<suppressions xmlns="https://www.owasp.org/index.php/OWASP_Dependency_Check_Suppression">
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.1.xsd">
+    <!-- Actual CVE: https://nvd.nist.gov/vuln/detail/CVE-2016-7051 -->
+    <!-- Suppressed since these dependencies are > 2.8.4 and not related to dataformat-xml -->
     <suppress>
         <notes><![CDATA[
-   file name: spring-boot-starter-data-jpa-1.4.3.RELEASE.jar
-   Likely false positive matching on the Boot "Starter" instead of actual Data JPA
-   ]]></notes>
-        <gav regex="true">^org\.springframework\.boot:spring-boot-starter-data-jpa:.*$</gav>
-        <cve>CVE-2016-6652</cve>
-    </suppress>
-
-    <!-- From reading the links provided by these CVEs this exploit is specific to the
-    installed Tomcat packages on Linux.  The CPEs reference tomcat-embed-core which is
-    a jar (i.e. embedded tomcat) and not part of the vulnerable packaging -->
-    <suppress>
-        <notes><![CDATA[
-   file name: tomcat-embed-core-8.5.11.jar
-   info: http://securityaffairs.co/wordpress/52156/hacking/cve-2016-5425-apache-tomcat.html
-   ]]></notes>
-        <gav regex="true">^org\.apache\.tomcat\.embed:tomcat-embed-.*:.*$</gav>
-        <cve>CVE-2016-6325</cve>
-        <cve>CVE-2016-5425</cve>
-    </suppress>
-
-    <!-- These seem to impact Debian-specific build of Tomcat.  I have not been
-     able to recreate this problem in Spring Boot -->
-    <suppress>
-        <notes><![CDATA[
-   file name: tomcat-embed-core-8.5.11.jar
-   ]]></notes>
-        <gav regex="true">^org\.apache\.tomcat\.embed:tomcat-embed-core:.*$</gav>
-        <cve>CVE-2017-6056</cve>
-    </suppress>
-    <suppress>
-        <notes><![CDATA[
-   file name: tomcat-embed-websocket-8.5.11.jar
-   ]]></notes>
-        <gav regex="true">^org\.apache\.tomcat\.embed:tomcat-embed-websocket:.*$</gav>
-        <cve>CVE-2017-6056</cve>
-    </suppress>
-
-
-    <!--
-    XmlMapper in the Jackson XML dataformat component (aka jackson-dataformat-xml) before 2.7.8 and 2.8.x before 2.8.4 allows remote attackers to conduct server-side request forgery (SSRF) attacks via vectors related to a DTD
-    NOTE: Suppressing because we are > 2.8.4
-     -->
-    <suppress>
-        <notes><![CDATA[
-   file name: jackson-core-2.8.8.jar
-   ]]></notes>
-        <gav regex="true">^com\.fasterxml\.jackson\.core:jackson-core:.*$</gav>
-        <cve>CVE-2016-7051</cve>
-    </suppress>
-    <suppress>
-        <notes><![CDATA[
-   file name: jackson-annotations-2.8.0.jar
-   ]]></notes>
-        <gav regex="true">^com\.fasterxml\.jackson\.core:jackson-annotations:.*$</gav>
-        <cve>CVE-2016-7051</cve>
-    </suppress>
-    <suppress>
-        <notes><![CDATA[
-   file name: jackson-databind-2.8.8.jar
-   ]]></notes>
-        <gav regex="true">^com\.fasterxml\.jackson\.core:jackson-databind:.*$</gav>
-        <cve>CVE-2016-7051</cve>
-    </suppress>
-    <suppress>
-        <notes><![CDATA[
-   file name: jackson-datatype-jsr310-2.8.8.jar
-   ]]></notes>
+      file name: jackson-datatype-jsr310-2.8.8.jar
+      ]]></notes>
         <gav regex="true">^com\.fasterxml\.jackson\.datatype:jackson-datatype-jsr310:.*$</gav>
-        <cve>CVE-2016-7051</cve>
+        <cpe>cpe:/a:fasterxml:jackson</cpe>
     </suppress>
     <suppress>
         <notes><![CDATA[

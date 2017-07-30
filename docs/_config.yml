@@ -4,6 +4,5 @@ description: >
   a developer journal to building a (somewhat) realistic application using Spring Boot and
   Spring Data JPA.
 theme: jekyll-theme-tactile
-baseurl: "spring-boot-jpa"
-url: "undertree.io"
+baseurl: /spring-boot-jpa
 permalink: /:title

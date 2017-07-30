@@ -23,9 +23,16 @@ My original server-side implementation of the Capstone project was also my first
 with Spring Boot and since then, I've always felt that there many improvements that I could have
 made.
 
-## Development Journal
+## My Development Journal
 
-- [Bootstrap]()
+- [Bootstrap the Application](http://undertree.io/spring-boot-jpa/bootstrap-your-application)
+- [Start with the Domain](http://undertree.io/spring-boot-jpa/start-with-a-domain-entity)
+- [Create a Repository](http://undertree.io/spring-boot-jpa/create-a-repository)
+- [Create a REST Controller](http://undertree.io/spring-boot-jpa/create-a-rest-controller)
+- [Add a Patient via POST](http://undertree.io/spring-boot-jpa/add-patient-via-post-method)
+- [Extending the Patient Model (Part 1)](http://undertree.io/spring-boot-jpa/extending-patient-model-1)
+- [Extending the Patient Model (Part 2)](http://undertree.io/spring-boot-jpa/extending-patient-model-2)
+- TBD
 
 # Additional Resources
 
@@ -37,7 +44,6 @@ made.
 - [Jackson](http://wiki.fasterxml.com/JacksonHome)
 - [H2 Database](http://www.h2database.com/html/main.html)
 - [AssertjJ](https://joel-costigliola.github.io/assertj/)
-
 
 # License
 

@@ -55,6 +55,7 @@
         </dependency>
 
         <!-- include Java8 (jsr310) date converters -->
+        <!-- this dependency can be removed when Boot upgrades to Hibernate 5.2 -->
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-java8</artifactId>

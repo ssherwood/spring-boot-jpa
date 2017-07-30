@@ -1,3 +1,6 @@
-# TODO
 
-Moving development logs to more of a blog format.
+To start:
+
+```bash
+bundle exec jekyll serve
+```

@@ -4,3 +4,6 @@ description: >
   a developer journal to building a (somewhat) realistic application using Spring Boot and
   Spring Data JPA.
 theme: jekyll-theme-tactile
+baseurl: ""
+url: "ssherwood.github.io"
+permalink: /:title

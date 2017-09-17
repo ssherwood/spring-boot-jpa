@@ -1,19 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.1.xsd">
-    <!-- Actual CVE: https://nvd.nist.gov/vuln/detail/CVE-2016-7051 -->
-    <!-- Suppressed since these dependencies are > 2.8.4 and not related to dataformat-xml -->
+    <!-- False positives: -->
+
+    <!-- This CVE is related to Drupal an not Apache validator -->
     <suppress>
         <notes><![CDATA[
-      file name: jackson-datatype-jsr310-2.8.8.jar
-      ]]></notes>
-        <gav regex="true">^com\.fasterxml\.jackson\.datatype:jackson-datatype-jsr310:.*$</gav>
-        <cpe>cpe:/a:fasterxml:jackson</cpe>
-    </suppress>
-    <suppress>
-        <notes><![CDATA[
-   file name: jackson-datatype-hibernate5-2.8.8.jar
-   ]]></notes>
-        <gav regex="true">^com\.fasterxml\.jackson\.datatype:jackson-datatype-hibernate5:.*$</gav>
-        <cve>CVE-2016-7051</cve>
+        file name: validation-api-1.1.0.Final.jar
+        ]]></notes>
+        <gav regex="true">^javax\.validation:validation-api:.*$</gav>
+        <cpe>cpe:/a:bean_project:bean</cpe>
     </suppress>
 </suppressions>

@@ -2,12 +2,28 @@
 <suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.1.xsd">
     <!-- False positives: -->
 
-    <!-- This CVE is related to Drupal an not Apache validator -->
     <suppress>
         <notes><![CDATA[
-        file name: validation-api-1.1.0.Final.jar
+        file name: tomcat-annotations-api-8.5.23.jar
         ]]></notes>
-        <gav regex="true">^javax\.validation:validation-api:.*$</gav>
-        <cpe>cpe:/a:bean_project:bean</cpe>
+        <gav regex="true">^org\.apache\.tomcat:tomcat-annotations-api:.*$</gav>
+        <cve>CVE-2016-5425</cve>
     </suppress>
+
+    <suppress>
+        <notes><![CDATA[
+        file name: tomcat-annotations-api-8.5.23.jar
+        ]]></notes>
+        <gav regex="true">^org\.apache\.tomcat:tomcat-annotations-api:.*$</gav>
+        <cve>CVE-2016-6325</cve>
+    </suppress>
+
+    <suppress>
+        <notes><![CDATA[
+        file name: tomcat-annotations-api-8.5.23.jar
+        ]]></notes>
+        <gav regex="true">^org\.apache\.tomcat:tomcat-annotations-api:.*$</gav>
+        <cve>CVE-2017-6056</cve>
+    </suppress>
+
 </suppressions>

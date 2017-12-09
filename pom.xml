@@ -76,6 +76,11 @@
             <groupId>com.querydsl</groupId>
             <artifactId>querydsl-jpa</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.querydsl</groupId>
+            <artifactId>querydsl-apt</artifactId>
+            <scope>provided</scope>
+        </dependency>
 
         <!-- include Apache Commons Lang: https://commons.apache.org/proper/commons-lang/ -->
         <dependency>
@@ -151,13 +156,6 @@
                         </configuration>
                     </execution>
                 </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>com.querydsl</groupId>
-                        <artifactId>querydsl-apt</artifactId>
-                        <version>${querydsl.version}</version>
-                    </dependency>
-                </dependencies>
             </plugin>
             <!-- http://www.eclemma.org/jacoco/trunk/doc/maven.html -->
             <plugin>

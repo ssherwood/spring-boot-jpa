@@ -38,7 +38,9 @@
         <commons-lang3.version>3.7</commons-lang3.version>
         <commons-beanutils.version>1.9.3</commons-beanutils.version>
         <commons-text.version>1.2</commons-text.version>
-        <!-- CVE-2017-17485 override -->
+        <!-- CVE-2017-5929 -->
+        <logback.version>1.2.3</logback.version>
+        <!-- CVE-2017-17485 -->
         <jackson.version>2.9.4</jackson.version>
     </properties>
 

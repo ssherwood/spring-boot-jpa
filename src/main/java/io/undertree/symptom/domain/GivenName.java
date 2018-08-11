@@ -16,6 +16,7 @@
 
 package io.undertree.symptom.domain;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 import javax.persistence.Embeddable;
@@ -34,7 +35,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
  * @author Shawn Sherwood
  */
 @Embeddable
-public class GivenName {
+public class GivenName implements Serializable {
 	@Size(min = 2, max = 50)
 	@Pattern(regexp = "^([a-zA-Z]+[,.]?[ ]?|[a-zA-Z]+['-]?)+$", message = "{Pattern.givenName}")
 	private String givenName;

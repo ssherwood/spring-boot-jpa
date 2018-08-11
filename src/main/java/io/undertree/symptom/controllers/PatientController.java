@@ -31,6 +31,7 @@ import io.undertree.symptom.repositories.PatientRepository;
 import org.apache.commons.beanutils.BeanUtils;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Page;
@@ -121,6 +122,7 @@ public class PatientController {
 	 * @return A single patient with the matching patientId
 	 */
 	@GetMapping("/{id}")
+	@Cacheable(value = "patients", key = "#patientId?.toString()")
 	public Patient getPatient(@PathVariable("id") final UUID patientId) {
 		return this.patientRepository.findByPatientId(patientId)
 				.orElseThrow(() ->
@@ -182,7 +184,7 @@ public class PatientController {
 	@DeleteMapping("/{id}")
 	public void deletePatient(@PathVariable("id") final UUID patientId) {
 		this.patientRepository.findByPatientId(patientId)
-				.ifPresent(p -> this.patientRepository.delete(p.getId()));
+				.ifPresent(this.patientRepository::delete);
 	}
 
 	/**

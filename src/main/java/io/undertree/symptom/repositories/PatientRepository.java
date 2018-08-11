@@ -16,19 +16,18 @@
 
 package io.undertree.symptom.repositories;
 
-import java.time.LocalDate;
-import java.util.Optional;
-import java.util.UUID;
-
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.StringPath;
 import io.undertree.symptom.domain.Patient;
 import io.undertree.symptom.domain.QPatient;
-
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.querydsl.QueryDslPredicateExecutor;
+import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
+
+import java.time.LocalDate;
+import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Spring Data JPA Repository for the Patient entity with QueryDsl support.
@@ -36,7 +35,7 @@ import org.springframework.data.querydsl.binding.QuerydslBindings;
  * @author Shawn Sherwood
  */
 public interface PatientRepository extends JpaRepository<Patient, Long>,
-		QueryDslPredicateExecutor<Patient>, QuerydslBinderCustomizer<QPatient> {
+		QuerydslPredicateExecutor<Patient>, QuerydslBinderCustomizer<QPatient> {
 
 	/**
 	 * Standard reference on QueryDsl QPatient.
@@ -80,6 +79,7 @@ public interface PatientRepository extends JpaRepository<Patient, Long>,
 	 * @param patientId the unique UUID of the patient to return
 	 * @return a Patient with the UUID provided
 	 */
+	//@Cacheable(value = "patients", key = "#patientId.toString()")
 	Optional<Patient> findByPatientId(UUID patientId);
 
 	/**

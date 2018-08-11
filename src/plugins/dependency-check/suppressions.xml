@@ -1,29 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.1.xsd">
-    <!-- False positives: -->
-
+    <!-- CVE https://nvd.nist.gov/vuln/detail/CVE-2018-10054 reported against Datomic -->
     <suppress>
         <notes><![CDATA[
-        file name: tomcat-annotations-api-8.5.23.jar
-        ]]></notes>
-        <gav regex="true">^org\.apache\.tomcat:tomcat-annotations-api:.*$</gav>
-        <cve>CVE-2016-5425</cve>
+   file name: h2-1.4.197.jar
+   ]]></notes>
+        <gav regex="true">^com\.h2database:h2:.*$</gav>
+        <cve>CVE-2018-10054</cve>
     </suppress>
-
-    <suppress>
-        <notes><![CDATA[
-        file name: tomcat-annotations-api-8.5.23.jar
-        ]]></notes>
-        <gav regex="true">^org\.apache\.tomcat:tomcat-annotations-api:.*$</gav>
-        <cve>CVE-2016-6325</cve>
-    </suppress>
-
-    <suppress>
-        <notes><![CDATA[
-        file name: tomcat-annotations-api-8.5.23.jar
-        ]]></notes>
-        <gav regex="true">^org\.apache\.tomcat:tomcat-annotations-api:.*$</gav>
-        <cve>CVE-2017-6056</cve>
-    </suppress>
-
 </suppressions>

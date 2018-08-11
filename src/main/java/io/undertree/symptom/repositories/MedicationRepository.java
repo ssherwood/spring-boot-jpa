@@ -19,9 +19,8 @@ package io.undertree.symptom.repositories;
 import com.querydsl.core.types.dsl.StringPath;
 import io.undertree.symptom.domain.Medication;
 import io.undertree.symptom.domain.QMedication;
-
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.querydsl.QueryDslPredicateExecutor;
+import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
 
@@ -31,7 +30,7 @@ import org.springframework.data.querydsl.binding.QuerydslBindings;
  * @author Shawn Sherwood
  */
 public interface MedicationRepository extends JpaRepository<Medication, Long>,
-		QueryDslPredicateExecutor<Medication>, QuerydslBinderCustomizer<QMedication> {
+		QuerydslPredicateExecutor<Medication>, QuerydslBinderCustomizer<QMedication> {
 
 	@Override
 	default void customize(QuerydslBindings bindings, QMedication root) {

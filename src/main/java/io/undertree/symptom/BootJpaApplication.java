@@ -16,15 +16,16 @@
 
 package io.undertree.symptom;
 
-import java.util.Map;
-
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.web.DefaultErrorAttributes;
-import org.springframework.boot.autoconfigure.web.ErrorAttributes;
+import org.springframework.boot.web.servlet.error.DefaultErrorAttributes;
+import org.springframework.boot.web.servlet.error.ErrorAttributes;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.WebRequest;
+
+import java.util.Map;
 
 /**
  * Basic Spring Boot Application originally generated from the Spring
@@ -33,6 +34,7 @@ import org.springframework.web.context.request.RequestAttributes;
  * @author Shawn Sherwood
  */
 @SpringBootApplication
+@EnableCaching
 public class BootJpaApplication {
 
 	/**
@@ -50,18 +52,14 @@ public class BootJpaApplication {
 	 * We really need to find a cleaner way of handling these error messages.
 	 *
 	 * @return customized ErrorAttributes
-	 */
+
 	@Bean
 	public ErrorAttributes errorAttributes() {
 		return new DefaultErrorAttributes() {
-
 			@Override
-			public Map<String, Object> getErrorAttributes(
-					final RequestAttributes requestAttributes,
-					final boolean includeStackTrace) {
-				Map<String, Object> attributes = super
-						.getErrorAttributes(requestAttributes, includeStackTrace);
-				Throwable error = getError(requestAttributes);
+			public Map<String, Object> getErrorAttributes(WebRequest webRequest, boolean includeStackTrace) {
+				Map<String, Object> attributes = super.getErrorAttributes(webRequest, includeStackTrace);
+				Throwable error = getError(webRequest);
 
 				if (error instanceof MethodArgumentNotValidException) {
 					MethodArgumentNotValidException ex =
@@ -73,4 +71,5 @@ public class BootJpaApplication {
 			}
 		};
 	}
+	 */
 }

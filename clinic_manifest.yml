@@ -1,0 +1,10 @@
+applications:
+- name: clinic
+  disk_quota: 1G
+  instances: 3
+  memory: 1G
+  routes:
+  - route: clinic.cfapps.io
+  services:
+  - ssherwood-mysql
+  stack: cflinuxfs2

@@ -18,10 +18,7 @@ package io.undertree.symptom.domain;
 
 import java.time.LocalDate;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.OneToOne;
+import javax.persistence.*;
 
 /**
  * Prescription entity.
@@ -32,7 +29,7 @@ import javax.persistence.OneToOne;
 public class Prescription {
 
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	private String description;
 	private LocalDate initialDate;

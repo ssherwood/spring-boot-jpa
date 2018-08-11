@@ -63,13 +63,13 @@ public class PatientRepositoryTests {
 	@Test
 	public void test_PatientRepository_SaveWithNull_ExpectException() throws Exception {
 		thrown.expect(InvalidDataAccessApiUsageException.class);
-		patientRepository.saveAndFlush((Patient) null);
+		patientRepository.saveAndFlush(null);
 	}
 
 	@Test
 	public void test_PatientRepository_SaveWithEmpty_ExpectException() throws Exception {
 		thrown.expect(ConstraintViolationException.class);
-		thrown.expectMessage(containsString("'may not be empty'"));
+		thrown.expectMessage(containsString("'must not be blank'"));
 		patientRepository.saveAndFlush(new Patient());
 	}
 
@@ -86,7 +86,7 @@ public class PatientRepositoryTests {
 	@Test
 	public void test_PatientRepository_SaveWithEmptyFamilyName_ExpectException() throws Exception {
 		thrown.expect(ConstraintViolationException.class);
-		thrown.expectMessage(allOf(containsString("familyName"), containsString("'may not be empty'")));
+		thrown.expectMessage(allOf(containsString("familyName"), containsString("'must not be blank'")));
 		patientRepository.saveAndFlush(new TestPatientBuilder().withFamilyName("").build());
 	}
 
@@ -110,7 +110,7 @@ public class PatientRepositoryTests {
 	public void test_PatientRepository_SaveWithInvalidEmail_ExpectException() throws Exception {
 		thrown.expect(ConstraintViolationException.class);
 		thrown.expectMessage(
-				allOf(containsString("email"), containsString("'not a well-formed email address'")));
+				allOf(containsString("email"), containsString("'must be a well-formed email address'")));
 		patientRepository.saveAndFlush(new TestPatientBuilder().withEmail("baz").build());
 	}
 

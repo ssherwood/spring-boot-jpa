@@ -46,6 +46,13 @@ made.
 - [H2 Database](http://www.h2database.com/html/main.html)
 - [AssertjJ](https://joel-costigliola.github.io/assertj/)
 
+
+# NOTES
+
+```how to kill an instance
+cf curl /v2/apps/{app-id}/instances/{instance-index} -X 'DELETE'
+```
+
 # License
 
     Copyright 2016-2017 Shawn Sherwood

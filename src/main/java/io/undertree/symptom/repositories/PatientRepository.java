@@ -17,6 +17,7 @@
 package io.undertree.symptom.repositories;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.core.types.dsl.StringPath;
 import io.undertree.symptom.domain.Patient;
 import io.undertree.symptom.domain.QPatient;
@@ -24,6 +25,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
+import org.springframework.data.querydsl.binding.SingleValueBinding;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -35,65 +37,64 @@ import java.util.UUID;
  * @author Shawn Sherwood
  */
 public interface PatientRepository extends JpaRepository<Patient, Long>,
-		QuerydslPredicateExecutor<Patient>, QuerydslBinderCustomizer<QPatient> {
+        QuerydslPredicateExecutor<Patient>, QuerydslBinderCustomizer<QPatient> {
 
-	/**
-	 * Standard reference on QueryDsl QPatient.
-	 * (FYI - I got the $ idea from
-	 * http://blog.mysema.com/2011/08/querydsl-in-wild.html
-	 * and I'm still not sure I'm okay with it).
-	 */
-	QPatient $ = QPatient.patient;
+    /**
+     * Return an Optional instance of a Patient with the given UUID.  Optional
+     * helps clean up some of the uglier null checking due to the fact that the
+     * lower level code returns null when no match is found.
+     *
+     * @param patientId the unique UUID of the patient to return
+     * @return a Patient with the UUID provided
+     */
+    //@Cacheable(value = "patients", key = "#patientId.toString()")
+    Optional<Patient> findByPatientId(UUID patientId);
 
-	/**
-	 * Constructs a BooleanExpression for matching on a String with any name
-	 * the Patient has (ignoring case).
-	 *
-	 * @param name String to match on
-	 * @return Expression combining all Patient name fields
-	 */
-	static BooleanExpression hasAnyNameContaining(final String name) {
-		return $.familyName.containsIgnoreCase(name).or(
-				$.givenName.givenName.containsIgnoreCase(name).or(
-						$.additionalName.containsIgnoreCase(name)));
-	}
+    /**
+     * Override default QueryDsl bindings.
+     * TODO explain what and why?
+     *
+     * @param bindings a QueryDslBindings to use
+     * @param root     the QPatient root
+     */
+    @Override
+    default void customize(QuerydslBindings bindings, QPatient root) {
+        bindings.excluding(root.id);
+        //bindings.excluding(root.patientId);
+        bindings.bind(String.class)
+                .first((SingleValueBinding<StringPath, String>) StringExpression::containsIgnoreCase);
+    }
 
-	/**
-	 * A BooleanExpression for matching an Entity with a specific Month and
-	 * Day of any give year to test for a birth day.  Specifically, this
-	 * ignores the given year as a wider birthday test.
-	 *
-	 * @param date a given LocalDate to mach with
-	 * @return Expression to match on the month/day for a possible birth day
-	 */
-	static BooleanExpression hasBirthdayOn(final LocalDate date) {
-		return $.birthDate.month().eq(date.getMonthValue()).and(
-				$.birthDate.dayOfMonth().eq(date.getDayOfMonth()));
-	}
+    /**
+     * QueryDsl Predicates for Patients.
+     */
+    abstract class Predicates {
+        private static final QPatient PATIENT = QPatient.patient;
 
-	/**
-	 * Return an Optional instance of a Patient with the given UUID.  Optional
-	 * helps clean up some of the uglier null checking due to the fact that the
-	 * lower level code returns null when no match is found.
-	 *
-	 * @param patientId the unique UUID of the patient to return
-	 * @return a Patient with the UUID provided
-	 */
-	//@Cacheable(value = "patients", key = "#patientId.toString()")
-	Optional<Patient> findByPatientId(UUID patientId);
+        /**
+         * Constructs a BooleanExpression for matching on a String with any name
+         * the Patient has (ignoring case).
+         *
+         * @param name String to match on
+         * @return Expression combining all Patient name fields
+         */
+        public static BooleanExpression hasAnyNameContaining(final String name) {
+            return PATIENT.familyName.containsIgnoreCase(name).or(
+                    PATIENT.givenName.givenName.containsIgnoreCase(name).or(
+                            PATIENT.additionalName.containsIgnoreCase(name)));
+        }
 
-	/**
-	 * Override default QueryDsl bindings.
-	 *
-	 * @param bindings a QueryDslBindings to use
-	 * @param root the QPatient root
-	 */
-	@Override
-	default void customize(QuerydslBindings bindings, QPatient root) {
-		bindings.excluding(root.id);
-		//bindings.excluding(root.patientId);
-		bindings.bind(String.class)
-				.first((StringPath path, String value) ->
-						path.containsIgnoreCase(value));
-	}
+        /**
+         * A BooleanExpression for matching an Entity with a specific Month and
+         * Day of any give year to test for a birth day.  Specifically, this
+         * ignores the given year as a wider birthday test.
+         *
+         * @param date a given LocalDate to mach with
+         * @return Expression to match on the month/day for a possible birth day
+         */
+        public static BooleanExpression hasBirthdayOn(final LocalDate date) {
+            return PATIENT.birthDate.month().eq(date.getMonthValue()).and(
+                    PATIENT.birthDate.dayOfMonth().eq(date.getDayOfMonth()));
+        }
+    }
 }

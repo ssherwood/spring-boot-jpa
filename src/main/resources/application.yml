@@ -1,0 +1,47 @@
+spring:
+  profiles:
+    active: dev
+  jackson:
+    serialization:
+      WRITE_DATES_AS_TIMESTAMPS: false
+    default-property-inclusion: non_empty
+  data:
+    web:
+      pageable:
+        default-page-size: 30
+        max-page-size: 1000
+        one-indexed-parameters: false
+        page-parameter: page
+        size-parameter: size
+      sort:
+        sort-parameter: sort
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+##
+## Anything in the "info" block is automatically added to the actuator endpoint
+##
+info:
+  app:
+    route-color: ${APP_ROUTE_COLOR:UNKNOWN}
+  cloudfoundry:
+    appliction-id: ${vcap.application.application_id:UNKNOWN}
+    appliction-name: ${vcap.application.application_name:UNKNOWN}
+    instance-guid: ${CF_INSTANCE_GUID:UNKNOWN}
+    instance-index: ${CF_INSTANCE_INDEX:UNKNOWN}
+    instance-ip: ${CF_INSTANCE_IP:UNKNOWN}
+    instance-port: ${CF_INSTANCE_PORT:UNKNOWN}
+
+#spring.metrics.export.redis.key=patients
+
+#spring.cache.type=redis
+logging:
+  level:
+    org.springframework.web.client.RestTemplate: DEBUG
+    org.springframework.cache: TRACE
+    redis.clients.jedis: TRACE

@@ -16,6 +16,7 @@
 
 package io.undertree.symptom.repositories;
 
+import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.core.types.dsl.StringPath;
 import io.undertree.symptom.domain.Medication;
 import io.undertree.symptom.domain.QMedication;
@@ -23,6 +24,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
+import org.springframework.data.querydsl.binding.SingleValueBinding;
 
 /**
  * Medication repository.
@@ -32,22 +34,25 @@ import org.springframework.data.querydsl.binding.QuerydslBindings;
 public interface MedicationRepository extends JpaRepository<Medication, Long>,
 		QuerydslPredicateExecutor<Medication>, QuerydslBinderCustomizer<QMedication> {
 
+	/**
+	 * Override default QueryDsl bindings.
+	 * TODO explain what and why?
+	 *
+	 * @param bindings a QueryDslBindings to use
+	 * @param root     the QPatient root
+	 */
 	@Override
 	default void customize(QuerydslBindings bindings, QMedication root) {
 		bindings.excluding(root.id);
 		bindings.bind(String.class)
-				.first((StringPath path, String value) ->
-						path.containsIgnoreCase(value));
+				.first((SingleValueBinding<StringPath, String>) StringExpression::containsIgnoreCase);
 	}
 
 	/**
 	 * QueryDsl Predicates for Medication.
 	 */
-	class Predicates {
-		static final QMedication $ = QMedication.medication;
-
-		private Predicates() {
-		}
+	abstract class Predicates {
+		private static final QMedication MEDICATION = QMedication.medication;
 
 		// TODO
 	}

@@ -1,0 +1,14 @@
+# Use H2 in dev profile
+spring:
+  datasource:
+    platform: h2
+
+# In "dev" profile make all of the actuator endpoints available
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always

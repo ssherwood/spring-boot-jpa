@@ -1,10 +1,12 @@
 applications:
 - name: clinic
   disk_quota: 1G
-  instances: 3
+  instances: 2
   memory: 1G
   routes:
   - route: clinic.cfapps.io
   services:
-  - ssherwood-mysql
   stack: cflinuxfs2
+  env:
+    SPRING_PROFILES_ACTIVE: cloud
+    APP_ROUTE_COLOR: blue

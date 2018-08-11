@@ -38,12 +38,6 @@
         <commons-lang3.version>3.7</commons-lang3.version>
         <commons-beanutils.version>1.9.3</commons-beanutils.version>
         <commons-text.version>1.4</commons-text.version>
-        <!-- CVE-2017-5929
-        <logback.version>1.2.3</logback.version>
-        -->
-        <!-- CVE-2017-17485
-        <jackson.version>2.9.4</jackson.version>
-         -->
     </properties>
 
     <dependencies>
@@ -55,16 +49,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
-<!--
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-redis</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-amqp</artifactId>
-        </dependency>
--->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -74,17 +58,10 @@
             <artifactId>spring-boot-starter-cache</artifactId>
         </dependency>
 
-        <!-- include Java8 (jsr310) date converters -->
-        <!-- this dependency can be removed when Boot upgrades to Hibernate 5.2 -->
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-java8</artifactId>
-        </dependency>
-
         <!-- include Jackson extensions -->
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
-            <artifactId>jackson-datatype-jsr310</artifactId>
+            <artifactId>jackson-datatype-jdk8</artifactId>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
@@ -128,12 +105,12 @@
             <artifactId>h2</artifactId>
             <scope>runtime</scope>
         </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
-            <optional>true</optional>
+            <scope>runtime</scope>
         </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>

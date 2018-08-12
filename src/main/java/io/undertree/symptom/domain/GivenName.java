@@ -20,6 +20,7 @@ import java.io.Serializable;
 import java.util.Objects;
 
 import javax.persistence.Embeddable;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
@@ -36,6 +37,8 @@ import com.fasterxml.jackson.annotation.JsonValue;
  */
 @Embeddable
 public class GivenName implements Serializable {
+
+	@NotBlank
 	@Size(min = 2, max = 50)
 	@Pattern(regexp = "^([a-zA-Z]+[,.]?[ ]?|[a-zA-Z]+['-]?)+$", message = "{Pattern.givenName}")
 	private String givenName;

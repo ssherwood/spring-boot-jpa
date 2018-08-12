@@ -23,6 +23,9 @@ My original server-side implementation of the Capstone project was also my first
 with Spring Boot and since then, I've always felt that there many improvements that I could have
 made.
 
+Below are links to my development journal with more detailed information about the challenges and
+decisions that I made during the ongoing implementation of the project:
+
 ## My Development Journal
 
 - [Bootstrap the Application](http://undertree.io/spring-boot-jpa/bootstrap-your-application)
@@ -54,7 +57,7 @@ cf curl /v2/apps/{app-id}/instances/{instance-index} -X 'DELETE'
 
 # License
 
-    Copyright 2016-2017 Shawn Sherwood
+    Copyright 2016-2018 Shawn Sherwood
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.

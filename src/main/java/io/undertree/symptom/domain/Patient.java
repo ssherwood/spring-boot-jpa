@@ -80,8 +80,8 @@ public class Patient implements Serializable {
 	private Long id;
 
 	@Column(unique = true, updatable = false)
-	@org.hibernate.annotations.Type(type = "uuid-binary")
-	//@org.hibernate.annotations.Type(type = "uuid-char")
+	//@org.hibernate.annotations.Type(type = "uuid-binary")
+	@org.hibernate.annotations.Type(type = "uuid-char")
 	private UUID patientId;
 
 	/*
@@ -90,6 +90,7 @@ public class Patient implements Serializable {
 	@Pattern(regexp = "^[A-Za-z0-9]+$")
 	private String givenName;
 	*/
+
 	@Valid
 	@Embedded
 	@JsonUnwrapped

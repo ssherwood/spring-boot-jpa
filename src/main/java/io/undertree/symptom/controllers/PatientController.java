@@ -24,7 +24,9 @@ import io.undertree.symptom.exceptions.NotFoundException;
 import io.undertree.symptom.repositories.PatientRepository;
 import org.apache.commons.beanutils.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Page;
@@ -53,6 +55,7 @@ import static io.undertree.symptom.repositories.PatientRepository.Predicates.has
 public class PatientController {
 
 	//private static final int DEFAULT_PAGE_SZ = 30;
+
 	private static final ExampleMatcher DEFAULT_MATCHER = ExampleMatcher
 			.matching()
 			.withIgnorePaths("patientId")
@@ -62,11 +65,19 @@ public class PatientController {
 	private final PatientRepository patientRepository;
 	private final ObjectMapper jacksonObjectMapper;
 
+	@Value("${custom.s3-bucket.url:http://127.0.0.1:9000}")
+	private String s3url;
+
 	@Autowired
 	public PatientController(final PatientRepository patientRepository,
 			final ObjectMapper jacksonObjectMapper) {
 		this.patientRepository = patientRepository;
 		this.jacksonObjectMapper = jacksonObjectMapper;
+	}
+
+	@GetMapping("/s3url")
+	public String getS3url() {
+		return s3url;
 	}
 
 	/**

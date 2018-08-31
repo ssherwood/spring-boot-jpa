@@ -30,7 +30,7 @@ public class DrugStrength {
 
 	@NotNull
 	@Min(0)
-	private Double value;
+	private Double value = 0.0;
 	private String unit;
 
 	public Double getValue() {

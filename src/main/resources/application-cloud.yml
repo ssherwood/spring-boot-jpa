@@ -5,3 +5,9 @@
 management:
   cloudfoundry:
     skip-ssl-validation: true
+
+custom:
+  s3-bucket:
+    url: ${vcap.services.demo-s3-bucket.credentials.url:foo}
+    accessKey: ${vcap.services.demo-s3-bucket.credentials.accessKey:foo}
+    secretKey: ${vcap.services.demo-s3-bucket.credentials.secretKey:foo}

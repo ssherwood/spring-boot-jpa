@@ -34,9 +34,12 @@ public class Prescription {
 	private String description;
 	private LocalDate initialDate;
 	private LocalDate expirationDate;
+
 	// TODO Doctor doctor
+
 	@OneToOne
 	private Patient patient;
+
 	@OneToOne
 	private Medication medication;
 

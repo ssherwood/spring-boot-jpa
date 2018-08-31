@@ -40,6 +40,7 @@ public class JacksonConfig {
 	 */
 	@Bean
 	public Module hibernate5Module() {
+		//https://github.com/FasterXML/jackson-datatype-hibernate/blob/master/hibernate5/src/main/java/com/fasterxml/jackson/datatype/hibernate5/Hibernate5Module.java
 		Hibernate5Module module = new Hibernate5Module();
 		//module.enable(Hibernate5Module.Feature.FORCE_LAZY_LOADING);
 		return module;

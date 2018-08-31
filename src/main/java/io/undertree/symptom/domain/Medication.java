@@ -45,7 +45,7 @@ public class Medication {
 	private Long id;
 
 	@NotNull
-	private Integer rxNormCode;
+	private Integer rxNormCode = 0;
 
 	@NotBlank
 	@Size(min = 2)

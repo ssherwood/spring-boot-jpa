@@ -32,6 +32,8 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.time.LocalDate;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsString;
@@ -128,5 +130,14 @@ public class PatientRepositoryTests {
 		thrown.expectMessage(
 				allOf(containsString("weight"), containsString("'must be greater than or equal to 0'")));
 		patientRepository.saveAndFlush(new TestPatientBuilder().withWeight((short) -1).build());
+	}
+
+	@Test
+	public void test_PatientRepository_SaveWithFutureBirthDayInFuture_ExpectException() throws Exception {
+		thrown.expect(ConstraintViolationException.class);
+		thrown.expectMessage(
+				allOf(containsString("birthDate"), containsString("'must be a past date'")));
+		patientRepository.saveAndFlush(new TestPatientBuilder()
+				.withBirthDate(LocalDate.now().plusDays(1)).build());
 	}
 }

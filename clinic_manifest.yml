@@ -1,11 +1,32 @@
+---
+defaults: &defaults
+  memory: 1G
+  disk_quota: 1G
+  stack: cflinuxfs2
+
 applications:
 - name: clinic
-  disk_quota: 1G
-  instances: 1
-  memory: 1G
+  <<: *defaults
+  path: ((path))/((app))-((version)).jar
+  buildpacks:
+  - java_buildpack
+  instances: ((instances))
   routes:
   services:
-  stack: cflinuxfs2
   env:
-    SPRING_PROFILES_ACTIVE: cloud
-    APP_ROUTE_COLOR: green
+    APP_ROUTE_COLOR: ((app_route_color))
+---
+# experimental manifest extension?
+create-services:
+- name: my-mongodb
+  service-plan: small
+  params: '{}'
+---
+create-user-provided-services:
+- name: my-old-backend-db
+  credentials:
+    url: ((url))
+    password: ((password))
+---
+routes:
+---

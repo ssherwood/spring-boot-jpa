@@ -5,6 +5,9 @@
 management:
   cloudfoundry:
     skip-ssl-validation: true
+  endpoint:
+    health:
+      show-details: always
 
 custom:
   s3-bucket:

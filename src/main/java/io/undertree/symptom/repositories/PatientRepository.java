@@ -53,6 +53,7 @@ public interface PatientRepository extends JpaRepository<Patient, Long>,
     /**
      * Override default QueryDsl bindings.
      * TODO explain what and why?
+     * This customizes QueryDsl to ignore case on queries involving String values
      *
      * @param bindings a QueryDslBindings to use
      * @param root     the QPatient root

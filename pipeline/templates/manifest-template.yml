@@ -1,0 +1,8 @@
+---
+applications:
+- name: APPNAME
+  memory: 1024M
+  instances: APPSCALE
+  buildpack: java_buildpack
+  path: APPPATH
+  services: [ APPSERVICES ]

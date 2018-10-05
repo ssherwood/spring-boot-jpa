@@ -1,0 +1,127 @@
+resource_types:
+- name: gcs
+  type: docker-image
+  source:
+    repository: frodenas/gcs-resource
+
+resources:
+- name: git-assets
+  type: git
+  source:
+    uri: https://github.com/ssherwood/spring-boot-jpa
+    
+- name: release
+  type: gcs
+  source:
+    bucket: ((bucket-name))
+    versioned_file: ((file-name))
+    json_key: ((gcp_service_account_key))
+    
+- name: PCF
+  type: cf
+  source:
+    api: ((pcf-api))
+    username: ((pcf-username))
+    password: ((pcf-password))
+    organization: ((pcf-org))
+    space: ((pcf-space))
+    skip_cert_check: false
+    
+jobs:
+- name: build-artifact
+  serial: true
+  plan:
+  - get: git-assets
+    trigger: true
+  - task: mvn-package
+    privileged: true
+    file: git-assets/pipeline/tasks/package.yml
+  - put: release
+    params:
+      file: mvn-package-output/spring-boot-jpa-0.0.2-SNAPSHOT.jar
+      acl: public-read
+      
+- name: deploy-app
+  serial: true
+  public: true
+  plan:
+  - get: git-assets
+    trigger: true
+    passed:
+    - build-artifact
+  - get: release
+    passed:
+    - build-artifact
+  - task: get-app-info
+    file: git-assets/pipeline/tasks/app-info.yml
+    params:
+      CF_APP: ((pcf-appname))
+      CF_APP_DOMAIN: ((pcf-app-domain))
+      CF_API: ((pcf-api))
+      CF_ORG: ((pcf-org))
+      CF_USER: ((pcf-username))
+      CF_PWD: ((pcf-password))
+      CF_SPACE: ((pcf-space))
+  - task: generate-manifest
+    file: git-assets/pipeline/tasks/generate-manifest.yml
+    params:
+      CF_APP: ((pcf-appname))
+      APP_PACKAGE: ../release/spring-boot-jpa-0.0.2-SNAPSHOT.jar
+  - put: PCF
+    params:
+      manifest: manifest-output/manifest.yml
+
+- name: integration-test
+  serial: true
+  public: true
+  plan:
+  - get: git-assets
+    trigger: true
+    passed:
+    - deploy-app
+  - task: get-app-info
+    file: git-assets/pipeline/tasks/app-info.yml
+    params:
+      CF_APP: ((pcf-appname))
+      CF_APP_DOMAIN: ((pcf-app-domain))
+      CF_API: ((pcf-api))
+      CF_ORG: ((pcf-org))
+      CF_USER: ((pcf-username))
+      CF_PWD: ((pcf-password))
+      CF_SPACE: ((pcf-space))
+  - task: run-integration-tests
+    file: git-assets/pipeline/tasks/integration-test.yml
+    params:
+      CF_APP: ((pcf-appname))
+      CF_APP_DOMAIN: ((pcf-app-domain))
+
+- name: ship-it
+  serial: true
+  public: true
+  plan:
+  - get: git-assets
+    trigger: true
+    passed:
+    - integration-test
+  - task: get-app-info
+    file: git-assets/pipeline/tasks/app-info.yml
+    params:
+      CF_APP: ((pcf-appname))
+      CF_APP_DOMAIN: ((pcf-app-domain))
+      CF_API: ((pcf-api))
+      CF_ORG: ((pcf-org))
+      CF_USER: ((pcf-username))
+      CF_PWD: ((pcf-password))
+      CF_SPACE: ((pcf-space))
+  - task: switch-app-routes
+    file: git-assets/pipeline/tasks/update-route.yml
+    params:
+      CF_APP: ((pcf-appname))
+      CF_APP_DOMAIN: ((pcf-app-domain))
+      CF_API: ((pcf-api))
+      CF_ORG: ((pcf-org))
+      CF_USER: ((pcf-username))
+      CF_PWD: ((pcf-password))
+      CF_SPACE: ((pcf-space))
+      
+      

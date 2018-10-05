@@ -1,0 +1,15 @@
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: maven
+    tag: latest
+
+inputs:
+  - name: git-assets 
+outputs:
+  - name: mvn-package-output
+
+run:
+  path: git-assets/pipeline/scripts/package.sh

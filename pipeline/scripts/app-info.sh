@@ -16,8 +16,9 @@ cf apps
 
 set +ex
 
-# Get app colour
-CURR_APP_COLOUR=$(cf apps | grep "${CF_APP}\-.*\.${CF_APP_DOMAIN}" | awk '{print $1}')
+# Get app colour from the default route
+CURR_APP_COLOUR=$(cf apps | grep "${CF_APP}\.${CF_APP_DOMAIN}" | awk '{print $1}')
+
 if [[ $CURR_APP_COLOUR =~ .*green.* ]]; then
   echo "green" > ./app-info/current-app.txt
   echo "blue" > ./app-info/next-deployment.txt

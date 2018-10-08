@@ -16,7 +16,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
-    <name>Spring Boot JPA</name>
+    <name>Spring Boot JPA - Clinic</name>
     <description>Spring Boot project using Spring Data JPA</description>
 
     <licenses>

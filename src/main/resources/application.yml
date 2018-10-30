@@ -22,6 +22,7 @@ spring:
     properties:
       hibernate:
         format_sql: true
+    open-in-view: false
 
 ##
 ## Anything in the "info" block is automatically added to the actuator endpoint

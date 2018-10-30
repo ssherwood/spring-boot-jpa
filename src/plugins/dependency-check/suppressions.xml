@@ -8,4 +8,11 @@
         <gav regex="true">^com\.h2database:h2:.*$</gav>
         <cve>CVE-2018-10054</cve>
     </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: h2-1.4.197.jar
+   ]]></notes>
+        <gav regex="true">^com\.h2database:h2:.*$</gav>
+        <cve>CVE-2018-14335</cve>
+    </suppress>
 </suppressions>

@@ -15,4 +15,11 @@
         <gav regex="true">^com\.h2database:h2:.*$</gav>
         <cve>CVE-2018-14335</cve>
     </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: guava-18.0.jar
+   ]]></notes>
+        <gav regex="true">^com\.google\.guava:guava:.*$</gav>
+        <cve>CVE-2018-10237</cve>
+    </suppress>
 </suppressions>

@@ -37,10 +37,9 @@
         <jacoco-maven-plugin.version>0.8.2</jacoco-maven-plugin.version>
         <commons-beanutils.version>1.9.3</commons-beanutils.version>
         <commons-text.version>1.6</commons-text.version>
-        <spring-cloud-sleuth.version>2.0.2.RELEASE</spring-cloud-sleuth.version>
+        <spring-cloud-sleuth.version>2.1.0.RELEASE</spring-cloud-sleuth.version>
     </properties>
 
-    <!--
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -52,7 +51,6 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-    -->
 
     <dependencies>
         <dependency>
@@ -71,24 +69,20 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-cache</artifactId>
         </dependency>
-        <!--
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-sleuth</artifactId>
         </dependency>
-        -->
 
-        <!-- include Jackson extensions (until Jackson 3.x)
+        <!-- include Jackson extensions (until Jackson 3.x) -->
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jdk8</artifactId>
         </dependency>
-        -->
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-hibernate5</artifactId>
         </dependency>
-
 
         <!-- include QueryDsl: http://www.querydsl.com/ -->
         <dependency>
@@ -131,7 +125,6 @@
             <artifactId>spring-boot-devtools</artifactId>
             <scope>runtime</scope>
         </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>

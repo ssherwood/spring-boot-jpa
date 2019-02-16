@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.1.xsd">
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.2.xsd">
     <!-- CVE https://nvd.nist.gov/vuln/detail/CVE-2018-10054 reported against Datomic -->
     <suppress>
         <notes><![CDATA[
@@ -7,12 +7,6 @@
    ]]></notes>
         <gav regex="true">^com\.h2database:h2:.*$</gav>
         <cve>CVE-2018-10054</cve>
-    </suppress>
-    <suppress>
-        <notes><![CDATA[
-   file name: h2-1.4.197.jar
-   ]]></notes>
-        <gav regex="true">^com\.h2database:h2:.*$</gav>
         <cve>CVE-2018-14335</cve>
     </suppress>
     <suppress>
@@ -21,5 +15,17 @@
    ]]></notes>
         <gav regex="true">^com\.google\.guava:guava:.*$</gav>
         <cve>CVE-2018-10237</cve>
+    </suppress>
+
+    <!-- mis-identification of "spring-security-rsa" with and older spring-security -->
+    <suppress>
+        <notes><![CDATA[
+   file name: spring-security-rsa-1.0.7.RELEASE.jar
+   ]]></notes>
+        <gav regex="true">^org\.springframework\.security:spring-security-rsa:.*$</gav>
+        <cve>CVE-2011-2731</cve>
+        <cve>CVE-2011-2732</cve>
+        <cve>CVE-2012-5055</cve>
+        <cve>CVE-2018-1260</cve>
     </suppress>
 </suppressions>

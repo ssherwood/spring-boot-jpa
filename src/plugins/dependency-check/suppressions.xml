@@ -1,14 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.2.xsd">
-    <!-- CVE https://nvd.nist.gov/vuln/detail/CVE-2018-10054 reported against Datomic -->
-    <suppress>
-        <notes><![CDATA[
-   file name: h2-1.4.197.jar
-   ]]></notes>
-        <gav regex="true">^com\.h2database:h2:.*$</gav>
-        <cve>CVE-2018-10054</cve>
-        <cve>CVE-2018-14335</cve>
-    </suppress>
+
+    <!-- CVE: https://nvd.nist.gov/vuln/detail/CVE-2018-10237 -->
+    <!-- NOTE: We are not using guava directly; from dependency in QueryDSL -->
     <suppress>
         <notes><![CDATA[
    file name: guava-18.0.jar
@@ -17,15 +11,41 @@
         <cve>CVE-2018-10237</cve>
     </suppress>
 
-    <!-- mis-identification of "spring-security-rsa" with and older spring-security -->
+    <!-- CVE https://nvd.nist.gov/vuln/detail/CVE-2018-10054 -->
+    <!-- CVE https://nvd.nist.gov/vuln/detail/CVE-2018-14335 -->
+    <!-- NOTE: H2 is not used in production -->
+    <suppress>
+        <notes><![CDATA[
+   file name: h2-1.4.197.jar
+   ]]></notes>
+        <gav regex="true">^com\.h2database:h2:.*$</gav>
+        <cve>CVE-2018-10054</cve>
+        <cve>CVE-2018-14335</cve>
+    </suppress>
+
+
+    <!-- NOTE: False Positive -->
+    <!-- Mis-identification of "spring-security-rsa-*" with and older version of spring-security -->
     <suppress>
         <notes><![CDATA[
    file name: spring-security-rsa-1.0.7.RELEASE.jar
    ]]></notes>
         <gav regex="true">^org\.springframework\.security:spring-security-rsa:.*$</gav>
+        <cve>CVE-2018-1260</cve>
+        <cve>CVE-2018-1258</cve>
         <cve>CVE-2011-2731</cve>
         <cve>CVE-2011-2732</cve>
         <cve>CVE-2012-5055</cve>
-        <cve>CVE-2018-1260</cve>
     </suppress>
+
+    <!-- NOTE: False Positive -->
+    <!-- Mis-identification of "spring-security-crypto-*" with and older version of spring-security -->
+    <suppress>
+        <notes><![CDATA[
+   file name: spring-security-crypto-5.1.3.RELEASE.jar
+   ]]></notes>
+        <gav regex="true">^org\.springframework\.security:spring-security-crypto:.*$</gav>
+        <cve>CVE-2018-1258</cve>
+    </suppress>
+
 </suppressions>

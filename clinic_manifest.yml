@@ -2,7 +2,7 @@
 defaults: &defaults
   memory: 1G
   disk_quota: 1G
-  stack: cflinuxfs2
+  stack: cflinuxfs3
 
 applications:
 - name: clinic

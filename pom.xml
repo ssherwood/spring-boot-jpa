@@ -74,6 +74,14 @@
             <artifactId>spring-cloud-starter-sleuth</artifactId>
         </dependency>
 
+        <!-- temp "fix" for CVE-2019-12814 -->
+        <!-- tried 2.9.9.2 but it breaks during tests with MismatchedInputException -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.9.9.1</version>
+        </dependency>
+
         <!-- include Jackson extensions (until Jackson 3.x) -->
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>

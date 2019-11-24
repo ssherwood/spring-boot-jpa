@@ -18,11 +18,7 @@ package io.undertree.symptom.controllers;
 import io.undertree.symptom.domain.GivenName;
 import io.undertree.symptom.domain.Patient;
 import io.undertree.symptom.domain.TestPatientBuilder;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.skyscreamer.jsonassert.JSONAssert;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -31,7 +27,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -42,14 +37,10 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 // TODO not sure why this fixed the test case breaks with running whole suite
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
 public class PatientControllerWebTests {
-
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
 
 	@Autowired
 	private TestRestTemplate restTemplate;

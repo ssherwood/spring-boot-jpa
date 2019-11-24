@@ -1,35 +1,88 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.2.xsd">
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
 
-    <!-- CVE: https://nvd.nist.gov/vuln/detail/CVE-2018-10237 -->
-    <!-- NOTE: We are not using guava directly; from dependency in QueryDSL -->
-    <!-- MORE: https://github.com/google/guava/wiki/CVE-2018-10237 -->
+    <!-- False Positive? -->
+    <!-- https://nvd.nist.gov/vuln/detail/CVE-2018-1258 -->
+    <!-- Justification: Dependency Check is confusing spring-security-crypto with the "spring-security" core project -->
     <suppress>
         <notes><![CDATA[
-   file name: guava-18.0.jar
-   ]]></notes>
-        <gav regex="true">^com\.google\.guava:guava:.*$</gav>
-        <cve>CVE-2018-10237</cve>
+      file name: spring-security-crypto-5.2.1.RELEASE.jar
+      ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.springframework\.security/spring\-security\-crypto@.*$</packageUrl>
+        <cve>CVE-2018-1258</cve>
     </suppress>
 
-    <!-- NOTE: False Positive -->
-    <!-- Mis-identification of "spring-security-rsa-*" with and older version of spring-security -->
+    <!-- False Positive? -->
+    <!-- Justification: Dependency Check is confusing spring-security-rsa with the "spring-security" core project -->
+    <!-- https://github.com/jeremylong/DependencyCheck/issues/1665 -->
     <suppress>
         <notes><![CDATA[
    file name: spring-security-rsa-1.0.7.RELEASE.jar
    ]]></notes>
-        <gav regex="true">^org\.springframework\.security:spring-security-rsa:.*$</gav>
+        <packageUrl regex="true">^pkg:maven/org\.springframework\.security/spring\-security\-rsa@.*$</packageUrl>
+        <cve>CVE-2011-2731</cve>
+        <cve>CVE-2011-2732</cve>
+        <cve>CVE-2012-5055</cve>
         <cve>CVE-2018-1258</cve>
     </suppress>
 
-    <!-- NOTE: False Positive -->
-    <!-- Mis-identification of "spring-security-crypto-*" with and older version of spring-security -->
+    <!-- False Positive? -->
+    <!-- https://nvd.nist.gov/vuln/detail/CVE-2018-10237 -->
+    <!-- Justification: Guava is a transitive dependency of QueryDsl; Guava is not being used for SerDes -->
+    <!-- https://github.com/querydsl/querydsl/issues/2324 -->
     <suppress>
         <notes><![CDATA[
-   file name: spring-security-crypto-5.1.3.RELEASE.jar
+   file name: guava-18.0.jar
    ]]></notes>
-        <gav regex="true">^org\.springframework\.security:spring-security-crypto:.*$</gav>
-        <cve>CVE-2018-1258</cve>
+        <packageUrl regex="true">^pkg:maven/com\.google\.guava/guava@.*$</packageUrl>
+        <cve>CVE-2018-10237</cve>
     </suppress>
 
 </suppressions>
+
+
+        <!--<?xml version="1.0" encoding="UTF-8"?>-->
+        <!--<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.2.xsd">-->
+
+        <!--    &lt;!&ndash; CVE: https://nvd.nist.gov/vuln/detail/CVE-2018-10237 &ndash;&gt;-->
+        <!--    &lt;!&ndash; NOTE: We are not using guava directly; from dependency in QueryDSL &ndash;&gt;-->
+        <!--    &lt;!&ndash; MORE: https://github.com/google/guava/wiki/CVE-2018-10237 &ndash;&gt;-->
+        <!--    <suppress>-->
+        <!--        <notes><![CDATA[-->
+        <!--   file name: guava-18.0.jar-->
+        <!--   ]]></notes>-->
+        <!--        <gav regex="true">^com\.google\.guava:guava:.*$</gav>-->
+        <!--        <cve>CVE-2018-10237</cve>-->
+        <!--    </suppress>-->
+
+        <!--    &lt;!&ndash; NOTE: False Positive &ndash;&gt;-->
+        <!--    &lt;!&ndash; Mis-identification of "spring-security-rsa-*" with and older version of spring-security &ndash;&gt;-->
+        <!--    <suppress>-->
+        <!--        <notes><![CDATA[-->
+        <!--   file name: spring-security-rsa-1.0.7.RELEASE.jar-->
+        <!--   ]]></notes>-->
+        <!--        <gav regex="true">^org\.springframework\.security:spring-security-rsa:.*$</gav>-->
+        <!--        <cve>CVE-2018-1258</cve>-->
+        <!--    </suppress>-->
+
+        <!--    &lt;!&ndash; NOTE: False Positive &ndash;&gt;-->
+        <!--    &lt;!&ndash; Mis-identification of "spring-security-crypto-*" with and older version of spring-security &ndash;&gt;-->
+        <!--    <suppress>-->
+        <!--        <notes><![CDATA[-->
+        <!--   file name: spring-security-crypto-5.1.3.RELEASE.jar-->
+        <!--   ]]></notes>-->
+        <!--        <gav regex="true">^org\.springframework\.security:spring-security-crypto:.*$</gav>-->
+        <!--        <cve>CVE-2018-1258</cve>-->
+        <!--    </suppress>-->
+
+        <!-- False Positive -->
+        <!-- Mis-identification of "spring-security-crypto-*" with and older version of spring-security -->
+        <!--    <suppress>-->
+        <!--        <notes><![CDATA[-->
+        <!--   file name: spring-security-crypto-5.2.1.RELEASE.jar-->
+        <!--   ]]></notes>-->
+        <!--        <packageUrl regex="true">^pkg:maven/org\.springframework\.security/spring\-security\-crypto@.*$</packageUrl>-->
+        <!--        <cve>CVE-2018-1258</cve>-->
+        <!--    </suppress>-->
+
+        <!--</suppressions>-->

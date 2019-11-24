@@ -12,7 +12,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.1.6.RELEASE</version>
+        <version>2.2.1.RELEASE</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -30,29 +30,21 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <java.version>8</java.version>
+        <java.version>11</java.version>
         <maven.test.skip>false</maven.test.skip>
         <apt-maven-plugin.version>1.1.3</apt-maven-plugin.version>
-        <dependency-check-maven.version>5.2.0</dependency-check-maven.version>
-        <jacoco-maven-plugin.version>0.8.4</jacoco-maven-plugin.version>
-        <commons-beanutils.version>1.9.3</commons-beanutils.version>
-        <commons-text.version>1.7</commons-text.version>
-        <spring-cloud-sleuth.version>2.1.2.RELEASE</spring-cloud-sleuth.version>
+        <dependency-check-maven.version>5.2.4</dependency-check-maven.version>
+        <jacoco-maven-plugin.version>0.8.5</jacoco-maven-plugin.version>
+        <commons-beanutils.version>1.9.4</commons-beanutils.version>
+        <commons-text.version>1.8</commons-text.version>
+        <spring-cloud.version>Hoxton.RC2</spring-cloud.version>
     </properties>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.springframework.cloud</groupId>
-                <artifactId>spring-cloud-sleuth</artifactId>
-                <version>${spring-cloud-sleuth.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
     <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
@@ -63,10 +55,6 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-cache</artifactId>
         </dependency>
         <dependency>
@@ -74,19 +62,7 @@
             <artifactId>spring-cloud-starter-sleuth</artifactId>
         </dependency>
 
-        <!-- temp "fix" for CVE-2019-12814 -->
-        <!-- tried 2.9.9.2 but it breaks during tests with MismatchedInputException -->
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>2.9.9.1</version>
-        </dependency>
-
         <!-- include Jackson extensions (until Jackson 3.x) -->
-        <dependency>
-            <groupId>com.fasterxml.jackson.datatype</groupId>
-            <artifactId>jackson-datatype-jdk8</artifactId>
-        </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-hibernate5</artifactId>
@@ -95,12 +71,12 @@
         <!-- include QueryDsl: http://www.querydsl.com/ -->
         <dependency>
             <groupId>com.querydsl</groupId>
-            <artifactId>querydsl-jpa</artifactId>
+            <artifactId>querydsl-apt</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.querydsl</groupId>
-            <artifactId>querydsl-apt</artifactId>
-            <scope>provided</scope>
+            <artifactId>querydsl-jpa</artifactId>
         </dependency>
 
         <!-- include Apache Commons Lang: https://commons.apache.org/proper/commons-lang/ -->
@@ -132,11 +108,18 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
             <scope>runtime</scope>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.junit.vintage</groupId>
+                    <artifactId>junit-vintage-engine</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 
@@ -197,12 +180,6 @@
                     <excludes>
                         <!-- exclude QueryDsl generated artifacts -->
                         <exclude>io/undertree/symptom/domain/Q*.*</exclude>
-                        <!--
-                        <exclude>io/undertree/symptom/domain/QDrugStrength.class</exclude>
-                        <exclude>io/undertree/symptom/domain/QMedication.class</exclude>
-                        <exclude>io/undertree/symptom/domain/QPatient.class</exclude>
-                        <exclude>io/undertree/symptom/domain/QPrescription.class</exclude>
-                        -->
                     </excludes>
                 </configuration>
                 <executions>
@@ -268,4 +245,24 @@
             <!-- -->
         </plugins>
     </build>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <repositories>
+        <repository>
+            <id>spring-milestones</id>
+            <name>Spring Milestones</name>
+            <url>https://repo.spring.io/milestone</url>
+        </repository>
+    </repositories>
 </project>

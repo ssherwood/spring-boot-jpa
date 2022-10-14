@@ -39,7 +39,7 @@
         <!-- https://mvnrepository.com/artifact/commons-beanutils/commons-beanutils -->
         <commons-beanutils.version>1.9.4</commons-beanutils.version>
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-text -->
-        <commons-text.version>1.9</commons-text.version>
+        <commons-text.version>1.10.0</commons-text.version>
         <spring-cloud.version>2020.0.2</spring-cloud.version>
     </properties>
 
